@@ -1,0 +1,36 @@
+/* Shared converted layout, sidebar, definition card, player, and monitor. */
+@import url("./integer-representations.css");
+
+.execution-title { margin: 0; text-align: center; font-size: 20px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+[hidden] { display: none !important; }
+.mod-controls { display: flex; width: min(420px, 100%); flex-direction: column; gap: 8px; }
+.range-control { display: flex; flex-direction: column; gap: 8px; color: var(--color-text-muted); font-size: 14px; }
+.range-inputs { display: flex; align-items: center; gap: 16px; }
+.range-inputs input[type="range"] { flex: 1; accent-color: var(--color-accent); }
+.range-inputs input[type="number"] { width: 72px; min-height: 44px; padding: 4px 8px; border: 1px solid var(--color-border); border-radius: 8px; outline: 0; background: var(--color-bg-elevated); color: var(--color-text); font: 14px var(--font-mono); }
+.quick-row { display: flex; justify-content: center; gap: 8px; }
+.quick-row button { min-width: 56px; min-height: 44px; border-radius: 999px; background: var(--color-bg-elevated); box-shadow: 0 2px 12px #0000000f; font: 700 14px var(--font-mono); transition: transform .2s; }
+.quick-row button:hover { transform: translateY(-1px); }
+.mod-canvas { display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 8px 0; }
+.walk-line { display: flex; max-width: 100%; flex-wrap: wrap; justify-content: center; gap: 3px; padding: 0 8px 24px; }
+.walk-tick { position: relative; width: 12px; height: 12px; border-radius: 50%; background: var(--color-border); transition: background-color .2s, transform .2s; }
+.walk-tick.done { background: var(--lap-color, var(--color-accent)); }
+.walk-tick.current { background: var(--color-secondary); box-shadow: 0 0 8px color-mix(in srgb, var(--color-secondary) 60%, transparent); transform: scale(1.5); }
+.walk-tick small { position: absolute; top: 14px; left: 50%; color: var(--color-text-muted); font: 10px var(--font-mono); transform: translateX(-50%); }
+.clock { width: min(320px, 80vw); height: auto; overflow: visible; }
+.clock-face { fill: var(--color-bg-elevated); stroke: var(--color-border); stroke-width: 1; filter: drop-shadow(0 2px 12px #0000000f); }
+.lap-arc { fill: none; stroke-width: 2; opacity: .28; animation: arc-in .3s ease-out; }
+.clock-label { fill: var(--color-text-muted); font: 12px var(--font-mono); }
+.clock-label.landing { fill: var(--color-text); font-weight: 700; }
+.landing-glow { fill: color-mix(in srgb, var(--color-secondary) 45%, transparent); animation: glow-in .3s ease-out; transform-box: fill-box; transform-origin: center; }
+.clock-hand-line { stroke: var(--color-secondary); stroke-width: 3.5; stroke-linecap: round; transition: x2 .2s ease-out, y2 .2s ease-out; }
+.hand-hub { fill: var(--color-secondary); }
+.readout { margin: 0; color: var(--color-text-muted); font-size: 14px; }
+.readout strong { color: var(--color-text); font-family: var(--font-mono); }
+
+@keyframes arc-in { from { opacity: 0; } to { opacity: .28; } }
+@keyframes glow-in { from { opacity: 0; transform: scale(.5); } to { opacity: 1; transform: scale(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .walk-tick, .clock-hand-line, .lap-arc, .landing-glow { transition: none; animation: none; }
+}

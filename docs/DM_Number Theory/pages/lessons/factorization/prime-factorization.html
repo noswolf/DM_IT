@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="เรียนรู้การแยกตัวประกอบเฉพาะด้วยต้นไม้ตัวประกอบ">
+    <title>การแยกตัวประกอบเฉพาะ | Number Theory</title>
+    <link rel="stylesheet" href="../../../css/modular-lessons/prime-factorization.css">
+    <script src="../../../js/index-modular-shell.js"></script>
+  </head>
+  <body>
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู">☰</button>
+      </div>
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a href="../foundations/divisibility.html"><span class="done">✓</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a href="../foundations/integer-representations.html"><span class="done">✓</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a href="../foundations/primes.html"><span class="done">✓</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a href="sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a href="../gcd/gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a href="../gcd/gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a class="active" href="prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a href="../modular/modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a href="../modular/congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a href="../modular/pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a href="../modular/check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a href="../modular/fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a href="../theorems/euler-totient.html"><span>13</span><span>ฟังก์ชันทอเทียนต์ของออยเลอร์ (Euler's Totient)</span></a></li>
+          <li><a href="../theorems/fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มาต์ (Fermat's Little Theorem)</span></a></li>
+          <li><a href="../gcd/extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a href="../cryptography/classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบคลาสสิก (Classical Ciphers)</span></a></li>
+          <li><a href="../theorems/chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a href="../cryptography/rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography)</span></a></li>
+        </ol>
+      </nav>
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>3/18 หัวข้อ · 17%</span><div><i></i></div></div>
+        <button class="learned-button" type="button">ทำเครื่องหมายว่าเรียนแล้ว</button>
+        <div class="utility-links"><a href="../../tools/playground.html">Playground</a><a href="../../tools/glossary.html">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article>
+        <header class="page-header">
+          <h1>การแยกตัวประกอบเฉพาะ (Prime Factorization)</h1>
+          <p>เข้าใจ Fundamental Theorem of Arithmetic ผ่านการแตกเลขเป็นต้นไม้</p>
+        </header>
+
+        <div class="lesson-stack">
+          <section class="definition-card" aria-labelledby="definition-title">
+            <h2 id="definition-title"><i></i>นิยาม</h2>
+            <p class="definition-text">การเขียนจำนวนนับในรูปการคูณของตัวประกอบที่เป็นจำนวนเฉพาะ</p>
+            <p class="sub-label">สูตร</p>
+            <div class="formula"><b>n</b> = p<sub>1</sub><sup>e₁</sup> × p<sub>2</sub><sup>e₂</sup> × … × p<sub>k</sub><sup>eₖ</sup></div>
+            <div class="definition-note">
+              <p>ให้ <code>n</code> ∈ ℤ และ <code>n</code> &gt; 1</p>
+              <p><strong>ทฤษฎีบทหลักมูลฐานของเลขคณิต</strong>กล่าวว่า n เขียนเป็นผลคูณของจำนวนเฉพาะได้เพียงแบบเดียว โดยไม่นับลำดับการเขียน</p>
+              <p>ไม่ว่าจะเริ่มแยกตัวประกอบจากตัวไหนก่อน สุดท้ายจะได้จำนวนเฉพาะชุดเดิมเสมอ</p>
+            </div>
+          </section>
+
+          <section class="execution" aria-labelledby="tree-title">
+            <h2 class="execution-title" id="tree-title">Prime Factorization — ต้นไม้ตัวประกอบ</h2>
+            <div class="execution-header">
+              <div class="header-row">
+                <label for="number-input">n<input id="number-input" type="number" min="2" max="400" value="360"></label>
+                <button id="random-button" type="button">🎲 สุ่มเลขใหม่</button>
+              </div>
+            </div>
+
+            <div class="execution-layout">
+              <div class="canvas-area factor-canvas">
+                <div class="trees-row">
+                  <section class="tree-block">
+                    <p class="tree-caption" id="primary-caption" hidden></p>
+                    <div class="tree-scroll"><svg class="tree-stage" id="primary-tree" role="img" aria-label="ต้นไม้แยกตัวประกอบแบบที่หนึ่ง"></svg></div>
+                  </section>
+                  <section class="tree-block" id="alternative-block" hidden>
+                    <p class="tree-caption" id="alternative-caption"></p>
+                    <div class="tree-scroll"><svg class="tree-stage" id="alternative-tree" role="img" aria-label="ต้นไม้แยกตัวประกอบแบบที่สอง"></svg></div>
+                  </section>
+                </div>
+                <div class="formula-bar" id="formula-bar" hidden></div>
+              </div>
+
+              <aside class="monitor-panel">
+                <p class="monitor-title">Execution Monitor</p>
+                <p class="monitor-hint" id="monitor-hint"></p>
+                <div class="monitor-log" id="monitor-log"></div>
+                <span class="monitor-badge" id="monitor-badge" hidden></span>
+              </aside>
+            </div>
+
+            <div class="player">
+              <button id="previous" type="button" aria-label="ขั้นก่อนหน้า">‹</button>
+              <button id="play" type="button" aria-label="เล่นขั้นตอน">▶</button>
+              <button id="next" type="button" aria-label="ขั้นถัดไป">›</button>
+              <div class="player-progress"><span><i id="progress-fill"></i></span><output id="step-label"></output></div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+
+    <script>
+      (() => {
+        const SVG_NS = 'http://www.w3.org/2000/svg';
+        const numberInput = document.querySelector('#number-input');
+        const playButton = document.querySelector('#play');
+        let currentStep = 0;
+        let playTimer = null;
+
+        function clamp(value) {
+          const number = Math.trunc(Number(value));
+          return Number.isNaN(number) ? 2 : Math.min(Math.max(number, 2), 400);
+        }
+
+        function smallestFactor(value) {
+          if (value % 2 === 0) return 2;
+          for (let factor = 3; factor * factor <= value; factor += 2) if (value % factor === 0) return factor;
+          return value;
+        }
+
+        function isPrime(value) {
+          return value >= 2 && smallestFactor(value) === value;
+        }
+
+        function primeFactors(value) {
+          let remaining = value;
+          const factors = [];
+          while (remaining > 1) {
+            const prime = smallestFactor(remaining);
+            let exponent = 0;
+            while (remaining % prime === 0) { remaining /= prime; exponent += 1; }
+            factors.push({ prime, exponent });
+          }
+          return factors;
+        }
+
+        function buildTree(value, firstPair = null) {
+          if (isPrime(value) || value < 4) return { value };
+          const factor = firstPair?.[0] * firstPair?.[1] === value ? firstPair[0] : smallestFactor(value);
+          const other = firstPair?.[0] * firstPair?.[1] === value ? firstPair[1] : value / factor;
+          return { value, children: [buildTree(factor), buildTree(other)] };
+        }
+
+        function countSplits(node) {
+          return node.children ? 1 + countSplits(node.children[0]) + countSplits(node.children[1]) : 0;
+        }
+
+        function alternativePair(value) {
+          const first = smallestFactor(value);
+          const other = value / first;
+          if (isPrime(value) || other === first) return null;
+          for (let factor = first + 1; factor * factor <= value; factor += 1) {
+            if (value % factor === 0 && factor !== first) return [factor, value / factor];
+          }
+          return isPrime(other) ? null : [other, first];
+        }
+
+        function layoutTree(root) {
+          const leafCount = (node) => node.children ? leafCount(node.children[0]) + leafCount(node.children[1]) : 1;
+          const width = leafCount(root);
+          const nodes = [];
+          let splitIndex = 0;
+          const queue = [{ node: root, xStart: 0, depth: 0, revealedBySplit: -1, parent: null }];
+          while (queue.length) {
+            const item = queue.shift();
+            const x = item.xStart + leafCount(item.node) / 2;
+            const laidOut = { value: item.node.value, x, y: item.depth, parent: item.parent, revealedBySplit: item.revealedBySplit, isPrime: !item.node.children };
+            if (item.node.children) {
+              laidOut.splitIndex = splitIndex++;
+              const leftWidth = leafCount(item.node.children[0]);
+              queue.push({ node: item.node.children[0], xStart: item.xStart, depth: item.depth + 1, revealedBySplit: laidOut.splitIndex, parent: { x, y: item.depth } });
+              queue.push({ node: item.node.children[1], xStart: item.xStart + leftWidth, depth: item.depth + 1, revealedBySplit: laidOut.splitIndex, parent: { x, y: item.depth } });
+            }
+            nodes.push(laidOut);
+          }
+          return { nodes, width, depth: Math.max(...nodes.map((node) => node.y)) };
+        }
+
+        function splitDescriptions(layout) {
+          return layout.nodes.filter((node) => node.splitIndex !== undefined).sort((a, b) => a.splitIndex - b.splitIndex).map((node) => {
+            const children = layout.nodes.filter((child) => child.parent?.x === node.x && child.parent?.y === node.y);
+            return { value: node.value, first: children[0]?.value, second: children[1]?.value, splitIndex: node.splitIndex };
+          });
+        }
+
+        function svgElement(name, attributes) {
+          const element = document.createElementNS(SVG_NS, name);
+          Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+          return element;
+        }
+
+        function renderTree(svg, layout, visibleSplits, clickable = false) {
+          const width = layout.width * 15 + 16;
+          const height = (layout.depth + 1) * 14 + 16;
+          const x = (value) => 8 + value * 15;
+          const y = (value) => 12 + value * 14;
+          svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+          svg.style.minWidth = `${Math.max(width * 3, 280)}px`;
+          const visible = layout.nodes.filter((node) => node.revealedBySplit < visibleSplits);
+          const elements = [];
+          visible.filter((node) => node.parent && node.revealedBySplit < visibleSplits).forEach((node) => {
+            elements.push(svgElement('line', { x1: x(node.parent.x), y1: y(node.parent.y), x2: x(node.x), y2: y(node.y), class: 'tree-edge' }));
+          });
+          visible.forEach((node) => {
+            const frontier = node.isPrime || (node.splitIndex !== undefined && node.splitIndex >= visibleSplits);
+            const group = svgElement('g', { class: !node.isPrime && frontier && clickable ? 'clickable-node' : '' });
+            const circleClass = node.isPrime && frontier ? 'tree-node prime' : !node.isPrime && frontier ? 'tree-node composite' : 'tree-node inner';
+            group.append(svgElement('circle', { cx: x(node.x), cy: y(node.y), r: 5.6, class: circleClass }));
+            const text = svgElement('text', { x: x(node.x), y: y(node.y), 'text-anchor': 'middle', 'dominant-baseline': 'middle', class: `node-text${node.isPrime && frontier ? ' prime' : ''}` });
+            text.textContent = node.value;
+            group.append(text);
+            if (!node.isPrime && frontier && clickable) group.addEventListener('click', advance);
+            elements.push(group);
+          });
+          svg.replaceChildren(...elements);
+        }
+
+        function formatFactorization(value, factors, separator = ' × ') {
+          return `${value} = ${factors.map((factor) => factor.exponent > 1 ? `${factor.prime}^${factor.exponent}` : factor.prime).join(separator)}`;
+        }
+
+        function stopPlaying() {
+          clearInterval(playTimer);
+          playTimer = null;
+          playButton.textContent = '▶';
+        }
+
+        function advance() {
+          stopPlaying();
+          currentStep += 1;
+          render();
+        }
+
+        function render() {
+          const value = clamp(numberInput.value);
+          const tree = buildTree(value);
+          const layout = layoutTree(tree);
+          const splits = countSplits(tree);
+          const factors = primeFactors(value);
+          const alternate = alternativePair(value);
+          const alternateLayout = alternate ? layoutTree(buildTree(value, alternate)) : null;
+          const totalSteps = 1 + splits + 1 + (alternateLayout ? 1 : 0);
+          const lastStep = totalSteps - 1;
+          numberInput.value = value;
+          currentStep = Math.min(currentStep, lastStep);
+          const visibleSplits = Math.min(currentStep, splits);
+          const showFormula = currentStep >= splits + 1;
+          const showAlternative = Boolean(alternateLayout) && currentStep >= splits + 2;
+          const descriptions = splitDescriptions(layout);
+
+          document.querySelector('#primary-caption').hidden = !showAlternative;
+          document.querySelector('#primary-caption').textContent = `แบบที่ 1: เริ่มจาก ${descriptions[0]?.first} × ${descriptions[0]?.second}`;
+          renderTree(document.querySelector('#primary-tree'), layout, visibleSplits, true);
+          document.querySelector('#alternative-block').hidden = !showAlternative;
+          if (showAlternative) {
+            document.querySelector('#alternative-caption').textContent = `แบบที่ 2: เริ่มจาก ${alternate[0]} × ${alternate[1]}`;
+            renderTree(document.querySelector('#alternative-tree'), alternateLayout, Infinity);
+          }
+
+          const formulaBar = document.querySelector('#formula-bar');
+          formulaBar.hidden = !showFormula;
+          if (showFormula) {
+            const chips = factors.map((factor, index) => {
+              const chip = document.createElement('span');
+              chip.className = 'formula-chip';
+              chip.style.setProperty('--index', index);
+              chip.innerHTML = `${factor.prime}${factor.exponent > 1 ? `<sup>${factor.exponent}</sup>` : ''}`;
+              return chip;
+            });
+            const equals = document.createElement('strong');
+            equals.textContent = `= ${value}`;
+            formulaBar.replaceChildren(...chips, equals);
+          }
+
+          const monitorHint = document.querySelector('#monitor-hint');
+          monitorHint.hidden = visibleSplits > 0;
+          monitorHint.textContent = isPrime(value) ? `${value} เป็นจำนวนเฉพาะอยู่แล้ว — ต้นไม้มีใบเดียว ลองเลขอื่นดู` : 'กด ▶ หรือกดโหนดเส้นประเพื่อแตกกิ่งเอง';
+          const lines = descriptions.filter((item) => item.splitIndex < visibleSplits).map((item) => {
+            const line = document.createElement('div');
+            line.className = 'monitor-line';
+            line.innerHTML = `<i style="background:#38bdf8"></i><span>${item.value} = ${item.first} × ${item.second}</span>`;
+            return line;
+          });
+          if (showFormula) {
+            const summary = document.createElement('div');
+            summary.className = 'monitor-line emphasis';
+            summary.innerHTML = `<i style="background:var(--color-secondary)"></i><span>${formatFactorization(value, factors)}</span>`;
+            lines.push(summary);
+          }
+          if (showAlternative) {
+            const theorem = document.createElement('div');
+            theorem.className = 'monitor-line emphasis';
+            theorem.innerHTML = '<span>แม้จะแตกต้นไม้คนละทาง สุดท้ายได้จำนวนเฉพาะชุดเดิมเสมอ — Fundamental Theorem of Arithmetic</span>';
+            lines.push(theorem);
+          }
+          document.querySelector('#monitor-log').replaceChildren(...lines);
+          document.querySelector('#monitor-badge').hidden = !showFormula;
+          document.querySelector('#monitor-badge').textContent = formatFactorization(value, factors, '·');
+          document.querySelector('#step-label').textContent = `${currentStep + 1}/${totalSteps}`;
+          document.querySelector('#progress-fill').style.width = `${(currentStep / lastStep) * 100}%`;
+        }
+
+        numberInput.addEventListener('change', () => { currentStep = 0; stopPlaying(); render(); });
+        document.querySelector('#random-button').addEventListener('click', () => { numberInput.value = 4 + Math.floor(Math.random() * 397); currentStep = 0; stopPlaying(); render(); });
+        document.querySelector('#previous').addEventListener('click', () => { stopPlaying(); currentStep = Math.max(0, currentStep - 1); render(); });
+        document.querySelector('#next').addEventListener('click', advance);
+        playButton.addEventListener('click', () => {
+          if (playTimer) { stopPlaying(); return; }
+          playButton.textContent = '❚❚';
+          playTimer = setInterval(() => {
+            const value = clamp(numberInput.value);
+            const tree = buildTree(value);
+            const lastStep = countSplits(tree) + 1 + (alternativePair(value) ? 1 : 0);
+            if (currentStep >= lastStep) { stopPlaying(); return; }
+            currentStep += 1;
+            render();
+            if (currentStep >= lastStep) stopPlaying();
+          }, 700);
+        });
+        document.querySelector('#sidebar-toggle').addEventListener('click', () => document.querySelector('#sidebar').classList.toggle('open'));
+        DMModularShell.initTheme(document.querySelector('#theme-toggle'));
+const completedLessonsStorageKey = 'dm2026:progress';
+const legacyCompletedLessonsStorageKey = 'dm-completed-lessons-v1';
+      const progressMigrationStorageKey = 'dm2026:progress-migrated-v1';
+      const defaultCompletedLessons = ['divisibility', 'integer-representations', 'primes'];
+
+      function normalizeTopicId(value) {
+        return String(value).split('/').pop().replace(/\.html$/, '');
+      }
+
+      function loadCompletedLessons() {
+        try {
+          const saved = localStorage.getItem(completedLessonsStorageKey);
+          const completed = new Set(saved === null ? [] : JSON.parse(saved).map(normalizeTopicId));
+          let hasStoredProgress = saved !== null;
+
+          if (localStorage.getItem(progressMigrationStorageKey) !== '1') {
+            const legacySaved = localStorage.getItem(legacyCompletedLessonsStorageKey);
+            if (legacySaved !== null) {
+              JSON.parse(legacySaved).map(normalizeTopicId).forEach((id) => completed.add(id));
+              hasStoredProgress = true;
+            }
+            localStorage.setItem(progressMigrationStorageKey, '1');
+          }
+
+          return hasStoredProgress ? completed : new Set(defaultCompletedLessons);
+        } catch {
+          return new Set(defaultCompletedLessons);
+        }
+      }
+
+      let completedLessons = loadCompletedLessons();
+
+      function saveCompletedLessons() {
+        try {
+          localStorage.setItem(completedLessonsStorageKey, JSON.stringify([...completedLessons]));
+        } catch {
+          // The button still works for this page if storage is unavailable.
+        }
+      }
+      saveCompletedLessons();
+
+      function renderLessonProgress() {
+        const links = [...document.querySelectorAll('.lesson-nav a')];
+        const lessonIds = links.map((link) => normalizeTopicId(link.getAttribute('href')));
+        links.forEach((link, index) => {
+          const marker = link.querySelector('span:first-child');
+          const isCompleted = completedLessons.has(lessonIds[index]);
+          marker.classList.toggle('done', isCompleted);
+          marker.textContent = isCompleted ? '✓' : String(index + 1).padStart(2, '0');
+        });
+
+        const completedCount = lessonIds.filter((id) => completedLessons.has(id)).length;
+        const percentage = Math.round(completedCount / lessonIds.length * 100);
+        const progress = document.querySelector('.lesson-progress');
+        progress.querySelector('span').textContent = `${completedCount}/${lessonIds.length} หัวข้อ · ${percentage}%`;
+        progress.querySelector('i').style.width = `${percentage}%`;
+
+        const currentLink = document.querySelector('.lesson-nav a.active');
+        const currentLesson = normalizeTopicId(currentLink.getAttribute('href'));
+        const learnedButton = document.querySelector('.learned-button');
+        const isCurrentCompleted = completedLessons.has(currentLesson);
+        learnedButton.classList.toggle('selected', isCurrentCompleted);
+        learnedButton.setAttribute('aria-pressed', String(isCurrentCompleted));
+        learnedButton.textContent = isCurrentCompleted ? '✓ เรียนหัวข้อนี้แล้ว' : 'ทำเครื่องหมายว่าเรียนแล้ว';
+      }
+
+      const learnedButton = document.querySelector('.learned-button');
+      learnedButton.addEventListener('click', () => {
+        const currentLesson = normalizeTopicId(document.querySelector('.lesson-nav a.active').getAttribute('href'));
+        if (completedLessons.has(currentLesson)) completedLessons.delete(currentLesson);
+        else completedLessons.add(currentLesson);
+        saveCompletedLessons();
+        renderLessonProgress();
+      });
+
+      window.addEventListener('storage', (event) => {
+        if (event.key === completedLessonsStorageKey || event.key === null) {
+          completedLessons = loadCompletedLessons();
+          renderLessonProgress();
+        }
+      });
+      renderLessonProgress();
+        render();
+      })();
+    </script>
+  </body>
+</html>

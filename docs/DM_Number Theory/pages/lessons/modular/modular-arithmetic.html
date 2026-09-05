@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="เรียนรู้เลขคณิตมอดุลาร์ผ่านนาฬิกา mod n">
+    <title>เลขคณิตมอดุลาร์ | Number Theory</title>
+    <link rel="stylesheet" href="../../../css/modular-lessons/modular-arithmetic.css">
+    <script src="../../../js/index-modular-shell.js"></script>
+  </head>
+  <body>
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู">☰</button>
+      </div>
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a href="../foundations/divisibility.html"><span class="done">✓</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a href="../foundations/integer-representations.html"><span class="done">✓</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a href="../foundations/primes.html"><span class="done">✓</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a href="../factorization/sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a href="../gcd/gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a href="../gcd/gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a href="../factorization/prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a class="active" href="modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a href="congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a href="pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a href="check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a href="fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a href="../theorems/euler-totient.html"><span>13</span><span>ฟังก์ชันทอเทียนต์ของออยเลอร์ (Euler's Totient)</span></a></li>
+          <li><a href="../theorems/fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มาต์ (Fermat's Little Theorem)</span></a></li>
+          <li><a href="../gcd/extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a href="../cryptography/classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบคลาสสิก (Classical Ciphers)</span></a></li>
+          <li><a href="../theorems/chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a href="../cryptography/rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography)</span></a></li>
+        </ol>
+      </nav>
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>3/18 หัวข้อ · 17%</span><div><i></i></div></div>
+        <button class="learned-button" type="button">ทำเครื่องหมายว่าเรียนแล้ว</button>
+        <div class="utility-links"><a href="../../tools/playground.html">Playground</a><a href="../../tools/glossary.html">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article>
+        <header class="page-header">
+          <h1>เลขคณิตมอดุลาร์ (Modular Arithmetic)</h1>
+          <p>มองเลข mod n เป็น “นาฬิกา” ที่วนซ้ำ แทนที่จะเป็นแค่เศษจากการหาร</p>
+        </header>
+
+        <div class="lesson-stack">
+          <section class="definition-card" aria-labelledby="definition-title">
+            <h2 id="definition-title"><i></i>นิยาม</h2>
+            <p class="definition-text">ระบบการคำนวณทางคณิตศาสตร์ที่เกี่ยวข้องกับเศษเหลือจากการหารจำนวนเต็มด้วยจำนวนคงที่จำนวนหนึ่ง ซึ่งเรียกว่า มอดุลัส (Modulus)</p>
+            <p class="sub-label">สูตร</p>
+            <div class="formula"><b>a</b> mod <b>d</b> = <b>a</b> − (floor(<b>a</b>/<b>d</b>) × <b>d</b>)</div>
+            <div class="definition-note">
+              <p>ให้ <code>a</code> ∈ ℤ และ <code>d</code> เป็นจำนวนเต็มบวก</p>
+              <p>ตามขั้นตอนวิธีการหาร จะมีจำนวนเต็ม <code>q</code> และ <code>r</code> เพียงชุดเดียวที่ทำให้</p>
+              <p class="statement-equation">a = dq + r โดยที่ 0 ≤ r &lt; d</p>
+              <p>เรานิยามให้ <strong>a mod d</strong> คือเศษเหลือ r ซึ่งคำนวณได้จากสูตรด้านบน</p>
+            </div>
+          </section>
+
+          <section class="execution" aria-labelledby="clock-title">
+            <h2 class="execution-title" id="clock-title">Modular Arithmetic — นาฬิกา mod d</h2>
+            <div class="execution-header">
+              <div class="mod-controls">
+                <label class="range-control" for="steps-range"><span>เดิน a ก้าว (ติดลบ = เดินย้อนหลัง)</span><span class="range-inputs"><input id="steps-range" type="range" min="-48" max="48" value="14"><input id="steps-number" type="number" min="-48" max="48" value="14"></span></label>
+                <label class="range-control" for="modulus-range"><span>นาฬิกา d ช่อง</span><span class="range-inputs"><input id="modulus-range" type="range" min="2" max="12" value="5"><input id="modulus-number" type="number" min="2" max="12" value="5"></span></label>
+                <div class="quick-row"><button type="button" data-add="-10">−10</button><button type="button" data-add="-1">−1</button><button type="button" data-add="1">+1</button><button type="button" data-add="10">+10</button></div>
+              </div>
+            </div>
+
+            <div class="execution-layout">
+              <div class="canvas-area mod-canvas">
+                <div class="walk-line" id="walk-line"></div>
+                <svg class="clock" id="clock" viewBox="0 0 200 200" role="img" aria-label="นาฬิกามอดุลาร์"></svg>
+                <p class="readout" id="readout"></p>
+              </div>
+              <aside class="monitor-panel">
+                <p class="monitor-title">Execution Monitor</p>
+                <p class="monitor-hint" id="monitor-hint"></p>
+                <div class="monitor-log" id="monitor-log"></div>
+                <span class="monitor-badge" id="monitor-badge" hidden></span>
+              </aside>
+            </div>
+
+            <div class="player">
+              <button id="previous" type="button" aria-label="ขั้นก่อนหน้า">‹</button>
+              <button id="play" type="button" aria-label="เล่นขั้นตอน">▶</button>
+              <button id="next" type="button" aria-label="ขั้นถัดไป">›</button>
+              <div class="player-progress"><span><i id="progress-fill"></i></span><output id="step-label"></output></div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+
+    <script>
+      (() => {
+        const SVG_NS = 'http://www.w3.org/2000/svg';
+        const lapColors = ['#38bdf8', 'var(--color-success)', '#a78bfa', '#f472b6', '#fb923c', '#22d3ee'];
+        const stepsRange = document.querySelector('#steps-range');
+        const stepsNumber = document.querySelector('#steps-number');
+        const modulusRange = document.querySelector('#modulus-range');
+        const modulusNumber = document.querySelector('#modulus-number');
+        const playButton = document.querySelector('#play');
+        let currentStep = 0;
+        let playTimer = null;
+
+        function clamp(value, minimum, maximum) {
+          const number = Math.trunc(Number(value));
+          return Number.isNaN(number) ? minimum : Math.min(Math.max(number, minimum), maximum);
+        }
+
+        function values() {
+          return { steps: clamp(stepsNumber.value, -48, 48), modulus: clamp(modulusNumber.value, 2, 12) };
+        }
+
+        function modulo(value, modulus) {
+          return ((value % modulus) + modulus) % modulus;
+        }
+
+        function syncInputs(steps, modulus) {
+          stepsRange.value = stepsNumber.value = steps;
+          modulusRange.value = modulusNumber.value = modulus;
+        }
+
+        function svgElement(name, attributes = {}) {
+          const element = document.createElementNS(SVG_NS, name);
+          Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+          return element;
+        }
+
+        function stopPlaying() {
+          clearInterval(playTimer);
+          playTimer = null;
+          playButton.textContent = '▶';
+        }
+
+        function renderWalkLine(totalSteps, modulus) {
+          const direction = Math.sign(totalSteps) || 1;
+          const totalMoves = Math.abs(totalSteps);
+          const ticks = Array.from({ length: totalMoves + 1 }, (_, index) => {
+            const tick = document.createElement('span');
+            tick.className = `walk-tick${index <= currentStep ? ' done' : ''}${index === currentStep ? ' current' : ''}`;
+            if (index <= currentStep && index > 0) tick.style.setProperty('--lap-color', lapColors[Math.floor((index - 1) / modulus) % lapColors.length]);
+            if (index === 0 || index === totalMoves || (index > 0 && index % modulus === 0)) {
+              const label = document.createElement('small');
+              label.textContent = index * direction;
+              tick.append(label);
+            }
+            return tick;
+          });
+          document.querySelector('#walk-line').replaceChildren(...ticks);
+        }
+
+        function renderClock(modulus, totalSteps) {
+          const center = 100;
+          const labelRadius = 74;
+          const walked = currentStep * (Math.sign(totalSteps) || 1);
+          const laps = Math.floor(currentStep / modulus);
+          const remainder = modulo(walked, modulus);
+          const complete = currentStep === Math.abs(totalSteps);
+          const elements = [svgElement('circle', { cx: center, cy: center, r: 88, class: 'clock-face' })];
+
+          for (let index = 0; index < Math.min(laps, 6); index += 1) {
+            elements.push(svgElement('circle', { cx: center, cy: center, r: 66 - index * 5, class: 'lap-arc', stroke: lapColors[index % lapColors.length] }));
+          }
+
+          for (let number = 0; number < modulus; number += 1) {
+            const angle = number / modulus * Math.PI * 2 - Math.PI / 2;
+            const x = center + labelRadius * Math.cos(angle);
+            const y = center + labelRadius * Math.sin(angle);
+            if (complete && number === remainder) elements.push(svgElement('circle', { cx: x, cy: y, r: 13, class: 'landing-glow' }));
+            const label = svgElement('text', { x, y, 'text-anchor': 'middle', 'dominant-baseline': 'middle', class: `clock-label${complete && number === remainder ? ' landing' : ''}` });
+            label.textContent = number;
+            elements.push(label);
+          }
+
+          const handAngle = walked / modulus * Math.PI * 2 - Math.PI / 2;
+          const handLength = labelRadius * .72;
+          const handEndX = center + handLength * Math.cos(handAngle);
+          const handEndY = center + handLength * Math.sin(handAngle);
+          elements.push(
+            svgElement('line', {
+              x1: center,
+              y1: center,
+              x2: handEndX,
+              y2: handEndY,
+              class: 'clock-hand-line',
+            }),
+            svgElement('circle', { cx: center, cy: center, r: 4.5, class: 'hand-hub' }),
+          );
+          document.querySelector('#clock').replaceChildren(...elements);
+        }
+
+        function renderMonitor(totalSteps, modulus) {
+          const direction = Math.sign(totalSteps) || 1;
+          const walked = currentStep * direction;
+          const laps = Math.floor(currentStep / modulus);
+          const remainder = modulo(walked, modulus);
+          const complete = currentStep === Math.abs(totalSteps);
+          document.querySelector('#monitor-hint').hidden = laps > 0 || complete;
+          document.querySelector('#monitor-hint').textContent = `เดิน ${Math.abs(totalSteps)} ก้าว${direction < 0 ? 'ย้อนหลัง' : 'ไปข้างหน้า'}บนนาฬิกา ${modulus} ช่อง — กด ▶ แล้วดูการเดินของเข็ม`;
+          const lines = Array.from({ length: laps }, (_, index) => {
+            const line = document.createElement('div');
+            line.className = 'monitor-line';
+            line.innerHTML = `<i style="background:${lapColors[index % lapColors.length]}"></i><span>ครบรอบที่ ${index + 1}: เดินมาแล้ว ${(index + 1) * modulus * direction} ก้าว</span>`;
+            return line;
+          });
+          if (complete) {
+            const quotient = Math.floor(totalSteps / modulus);
+            const finalRemainder = modulo(totalSteps, modulus);
+            const summary = document.createElement('div');
+            summary.className = 'monitor-line emphasis';
+            summary.innerHTML = `<span>${totalSteps} = ${modulus} × ${quotient} + ${finalRemainder}</span>`;
+            lines.push(summary);
+          }
+          document.querySelector('#monitor-log').replaceChildren(...lines);
+          document.querySelector('#monitor-badge').hidden = !complete;
+          document.querySelector('#monitor-badge').textContent = `${totalSteps} mod ${modulus} = ${modulo(totalSteps, modulus)}`;
+          document.querySelector('#readout').innerHTML = `เดินแล้ว <strong>${walked}</strong> ก้าว (${direction < 0 ? 'ย้อนหลัง' : 'ไปข้างหน้า'}) → วนครบ <strong>${laps}</strong> รอบ อยู่ที่เศษ <strong>${remainder}</strong>`;
+        }
+
+        function render() {
+          const { steps, modulus } = values();
+          syncInputs(steps, modulus);
+          currentStep = Math.min(currentStep, Math.abs(steps));
+          renderWalkLine(steps, modulus);
+          renderClock(modulus, steps);
+          renderMonitor(steps, modulus);
+          const totalMoves = Math.abs(steps);
+          document.querySelector('#step-label').textContent = `${currentStep}/${totalMoves}`;
+          document.querySelector('#progress-fill').style.width = `${(currentStep / (totalMoves || 1)) * 100}%`;
+        }
+
+        function updateInputs(steps, modulus, autoPlay = false) {
+          syncInputs(clamp(steps, -48, 48), clamp(modulus, 2, 12));
+          currentStep = 0;
+          stopPlaying();
+          render();
+          if (autoPlay && clamp(steps, -48, 48) !== 0) startPlaying();
+        }
+
+        function startPlaying() {
+          const { steps } = values();
+          if (currentStep >= Math.abs(steps)) return;
+          playButton.textContent = '❚❚';
+          playTimer = setInterval(() => {
+            const latestSteps = Math.abs(values().steps);
+            if (currentStep >= latestSteps) { stopPlaying(); return; }
+            currentStep += 1;
+            render();
+            if (currentStep >= latestSteps) stopPlaying();
+          }, 220);
+        }
+
+        stepsRange.addEventListener('input', () => updateInputs(stepsRange.value, modulusNumber.value));
+        stepsNumber.addEventListener('change', () => updateInputs(stepsNumber.value, modulusNumber.value));
+        modulusRange.addEventListener('input', () => updateInputs(stepsNumber.value, modulusRange.value));
+        modulusNumber.addEventListener('change', () => updateInputs(stepsNumber.value, modulusNumber.value));
+        document.querySelectorAll('[data-add]').forEach((button) => button.addEventListener('click', () => updateInputs(values().steps + Number(button.dataset.add), values().modulus, true)));
+        document.querySelector('#previous').addEventListener('click', () => { stopPlaying(); currentStep = Math.max(0, currentStep - 1); render(); });
+        document.querySelector('#next').addEventListener('click', () => { stopPlaying(); currentStep = Math.min(Math.abs(values().steps), currentStep + 1); render(); });
+        playButton.addEventListener('click', () => playTimer ? stopPlaying() : startPlaying());
+        document.querySelector('#sidebar-toggle').addEventListener('click', () => document.querySelector('#sidebar').classList.toggle('open'));
+        DMModularShell.initTheme(document.querySelector('#theme-toggle'));
+const completedLessonsStorageKey = 'dm2026:progress';
+const legacyCompletedLessonsStorageKey = 'dm-completed-lessons-v1';
+      const progressMigrationStorageKey = 'dm2026:progress-migrated-v1';
+      const defaultCompletedLessons = ['divisibility', 'integer-representations', 'primes'];
+
+      function normalizeTopicId(value) {
+        return String(value).split('/').pop().replace(/\.html$/, '');
+      }
+
+      function loadCompletedLessons() {
+        try {
+          const saved = localStorage.getItem(completedLessonsStorageKey);
+          const completed = new Set(saved === null ? [] : JSON.parse(saved).map(normalizeTopicId));
+          let hasStoredProgress = saved !== null;
+
+          if (localStorage.getItem(progressMigrationStorageKey) !== '1') {
+            const legacySaved = localStorage.getItem(legacyCompletedLessonsStorageKey);
+            if (legacySaved !== null) {
+              JSON.parse(legacySaved).map(normalizeTopicId).forEach((id) => completed.add(id));
+              hasStoredProgress = true;
+            }
+            localStorage.setItem(progressMigrationStorageKey, '1');
+          }
+
+          return hasStoredProgress ? completed : new Set(defaultCompletedLessons);
+        } catch {
+          return new Set(defaultCompletedLessons);
+        }
+      }
+
+      let completedLessons = loadCompletedLessons();
+
+      function saveCompletedLessons() {
+        try {
+          localStorage.setItem(completedLessonsStorageKey, JSON.stringify([...completedLessons]));
+        } catch {
+          // The button still works for this page if storage is unavailable.
+        }
+      }
+      saveCompletedLessons();
+
+      function renderLessonProgress() {
+        const links = [...document.querySelectorAll('.lesson-nav a')];
+        const lessonIds = links.map((link) => normalizeTopicId(link.getAttribute('href')));
+        links.forEach((link, index) => {
+          const marker = link.querySelector('span:first-child');
+          const isCompleted = completedLessons.has(lessonIds[index]);
+          marker.classList.toggle('done', isCompleted);
+          marker.textContent = isCompleted ? '✓' : String(index + 1).padStart(2, '0');
+        });
+
+        const completedCount = lessonIds.filter((id) => completedLessons.has(id)).length;
+        const percentage = Math.round(completedCount / lessonIds.length * 100);
+        const progress = document.querySelector('.lesson-progress');
+        progress.querySelector('span').textContent = `${completedCount}/${lessonIds.length} หัวข้อ · ${percentage}%`;
+        progress.querySelector('i').style.width = `${percentage}%`;
+
+        const currentLink = document.querySelector('.lesson-nav a.active');
+        const currentLesson = normalizeTopicId(currentLink.getAttribute('href'));
+        const learnedButton = document.querySelector('.learned-button');
+        const isCurrentCompleted = completedLessons.has(currentLesson);
+        learnedButton.classList.toggle('selected', isCurrentCompleted);
+        learnedButton.setAttribute('aria-pressed', String(isCurrentCompleted));
+        learnedButton.textContent = isCurrentCompleted ? '✓ เรียนหัวข้อนี้แล้ว' : 'ทำเครื่องหมายว่าเรียนแล้ว';
+      }
+
+      const learnedButton = document.querySelector('.learned-button');
+      learnedButton.addEventListener('click', () => {
+        const currentLesson = normalizeTopicId(document.querySelector('.lesson-nav a.active').getAttribute('href'));
+        if (completedLessons.has(currentLesson)) completedLessons.delete(currentLesson);
+        else completedLessons.add(currentLesson);
+        saveCompletedLessons();
+        renderLessonProgress();
+      });
+
+      window.addEventListener('storage', (event) => {
+        if (event.key === completedLessonsStorageKey || event.key === null) {
+          completedLessons = loadCompletedLessons();
+          renderLessonProgress();
+        }
+      });
+      renderLessonProgress();
+        render();
+      })();
+    </script>
+  </body>
+</html>

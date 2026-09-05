@@ -1,0 +1,105 @@
+@import url("../shared/lesson-shell.css");
+
+.visualizer-layout { margin-top: 32px; }
+.lcg-controls .control-group { min-width: 78px; }
+.lcg-clock {
+  position: relative;
+  display: block;
+  width: 190px;
+  height: 220px;
+  margin: 8px auto 24px;
+}
+
+.clock-face {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 190px;
+  height: 190px;
+  filter: drop-shadow(0 8px 22px #00000012);
+}
+
+.clock-dial {
+  fill: var(--color-bg-elevated);
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.clock-marker {
+  fill: var(--color-text-muted);
+  font-family: var(--font-mono);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.clock-marker.current { fill: var(--color-secondary); font-weight: 700; }
+
+.clock-hand {
+  stroke: var(--color-secondary);
+  stroke-width: 3;
+  stroke-linecap: round;
+  filter: drop-shadow(0 1px 2px #00000018);
+}
+
+.clock-center {
+  background: var(--color-secondary);
+  fill: var(--color-secondary);
+}
+
+.lcg-clock strong {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.lcg-clock span {
+  position: absolute;
+  top: 202px;
+  left: 50%;
+  margin: 0;
+  color: var(--color-text-muted);
+  font: 12px var(--font-mono);
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.sequence-row {
+  display: flex;
+  min-height: 48px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.sequence-chip {
+  display: inline-flex;
+  min-width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  font: 12px var(--font-mono);
+  animation: chip-in .2s ease-out both;
+}
+
+.sequence-chip.seed { border-color: var(--color-secondary); color: var(--color-secondary); }
+.sequence-chip.repeat { border-color: var(--color-success); background: color-mix(in srgb, var(--color-success) 18%, transparent); color: var(--color-success); font-weight: 700; }
+.sequence-chip.current { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.status-banner { margin: 12px 0 0; }
+.period-note { margin: 18px 0 0; color: var(--color-success); font-size: 14px; text-align: center; }
+
+@keyframes chip-in {
+  from { opacity: 0; transform: translateY(4px) scale(.94); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sequence-chip { animation: none; }
+}

@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="เรียนรู้ขั้นตอนวิธียูคลิดแบบขยายและเอกลักษณ์ของเบซูต์แบบโต้ตอบ">
+    <title>ขั้นตอนวิธียูคลิดแบบขยาย | Number Theory</title>
+    <link rel="stylesheet" href="../../../css/modular-lessons/extended-euclidean.css">
+    <script src="../../../js/index-modular-shell.js"></script>
+  </head>
+  <body>
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู">☰</button>
+      </div>
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a href="../foundations/divisibility.html"><span class="done">✓</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a href="../foundations/integer-representations.html"><span class="done">✓</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a href="../foundations/primes.html"><span class="done">✓</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a href="../factorization/sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a href="gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a href="gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a href="../factorization/prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a href="../modular/modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a href="../modular/congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a href="../modular/pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a href="../modular/check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a href="../modular/fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a href="../theorems/euler-totient.html"><span>13</span><span>ฟังก์ชันทอเทียนต์ของออยเลอร์ (Euler's Totient)</span></a></li>
+          <li><a href="../theorems/fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มาต์ (Fermat's Little Theorem)</span></a></li>
+          <li><a class="active" href="extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a href="../cryptography/classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบคลาสสิก (Classical Ciphers)</span></a></li>
+          <li><a href="../theorems/chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a href="../cryptography/rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography)</span></a></li>
+        </ol>
+      </nav>
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>3/18 หัวข้อ · 17%</span><div><i></i></div></div>
+        <button class="learned-button" type="button">ทำเครื่องหมายว่าเรียนแล้ว</button>
+        <div class="utility-links"><a href="../../tools/playground.html">Playground</a><a href="../../tools/glossary.html">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article>
+        <header class="page-header">
+          <h1>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</h1>
+          <p>เข้าใจว่านอกจากหา gcd แล้ว เราหาค่า x,y ที่ทำให้ ax+by=gcd(a,b) ได้ด้วย (Bézout's identity)</p>
+        </header>
+
+        <div class="lesson-stack">
+          <section class="definition-card" aria-labelledby="definition-title">
+            <h2 id="definition-title"><i></i>นิยาม</h2>
+            <p class="definition-text">ขั้นตอนวิธีทางคณิตศาสตร์ที่ใช้หาตัวหารร่วมมาก (ห.ร.ม. หรือ GCD) ของจำนวนเต็มสองจำนวน <code>a</code> และ <code>b</code> พร้อมทั้งหาค่าสัมประสิทธิ์ของเบซูต์ (Bézout coefficients) <code>x</code> และ <code>y</code> ที่สอดคล้องกับสมการเชิงเส้น <code>ax + by = gcd(a, b)</code></p>
+            <p class="sub-label">สูตร</p>
+            <div class="formula"><b>a</b>x + <b>b</b>y = gcd(<b>a</b>, <b>b</b>)</div>
+            <div class="definition-note">
+              <p>ให้ <code>a</code>, <code>b</code> ∈ ℤ โดยที่ a และ b ไม่เป็นศูนย์พร้อมกัน</p>
+              <p><strong>เอกลักษณ์ของเบซูต์</strong> รับประกันว่ามีจำนวนเต็ม <code>x</code> และ <code>y</code> อย่างน้อยหนึ่งคู่เสมอที่ทำให้สมการด้านบนเป็นจริง</p>
+              <p>หรือกล่าวได้ว่า ตัวหารร่วมมากของ a และ b เขียนเป็นผลรวมเชิงเส้นของ a และ b ที่มีสัมประสิทธิ์เป็นจำนวนเต็มได้เสมอ โดยขั้นตอนวิธียูคลิดแบบขยายจะหาคู่ (x, y) นั้นด้วยการแทนค่าย้อนกลับจากขั้นสุดท้ายไปขั้นแรก</p>
+            </div>
+          </section>
+
+          <section class="execution" aria-labelledby="visualizer-title">
+            <h2 class="execution-title" id="visualizer-title">Extended Euclidean — ย้อนรอยหา x, y</h2>
+            <div class="execution-header">
+              <div class="inputs-row">
+                <label for="number-a">a<input id="number-a" type="number" min="1" max="240" value="240"></label>
+                <label for="number-b">b<input id="number-b" type="number" min="1" max="240" value="46"></label>
+              </div>
+            </div>
+
+            <div class="execution-layout">
+              <div class="canvas-area extended-canvas">
+                <section class="phase-card">
+                  <h3>เฟสเดินหน้า (Euclidean)</h3>
+                  <p class="phase-hint" id="forward-hint">ยังไม่เริ่ม — กด ▶ เพื่อหารหาเศษทีละรอบ</p>
+                  <div class="forward-table" id="forward-table"></div>
+                </section>
+
+                <section class="phase-card back-card" id="back-card" hidden>
+                  <h3>เฟสย้อนกลับ (Back-substitution)</h3>
+                  <p class="phase-hint" id="back-hint">เริ่มจากแถวที่ให้ GCD แล้วแทนค่ากลับขึ้นไปทีละแถว</p>
+                  <div class="back-stack" id="back-stack"></div>
+                  <div class="coefficient-tracker" id="coefficient-tracker" hidden>
+                    <strong id="tracker-x"></strong><strong id="tracker-y"></strong><span id="tracker-for"></span>
+                  </div>
+                </section>
+
+                <section class="phase-card try-card" id="try-card" hidden>
+                  <h3>ลองเอง: ใส่ค่า x และ y อีกคู่หนึ่งแล้วตรวจคำตอบ</h3>
+                  <div class="try-row"><span id="try-equation"></span><input id="try-x" type="number" placeholder="x" aria-label="ค่า x"><span>y =</span><input id="try-y" type="number" placeholder="y" aria-label="ค่า y"></div>
+                  <p id="try-feedback" hidden></p>
+                </section>
+              </div>
+
+              <aside class="monitor-panel">
+                <p class="monitor-title">Execution Monitor</p>
+                <p class="monitor-hint" id="monitor-hint">เดินหน้า: หารซ้ำ ๆ จนพบ GCD แล้วค่อยย้อนกลับเพื่อหา x และ y — กด ▶</p>
+                <div class="monitor-log" id="monitor-log"></div>
+                <span class="monitor-badge" id="monitor-badge" hidden></span>
+              </aside>
+            </div>
+
+            <div class="player">
+              <button id="previous" type="button" aria-label="ขั้นก่อนหน้า">‹</button>
+              <button id="play" type="button" aria-label="เล่นขั้นตอน">▶</button>
+              <button id="next" type="button" aria-label="ขั้นถัดไป">›</button>
+              <div class="player-progress"><span><i id="progress-fill"></i></span><output id="step-label"></output></div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+
+    <script>
+      (() => {
+        const numberA = document.querySelector('#number-a');
+        const numberB = document.querySelector('#number-b');
+        const playButton = document.querySelector('#play');
+        const tryX = document.querySelector('#try-x');
+        const tryY = document.querySelector('#try-y');
+        let currentStep = 0;
+        let playTimer = null;
+
+        function clamp(value) {
+          const number = Math.trunc(Number(value));
+          return Number.isNaN(number) ? 1 : Math.min(Math.max(number, 1), 240);
+        }
+
+        function euclideanSteps(first, second) {
+          let a = Math.max(first, second);
+          let b = Math.min(first, second);
+          const steps = [];
+          while (b !== 0) {
+            const quotient = Math.floor(a / b);
+            const remainder = a % b;
+            steps.push({ a, b, quotient, remainder });
+            [a, b] = [b, remainder];
+          }
+          return steps;
+        }
+
+        function extendedEuclidean(first, second) {
+          const larger = Math.max(first, second);
+          const smaller = Math.min(first, second);
+          const forward = euclideanSteps(larger, smaller);
+          const gcd = forward.length === 0 ? larger : forward[forward.length - 1].b;
+          const back = [];
+          let x;
+          let y;
+          const startIndex = forward.length - 2;
+
+          if (startIndex < 0) {
+            x = 0;
+            y = 1;
+            back.push({ a: forward[0].a, b: forward[0].b, x, y });
+          } else {
+            x = 1;
+            y = -forward[startIndex].quotient;
+            back.push({ a: forward[startIndex].a, b: forward[startIndex].b, x, y });
+            for (let index = startIndex - 1; index >= 0; index -= 1) {
+              const step = forward[index];
+              [x, y] = [y, x - y * step.quotient];
+              back.push({ a: step.a, b: step.b, x, y });
+            }
+          }
+          return { larger, smaller, forward, back, gcd, x, y };
+        }
+
+        function signed(value) {
+          return value < 0 ? `− ${Math.abs(value)}` : `+ ${value}`;
+        }
+
+        function stopPlaying() {
+          clearInterval(playTimer);
+          playTimer = null;
+          playButton.textContent = '▶';
+        }
+
+        function renderForward(data, visibleCount, showGcd, activeBack) {
+          document.querySelector('#forward-hint').hidden = visibleCount > 0;
+          const rows = data.forward.slice(0, visibleCount).map((step) => {
+            const row = document.createElement('div');
+            row.className = 'forward-row';
+            if (activeBack && step.a === activeBack.a && step.b === activeBack.b) row.classList.add('source');
+            const remainderClass = showGcd && step.remainder === data.gcd ? ' class="gcd-mark"' : '';
+            row.innerHTML = `${step.a} = ${step.quotient} × ${step.b} + <strong${remainderClass}>${step.remainder}</strong>`;
+            return row;
+          });
+          document.querySelector('#forward-table').replaceChildren(...rows);
+        }
+
+        function renderBack(data, showBack, visibleCount) {
+          const card = document.querySelector('#back-card');
+          card.hidden = !showBack;
+          if (!showBack) return;
+          const visible = data.back.slice(0, visibleCount);
+          document.querySelector('#back-hint').hidden = visible.length > 0;
+          const rows = visible.map((step, index) => {
+            const row = document.createElement('div');
+            row.className = `back-row${index === visible.length - 1 ? ' active' : ''}`;
+            row.innerHTML = `<span class="back-arrow">${index === 0 ? '↰' : '↑'}</span><span>${data.gcd} = <strong class="coef-x">${step.x}</strong> × ${step.a} ${signed(step.y)} × ${step.b}</span>`;
+            return row;
+          });
+          document.querySelector('#back-stack').replaceChildren(...rows);
+
+          const tracker = document.querySelector('#coefficient-tracker');
+          tracker.hidden = visible.length === 0;
+          if (visible.length > 0) {
+            const latest = visible[visible.length - 1];
+            document.querySelector('#tracker-x').textContent = `x = ${latest.x}`;
+            document.querySelector('#tracker-y').textContent = `y = ${latest.y}`;
+            document.querySelector('#tracker-for').textContent = `สำหรับคู่ (${latest.a}, ${latest.b})`;
+          }
+        }
+
+        function renderTry(data, complete) {
+          document.querySelector('#try-card').hidden = !complete;
+          if (!complete) return;
+          document.querySelector('#try-equation').textContent = `${data.larger}·x + ${data.smaller}·y = ${data.gcd} เมื่อ x =`;
+          const feedback = document.querySelector('#try-feedback');
+          if (tryX.value === '' || tryY.value === '') {
+            feedback.hidden = true;
+            return;
+          }
+          const x = Number(tryX.value);
+          const y = Number(tryY.value);
+          const value = data.larger * x + data.smaller * y;
+          const correct = Number.isFinite(value) && value === data.gcd;
+          feedback.hidden = false;
+          feedback.className = correct ? 'try-ok' : 'try-no';
+          feedback.textContent = correct
+            ? `${data.larger}×(${x}) + ${data.smaller}×(${y}) = ${value} ✓ ใช้ได้! คำตอบมีได้หลายคู่`
+            : `${data.larger}×(${x}) + ${data.smaller}×(${y}) = ${value} ≠ ${data.gcd} — ยังไม่ใช่`;
+        }
+
+        function renderMonitor(data, forwardCount, showBack, backCount, complete) {
+          const lines = data.forward.slice(0, forwardCount).map((step) => {
+            const line = document.createElement('div');
+            line.className = 'monitor-line';
+            line.innerHTML = `<i style="background:#38bdf8"></i><span>${step.a} = ${step.quotient} × ${step.b} + ${step.remainder}</span>`;
+            return line;
+          });
+          if (showBack) {
+            const transition = document.createElement('div');
+            transition.className = 'monitor-line emphasis';
+            transition.innerHTML = `<i style="background:var(--color-secondary)"></i><span>gcd = ${data.gcd} — ย้อนกลับเพื่อหา x, y</span>`;
+            lines.push(transition);
+          }
+          data.back.slice(0, backCount).forEach((step) => {
+            const line = document.createElement('div');
+            line.className = 'monitor-line';
+            line.innerHTML = `<i style="background:#a78bfa"></i><span>${data.gcd} = ${step.x} × ${step.a} ${signed(step.y)} × ${step.b}</span>`;
+            lines.push(line);
+          });
+          if (complete) {
+            const summary = document.createElement('div');
+            summary.className = 'monitor-line emphasis';
+            summary.innerHTML = `<i style="background:var(--color-success)"></i><span>${data.larger}×(${data.x}) + ${data.smaller}×(${data.y}) = ${data.gcd} ✓</span>`;
+            lines.push(summary);
+          }
+          document.querySelector('#monitor-log').replaceChildren(...lines);
+          document.querySelector('#monitor-hint').hidden = lines.length > 0;
+          const badge = document.querySelector('#monitor-badge');
+          badge.hidden = !complete;
+          badge.textContent = `${data.larger}x + ${data.smaller}y = ${data.gcd} โดย x=${data.x}, y=${data.y}`;
+        }
+
+        function render() {
+          const a = clamp(numberA.value);
+          const b = clamp(numberB.value);
+          numberA.value = a;
+          numberB.value = b;
+          const data = extendedEuclidean(a, b);
+          const totalSteps = 1 + data.forward.length + 1 + data.back.length + 1;
+          const lastStep = totalSteps - 1;
+          currentStep = Math.min(currentStep, lastStep);
+          const forwardCount = Math.min(currentStep, data.forward.length);
+          const showBack = currentStep >= data.forward.length + 1;
+          const backCount = Math.min(Math.max(currentStep - data.forward.length - 1, 0), data.back.length);
+          const complete = currentStep >= lastStep;
+          const activeBack = backCount > 0 ? data.back[backCount - 1] : null;
+
+          renderForward(data, forwardCount, showBack, activeBack);
+          renderBack(data, showBack, backCount);
+          renderTry(data, complete);
+          renderMonitor(data, forwardCount, showBack, backCount, complete);
+          document.querySelector('#step-label').textContent = `${currentStep + 1}/${totalSteps}`;
+          document.querySelector('#progress-fill').style.width = `${currentStep / (lastStep || 1) * 100}%`;
+          return { lastStep };
+        }
+
+        [numberA, numberB].forEach((input) => input.addEventListener('change', () => {
+          currentStep = 0;
+          tryX.value = '';
+          tryY.value = '';
+          stopPlaying();
+          render();
+        }));
+        [tryX, tryY].forEach((input) => input.addEventListener('input', render));
+        document.querySelector('#previous').addEventListener('click', () => { stopPlaying(); currentStep = Math.max(0, currentStep - 1); render(); });
+        document.querySelector('#next').addEventListener('click', () => {
+          stopPlaying();
+          const lastStep = render().lastStep;
+          currentStep = Math.min(lastStep, currentStep + 1);
+          render();
+        });
+        playButton.addEventListener('click', () => {
+          if (playTimer) { stopPlaying(); return; }
+          const lastStep = render().lastStep;
+          if (currentStep >= lastStep) return;
+          playButton.textContent = '❚❚';
+          playTimer = setInterval(() => {
+            const latestLastStep = render().lastStep;
+            if (currentStep >= latestLastStep) { stopPlaying(); return; }
+            currentStep += 1;
+            render();
+            if (currentStep >= latestLastStep) stopPlaying();
+          }, 650);
+        });
+        document.querySelector('#sidebar-toggle').addEventListener('click', () => document.querySelector('#sidebar').classList.toggle('open'));
+        DMModularShell.initTheme(document.querySelector('#theme-toggle'));
+
+        const completedLessonsStorageKey = 'dm2026:progress';
+        const legacyCompletedLessonsStorageKey = 'dm-completed-lessons-v1';
+        const progressMigrationStorageKey = 'dm2026:progress-migrated-v1';
+        const defaultCompletedLessons = ['divisibility', 'integer-representations', 'primes'];
+
+        function normalizeTopicId(value) {
+          return String(value).split('/').pop().replace(/\.html$/, '');
+        }
+
+        function loadCompletedLessons() {
+          try {
+            const saved = localStorage.getItem(completedLessonsStorageKey);
+            const completed = new Set(saved === null ? [] : JSON.parse(saved).map(normalizeTopicId));
+            let hasStoredProgress = saved !== null;
+            if (localStorage.getItem(progressMigrationStorageKey) !== '1') {
+              const legacySaved = localStorage.getItem(legacyCompletedLessonsStorageKey);
+              if (legacySaved !== null) {
+                JSON.parse(legacySaved).map(normalizeTopicId).forEach((id) => completed.add(id));
+                hasStoredProgress = true;
+              }
+              localStorage.setItem(progressMigrationStorageKey, '1');
+            }
+            return hasStoredProgress ? completed : new Set(defaultCompletedLessons);
+          } catch {
+            return new Set(defaultCompletedLessons);
+          }
+        }
+
+        let completedLessons = loadCompletedLessons();
+
+        function saveCompletedLessons() {
+          try { localStorage.setItem(completedLessonsStorageKey, JSON.stringify([...completedLessons])); } catch { /* Storage may be unavailable. */ }
+        }
+        saveCompletedLessons();
+
+        function renderLessonProgress() {
+          const links = [...document.querySelectorAll('.lesson-nav a')];
+          const lessonIds = links.map((link) => normalizeTopicId(link.getAttribute('href')));
+          links.forEach((link, index) => {
+            const marker = link.querySelector('span:first-child');
+            const completed = completedLessons.has(lessonIds[index]);
+            marker.classList.toggle('done', completed);
+            marker.textContent = completed ? '✓' : String(index + 1).padStart(2, '0');
+          });
+          const completedCount = lessonIds.filter((id) => completedLessons.has(id)).length;
+          const percentage = Math.round(completedCount / lessonIds.length * 100);
+          const progress = document.querySelector('.lesson-progress');
+          progress.querySelector('span').textContent = `${completedCount}/${lessonIds.length} หัวข้อ · ${percentage}%`;
+          progress.querySelector('i').style.width = `${percentage}%`;
+          const currentLesson = normalizeTopicId(document.querySelector('.lesson-nav a.active').getAttribute('href'));
+          const button = document.querySelector('.learned-button');
+          const completed = completedLessons.has(currentLesson);
+          button.classList.toggle('selected', completed);
+          button.setAttribute('aria-pressed', String(completed));
+          button.textContent = completed ? '✓ เรียนหัวข้อนี้แล้ว' : 'ทำเครื่องหมายว่าเรียนแล้ว';
+        }
+
+        document.querySelector('.learned-button').addEventListener('click', () => {
+          const currentLesson = normalizeTopicId(document.querySelector('.lesson-nav a.active').getAttribute('href'));
+          if (completedLessons.has(currentLesson)) completedLessons.delete(currentLesson);
+          else completedLessons.add(currentLesson);
+          saveCompletedLessons();
+          renderLessonProgress();
+        });
+        window.addEventListener('storage', (event) => {
+          if (event.key === completedLessonsStorageKey || event.key === null) {
+            completedLessons = loadCompletedLessons();
+            renderLessonProgress();
+          }
+        });
+
+        renderLessonProgress();
+        render();
+      })();
+    </script>
+  </body>
+</html>

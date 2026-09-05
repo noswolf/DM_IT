@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="เรียนรู้สมภาคด้วยการจัดตัวเลขลงในบ้านเดียวกันตามเศษเหลือ">
+    <title>สมภาค (Congruence) | Number Theory</title>
+    <link rel="stylesheet" href="../../../css/root-lessons/congruence.css">
+    <script src="../../../js/lesson-shell.js" defer></script>
+  </head>
+  <body data-lesson-id="congruence">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู" aria-expanded="false">☰</button>
+      </div>
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a data-lesson-id="divisibility" href="../foundations/divisibility.html"><span>01</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a data-lesson-id="integer-representations" href="../foundations/integer-representations.html"><span>02</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a data-lesson-id="primes" href="../foundations/primes.html"><span>03</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a data-lesson-id="sieve-of-eratosthenes" href="../factorization/sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a data-lesson-id="gcd-euclidean" href="../gcd/gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="gcd-prime-factorization" href="../gcd/gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a data-lesson-id="prime-factorization" href="../factorization/prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a data-lesson-id="modular-arithmetic" href="modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a data-lesson-id="congruence" href="congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a data-lesson-id="pseudorandom-numbers" href="pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a data-lesson-id="check-digits" href="check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a data-lesson-id="fast-modular-exponentiation" href="fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a data-lesson-id="euler-totient" href="../theorems/euler-totient.html"><span>13</span><span>ฟังก์ชันออยเลอร์ (Euler's Totient Function φ(n))</span></a></li>
+          <li><a data-lesson-id="fermats-little-theorem" href="../theorems/fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มา (Fermat's Little Theorem)</span></a></li>
+          <li><a data-lesson-id="extended-euclidean" href="../gcd/extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="classical-ciphers" href="../cryptography/classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบดั้งเดิม (Classical Ciphers)</span></a></li>
+          <li><a data-lesson-id="chinese-remainder-theorem" href="../theorems/chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a data-lesson-id="rsa-cryptography" href="../cryptography/rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography) — Capstone</span></a></li>
+        </ol>
+      </nav>
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>0/18 หัวข้อ · 0%</span><div><i></i></div></div>
+        <button class="learned-button" type="button" aria-pressed="false">ทำเครื่องหมายว่าเรียนแล้ว</button>
+        <div class="utility-links"><a href="../../tools/playground.html">Playground</a><a href="../../tools/glossary.html">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article>
+        <header class="page-header">
+          <h1>สมภาค (Congruence)</h1>
+          <p>จำนวนสองจำนวนอยู่ “บ้าน” เดียวกัน เมื่อเหลือเศษเท่ากันเมื่อหารด้วย n</p>
+        </header>
+
+        <div class="lesson-stack">
+          <section class="definition-card" aria-labelledby="definition-title">
+            <h2 id="definition-title"><i></i>นิยาม</h2>
+            <p class="definition-text">การที่จำนวนเต็มสองจำนวนหารด้วยจำนวนเต็มบวกเดียวกันแล้วเหลือเศษเท่ากัน</p>
+            <p class="sub-label">สูตร</p>
+            <div class="formula"><b>a</b> ≡ <b>b</b> (mod <b>n</b>) &nbsp;⟺&nbsp; <b>n</b> | (<b>a</b> − <b>b</b>)</div>
+            <div class="definition-note">
+              <p>ให้ <code>a</code>, <code>b</code> ∈ ℤ และ <code>n</code> เป็นจำนวนเต็มบวก</p>
+              <p>เรากล่าวว่า <strong>a และ b เป็น congruent modulo n</strong> ก็ต่อเมื่อ n หารผลต่าง (a − b) ลงตัว</p>
+              <p class="statement-equation">a = b + kn &nbsp;สำหรับบางจำนวนเต็ม k</p>
+              <p>หรือกล่าวได้ว่า a และ b เหลือเศษเท่ากันเมื่อหารด้วย n</p>
+            </div>
+          </section>
+
+          <section class="lesson-card" aria-labelledby="visualizer-title">
+            <div class="lesson-card-header">
+              <div>
+                <h2 id="visualizer-title">Congruence — เลขบ้านเดียวกัน</h2>
+                <p>จัดเลข 0–30 ลงตามเศษที่ได้จากการหารด้วย mod n</p>
+              </div>
+              <div class="control-row congruence-controls">
+                <label class="control-group" for="modulus-range"><span>mod n</span><span class="control-range"><input id="modulus-range" type="range" min="2" max="12" value="4"><output id="modulus-value">4</output></span></label>
+                <input id="modulus-number" type="number" min="2" max="12" value="4" aria-label="ค่า modulus n">
+                <div class="button-row"><button class="primary" id="reset-lesson" type="button">รีเซ็ต</button></div>
+              </div>
+            </div>
+
+            <div class="visualizer-layout">
+              <div class="visualizer-canvas">
+                <p class="status-banner" id="congruence-hint" aria-live="polite">กด ▶ เพื่อดูการเติมเลขตามลำดับเศษ mod n ทีละตัว</p>
+                <div class="bucket-grid" id="bucket-grid" aria-label="กลุ่มเลขตามเศษเหลือ"></div>
+                <div class="status-banner pair-result" id="pair-result" aria-live="polite">เลือกเลข 2 ตัวจากช่องใดก็ได้เพื่อตรวจสอบว่า congruent กันไหม</div>
+              </div>
+              <aside class="monitor-panel" aria-label="ตัวติดตามขั้นตอน">
+                <p class="monitor-title">Execution Monitor</p>
+                <p class="monitor-hint">เลขที่อยู่ในบ้านเดียวกันมีเศษเหลือเท่ากัน จึงเป็นสมภาคกัน modulo n</p>
+                <div class="summary-card" aria-live="polite" hidden>
+                  <strong id="summary-title">4 บ้านตามเศษ 0–3</strong>
+                  <p id="summary-text">ตัวเลขแต่ละตัวจะอยู่ในบ้านเดียว และตัวเลขในบ้านเดียวกันจะสมภาคกัน modulo 4</p>
+                </div>
+                <div class="monitor-log" id="monitor-log"></div>
+              </aside>
+            </div>
+
+            <div class="step-controls" aria-label="ควบคุมขั้นตอน">
+              <button id="previous-step" type="button" aria-label="ขั้นก่อนหน้า">‹</button>
+              <button id="play-step" type="button" aria-label="เล่นขั้นตอน">▶</button>
+              <button id="next-step" type="button" aria-label="ขั้นถัดไป">›</button>
+              <button id="reset-step" type="button" aria-label="รีเซ็ตขั้นตอน">↺</button>
+              <div class="step-progress"><span><i id="step-progress-fill"></i></span><output id="step-label">0/8</output></div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+
+    <script>
+      (() => {
+        const numbers = Array.from({ length: 31 }, (_, index) => index);
+        const colors = ['#38bdf8', '#3e8659', '#a78bfa', '#f472b6', '#fb923c', '#22d3ee', '#facc15', '#94a3b8', '#4ade80', '#f87171', '#60a5fa', '#c084fc'];
+        const range = document.querySelector('#modulus-range');
+        const numberInput = document.querySelector('#modulus-number');
+        const modulusValue = document.querySelector('#modulus-value');
+        const bucketGrid = document.querySelector('#bucket-grid');
+        const pairResult = document.querySelector('#pair-result');
+        const hint = document.querySelector('#congruence-hint');
+        const summaryCard = document.querySelector('.summary-card');
+        const summaryTitle = document.querySelector('#summary-title');
+        const summaryText = document.querySelector('#summary-text');
+        const monitorLog = document.querySelector('#monitor-log');
+        const progressFill = document.querySelector('#step-progress-fill');
+        const stepLabel = document.querySelector('#step-label');
+        const playButton = document.querySelector('#play-step');
+        let modulus = 4;
+        let step = 0;
+        let selected = [];
+        let timer = null;
+
+        function stopPlaying() {
+          if (timer !== null) window.clearInterval(timer);
+          timer = null;
+          playButton.textContent = '▶';
+          playButton.setAttribute('aria-label', 'เล่นขั้นตอน');
+        }
+
+        function setModulus(value) {
+          const next = Math.min(Math.max(Math.trunc(Number(value) || 2), 2), 12);
+          modulus = next;
+          range.value = String(next);
+          numberInput.value = String(next);
+          modulusValue.textContent = String(next);
+          step = 0;
+          selected = [];
+          stopPlaying();
+          render();
+        }
+
+        function chooseNumber(value) {
+          selected = selected.includes(value) ? selected.filter((item) => item !== value) : selected.length >= 2 ? [value] : [...selected, value];
+          render();
+        }
+
+        function setStep(nextStep) {
+          step = Math.min(Math.max(nextStep, 0), getTotalSteps());
+          render();
+          if (step >= getTotalSteps()) stopPlaying();
+        }
+
+        function getTotalSteps() {
+          return Math.ceil(numbers.length / modulus);
+        }
+
+        function addMonitorLine(text, tone) {
+          const line = document.createElement('div');
+          line.className = `monitor-line ${tone || ''}`;
+          const dot = document.createElement('i');
+          const copy = document.createElement('span');
+          dot.setAttribute('aria-hidden', 'true');
+          copy.textContent = text;
+          line.append(dot, copy);
+          monitorLog.append(line);
+        }
+
+        function renderBuckets() {
+          const buckets = Array.from({ length: modulus }, () => []);
+          const visibleEnd = Math.min(step * modulus, numbers.length);
+          const hasLatestBatch = step > 0 && step < getTotalSteps();
+          const latestStart = hasLatestBatch ? (step - 1) * modulus : 0;
+          numbers.slice(0, visibleEnd).forEach((value) => buckets[value % modulus].push(value));
+          bucketGrid.style.setProperty('--bucket-count', String(modulus));
+          bucketGrid.replaceChildren();
+          buckets.forEach((values, bucketIndex) => {
+            const bucket = document.createElement('section');
+            bucket.className = 'bucket';
+            const label = document.createElement('span');
+            label.className = 'bucket-label';
+            label.style.background = colors[bucketIndex % colors.length];
+            label.textContent = `เศษ ${bucketIndex}`;
+            const valueList = document.createElement('div');
+            valueList.className = 'bucket-values';
+            values.forEach((value) => {
+              const button = document.createElement('button');
+              button.type = 'button';
+              button.textContent = String(value);
+              button.title = `${value} mod ${modulus} = ${bucketIndex}`;
+              button.classList.toggle('selected', selected.includes(value));
+              button.classList.toggle('newly-added', hasLatestBatch && value >= latestStart && value < visibleEnd);
+              button.setAttribute('aria-pressed', String(selected.includes(value)));
+              button.addEventListener('click', () => chooseNumber(value));
+              valueList.append(button);
+            });
+            bucket.append(label, valueList);
+            bucketGrid.append(bucket);
+          });
+        }
+
+        function renderPairResult() {
+          pairResult.className = 'status-banner pair-result';
+          if (selected.length !== 2) {
+            pairResult.textContent = 'เลือกเลข 2 ตัวจากช่องใดก็ได้เพื่อตรวจสอบว่า congruent กันไหม';
+            return;
+          }
+          const [a, b] = [...selected].sort((left, right) => right - left);
+          const difference = a - b;
+          const quotient = difference / modulus;
+          const isCongruent = difference % modulus === 0;
+          pairResult.classList.add(isCongruent ? 'good' : 'warn');
+          pairResult.textContent = isCongruent
+            ? `${a} ≡ ${b} (mod ${modulus}) — ${a} − ${b} = ${difference} = ${quotient} × ${modulus}`
+            : `${a} ≢ ${b} (mod ${modulus}) — ${modulus} ไม่หาร ${difference} ลงตัว`;
+        }
+
+        function renderMonitor() {
+          monitorLog.replaceChildren();
+          if (step === 0) addMonitorLine(`พร้อมสร้างเลข 0–30 ทีละชุด ชุดละ ${modulus} ตัว`, '');
+          if (selected.length === 2) {
+            const sameBucket = selected[0] % modulus === selected[1] % modulus;
+            addMonitorLine(sameBucket ? 'เลขที่เลือกอยู่บ้านเดียวกัน' : 'เลขที่เลือกอยู่คนละบ้าน', sameBucket ? 'good' : 'warn');
+          }
+        }
+
+        function renderSummary() {
+          summaryCard.hidden = step < getTotalSteps();
+          summaryTitle.textContent = `${modulus} บ้านตามเศษ 0–${modulus - 1}`;
+          summaryText.textContent = `ตัวเลขแต่ละตัวจะอยู่ในบ้านเดียว และตัวเลขในบ้านเดียวกันจะสมภาคกัน modulo ${modulus}`;
+        }
+
+        function render() {
+          const totalSteps = getTotalSteps();
+          modulusValue.textContent = String(modulus);
+          progressFill.style.width = `${step / totalSteps * 100}%`;
+          stepLabel.textContent = `${step}/${totalSteps}`;
+          hint.textContent = step < totalSteps ? 'กด ▶ เพื่อดูการสร้างเลข 0–30 ทีละชุดตาม mod n' : 'เลือกเลข 2 ตัวจากช่องใดก็ได้เพื่อตรวจสอบว่า congruent กันไหม';
+          renderSummary();
+          renderBuckets();
+          renderPairResult();
+          renderMonitor();
+        }
+
+        range.addEventListener('input', () => setModulus(range.value));
+        numberInput.addEventListener('change', () => setModulus(numberInput.value));
+        document.querySelector('#previous-step').addEventListener('click', () => { stopPlaying(); setStep(step - 1); });
+        document.querySelector('#next-step').addEventListener('click', () => { stopPlaying(); setStep(step + 1); });
+        document.querySelector('#reset-step').addEventListener('click', () => { selected = []; setStep(0); });
+        document.querySelector('#reset-lesson').addEventListener('click', () => setModulus(4));
+        playButton.addEventListener('click', () => {
+          if (timer !== null) {
+            stopPlaying();
+            return;
+          }
+          if (step >= getTotalSteps()) setStep(0);
+          playButton.textContent = 'Ⅱ';
+          playButton.setAttribute('aria-label', 'หยุดขั้นตอน');
+          timer = window.setInterval(() => setStep(step + 1), 260);
+        });
+
+        render();
+      })();
+    </script>
+  </body>
+</html>

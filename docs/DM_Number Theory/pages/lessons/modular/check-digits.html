@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="เข้าใจว่าเลขตรวจสอบท้ายบาร์โค้ด (UPC) ใช้เลขคณิตมอดุลาร์ตรวจจับข้อผิดพลาดจากการพิมพ์เลขผิดได้อย่างไร">
+    <title>เลขตรวจสอบ | Number Theory</title>
+    <link rel="stylesheet" href="../../../css/root-lessons/check-digits.css">
+    <script src="../../../js/lesson-shell.js" defer></script>
+  </head>
+  <body data-lesson-id="check-digits">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู" aria-expanded="false">☰</button>
+      </div>
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a data-lesson-id="divisibility" href="../foundations/divisibility.html"><span>01</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a data-lesson-id="integer-representations" href="../foundations/integer-representations.html"><span>02</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a data-lesson-id="primes" href="../foundations/primes.html"><span>03</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a data-lesson-id="sieve-of-eratosthenes" href="../factorization/sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a data-lesson-id="gcd-euclidean" href="../gcd/gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="gcd-prime-factorization" href="../gcd/gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a data-lesson-id="prime-factorization" href="../factorization/prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a data-lesson-id="modular-arithmetic" href="modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a data-lesson-id="congruence" href="congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a data-lesson-id="pseudorandom-numbers" href="pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a data-lesson-id="check-digits" href="check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a data-lesson-id="fast-modular-exponentiation" href="fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a data-lesson-id="euler-totient" href="../theorems/euler-totient.html"><span>13</span><span>ฟังก์ชันออยเลอร์ (Euler's Totient Function φ(n))</span></a></li>
+          <li><a data-lesson-id="fermats-little-theorem" href="../theorems/fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มา (Fermat's Little Theorem)</span></a></li>
+          <li><a data-lesson-id="extended-euclidean" href="../gcd/extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="classical-ciphers" href="../cryptography/classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบดั้งเดิม (Classical Ciphers)</span></a></li>
+          <li><a data-lesson-id="chinese-remainder-theorem" href="../theorems/chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a data-lesson-id="rsa-cryptography" href="../cryptography/rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography) — Capstone</span></a></li>
+        </ol>
+      </nav>
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>0/18 หัวข้อ · 0%</span><div><i></i></div></div>
+        <button class="learned-button" type="button" aria-pressed="false">ทำเครื่องหมายว่าเรียนแล้ว</button>
+        <div class="utility-links"><a href="../../tools/playground.html">Playground</a><a href="../../tools/glossary.html">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article>
+        <header class="page-header">
+          <h1>เลขตรวจสอบ (Check Digits)</h1>
+          <p>เข้าใจว่าเลขตรวจสอบท้ายบาร์โค้ด (UPC) ใช้เลขคณิตมอดุลาร์ตรวจจับข้อผิดพลาดจากการพิมพ์เลขผิดได้อย่างไร</p>
+        </header>
+
+        <div class="lesson-stack">
+          <section class="definition-card" aria-labelledby="definition-title">
+            <h2 id="definition-title"><i></i>นิยาม</h2>
+            <p class="definition-text">เลขตรวจสอบ (Check Digit) คือ ตัวเลขหนึ่งหลัก (หรือตัวอักษร) ที่ถูกคำนวณขึ้นมาจากชุดตัวเลขหลักอื่น ๆ ก่อนหน้า โดยมีวัตถุประสงค์เพื่อใช้ตรวจสอบความถูกต้องของข้อมูล และป้องกันความผิดพลาดที่อาจเกิดขึ้นจากการคีย์ข้อมูลผิด การสลับตำแหน่งตัวเลข หรือการส่งผ่านข้อมูลในระบบคอมพิวเตอร์</p>
+            <p class="sub-label">สูตร</p>
+            <div class="formula">3·(d<sub>1</sub>+d<sub>3</sub>+…+d<sub>11</sub>) + (d<sub>2</sub>+d<sub>4</sub>+…+d<sub>10</sub>) + <b>check</b> ≡ 0 (mod 10)</div>
+            <div class="definition-note">
+              <p>ให้ <code>d<sub>1</sub>d<sub>2</sub>…d<sub>k</sub></code> เป็นชุดตัวเลข โดยที่ k−1 หลักแรกคือหลักข้อมูล และหลักสุดท้าย <code>d<sub>k</sub></code> คือหลักตรวจสอบ พร้อมด้วยน้ำหนักประจำหลัก <code>w<sub>1</sub>, …, w<sub>k</sub></code> และมอดุลัส <code>n</code></p>
+              <p>เรานิยาม <strong>เลขตรวจสอบ</strong> ให้เป็นหลักที่เลือกมาเพื่อทำให้ผลรวมถ่วงน้ำหนักของทุกหลักสอดคล้องกับสมภาค</p>
+              <div class="general-formula">w<sub>1</sub>d<sub>1</sub> + w<sub>2</sub>d<sub>2</sub> + … + w<sub>k</sub>d<sub>k</sub> ≡ 0 (mod n)</div>
+              <p>โดยระบบ UPC ใช้ w = (3, 1, 3, 1, …) กับ n = 10 ส่วน ISBN-10 ใช้ w = (10, 9, …, 2, 1) กับ n = 11 (จึงอาจได้หลักตรวจสอบเป็น <code>X</code> แทนค่า 10) — ถ้าสมภาคนี้ไม่เป็นจริง แสดงว่าชุดตัวเลขนั้นผิด</p>
+            </div>
+          </section>
+
+          <section class="lesson-card" aria-labelledby="visualizer-title">
+            <div class="lesson-card-header check-header">
+              <div class="mode-toggle" role="group" aria-label="เลือกระบบ check digit">
+                <button class="mode-button selected" data-check-mode="upc" type="button">UPC</button>
+                <button class="mode-button" data-check-mode="isbn10" type="button">ISBN-10</button>
+              </div>
+              <div class="stage-toggle" role="group" aria-label="เลือกด่านการเรียนรู้">
+                <button class="stage-button selected" data-stage="1" type="button">1. สร้างชุดตัวเลข</button>
+                <button class="stage-button" data-stage="2" type="button">2. ตรวจสอบ</button>
+              </div>
+            </div>
+
+            <div class="check-workspace">
+              <div class="check-main">
+                <section id="stage-one" class="check-canvas" aria-labelledby="visualizer-title">
+                  <h2 class="stage-title" id="visualizer-title">สร้างชุดตัวเลขของคุณเอง</h2>
+                  <p class="stage-description" id="stage-one-description">กำหนดเลขหลักข้อมูลได้ตามต้องการ หลักสุดท้าย (<strong>Check Digit</strong>) จะคำนวณได้จากเลขหลักข้างหน้าโดยอัตโนมัติ</p>
+                  <label for="main-number-input" class="sr-only">ชุดข้อมูล</label>
+                  <input class="main-input" id="main-number-input" type="text" inputmode="numeric" value="01234567890" maxlength="11" autocomplete="off" aria-describedby="incomplete-note">
+                  <p class="incomplete-note" id="incomplete-note" aria-live="polite"></p>
+                  <div class="barcode-row" id="barcode-row" aria-label="ตัวเลขและน้ำหนัก"></div>
+                  <p class="sum-readout" id="sum-readout" aria-live="polite"></p>
+                  <div class="result-banner" id="check-result" aria-live="polite">กด ▶ เพื่อเริ่มคำนวณ</div>
+                  <div class="stage-footer"><button class="next-button" id="advance-stage" type="button">ไปด่านตรวจสอบ →</button></div>
+                </section>
+
+                <section id="stage-two" class="check-canvas" aria-labelledby="stage-two-title" hidden>
+                  <h2 class="stage-title" id="stage-two-title">ตรวจสอบว่าชุดตัวเลข UPC นี้ถูกต้องหรือไม่</h2>
+                  <div class="barcode-row" id="challenge-digits" aria-label="ข้อมูลตัวอย่าง"></div>
+                  <div class="guess-row" role="group" aria-label="คำตอบการตรวจสอบ"><button class="guess-button" data-verdict="valid" type="button">🟢 Valid</button><button class="guess-button" data-verdict="invalid" type="button">🔴 Invalid</button></div>
+                  <div class="stage-two-footer"><button class="next-button" id="verify-challenge" type="button" disabled>ตรวจสอบ</button><button class="reset-button" id="random-challenge" type="button">🎲 สุ่มโจทย์ใหม่</button></div>
+                  <div class="verify-panel" id="verify-panel" aria-live="polite" hidden></div>
+                </section>
+
+                <div class="step-controls" id="check-step-controls" aria-label="ควบคุมขั้นตอน">
+                  <button id="check-prev" type="button" aria-label="ขั้นก่อนหน้า">‹</button>
+                  <button id="check-play" type="button" aria-label="เล่นขั้นตอน">▶</button>
+                  <button id="check-next" type="button" aria-label="ขั้นถัดไป">›</button>
+                  <button id="check-reset-step" type="button" aria-label="รีเซ็ตขั้นตอน">↺</button>
+                  <div class="step-progress"><span><i id="check-step-fill"></i></span><output id="check-step-label">0/12</output></div>
+                </div>
+              </div>
+
+              <aside class="monitor-panel" aria-label="ตัวติดตามขั้นตอน">
+                <p class="monitor-title">Execution Monitor</p>
+                <p class="monitor-hint" id="check-monitor-hint">ทุกหลักถูกคูณด้วยน้ำหนักของตำแหน่ง แล้วใช้เศษเหลือเพื่อสร้างหรือยืนยัน check digit</p>
+                <div class="monitor-log" id="check-monitor"></div>
+              </aside>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+
+    <script>
+      (() => {
+        const modeButtons = document.querySelectorAll('[data-check-mode]');
+        const stageButtons = document.querySelectorAll('[data-stage]');
+        const stageOne = document.querySelector('#stage-one');
+        const stageTwo = document.querySelector('#stage-two');
+        const mainInput = document.querySelector('#main-number-input');
+        const stageDescription = document.querySelector('#stage-one-description');
+        const incompleteNote = document.querySelector('#incomplete-note');
+        const barcodeRow = document.querySelector('#barcode-row');
+        const sumReadout = document.querySelector('#sum-readout');
+        const checkResult = document.querySelector('#check-result');
+        const monitor = document.querySelector('#check-monitor');
+        const monitorHint = document.querySelector('#check-monitor-hint');
+        const progressFill = document.querySelector('#check-step-fill');
+        const stepLabel = document.querySelector('#check-step-label');
+        const playButton = document.querySelector('#check-play');
+        const stepControls = document.querySelector('#check-step-controls');
+        const challengeDigits = document.querySelector('#challenge-digits');
+        const verifyButton = document.querySelector('#verify-challenge');
+        const randomChallengeButton = document.querySelector('#random-challenge');
+        const verifyPanel = document.querySelector('#verify-panel');
+        let mode = 'upc';
+        let stage = 1;
+        let inputDigits = '01234567890';
+        let step = 0;
+        let timer = null;
+        let challenge = 0;
+        let verdict = null;
+        let challengeVerified = false;
+
+        const data = {
+          upc: {
+            label: 'UPC',
+            length: 11,
+            defaultDigits: '01234567890',
+            weights: (length) => Array.from({ length }, (_, index) => index % 2 === 0 ? 3 : 1),
+            modulus: 10,
+            checkText: (value) => String(value),
+            challenges: [
+              { digits: '01234567890', received: 5 },
+              { digits: '01234567890', received: 3 },
+              { digits: '03600029145', received: 2 },
+              { digits: '03600029145', received: 7 }
+            ]
+          },
+          isbn10: {
+            label: 'ISBN-10',
+            length: 9,
+            defaultDigits: '097522980',
+            weights: (length) => Array.from({ length }, (_, index) => 10 - index),
+            modulus: 11,
+            checkText: (value) => value === 10 ? 'X' : String(value),
+            challenges: [
+              { digits: '097522980', received: 10 },
+              { digits: '097522980', received: 5 },
+              { digits: '030640615', received: 2 },
+              { digits: '030640615', received: 9 }
+            ]
+          }
+        };
+
+        function currentData() { return data[mode]; }
+        function weights() { return currentData().weights(inputDigits.length); }
+        function calculate(digits, digitWeights = currentData().weights(digits.length)) {
+          const sum = [...digits].reduce((total, digit, index) => total + Number(digit) * digitWeights[index], 0);
+          const modulus = currentData().modulus;
+          return { sum, check: (modulus - sum % modulus) % modulus };
+        }
+        function stopPlaying() {
+          if (timer !== null) window.clearInterval(timer);
+          timer = null;
+          playButton.textContent = '▶';
+          playButton.setAttribute('aria-label', 'เล่นขั้นตอน');
+        }
+        function addMonitorLine(text, tone = '') {
+          const line = document.createElement('div');
+          line.className = `monitor-line ${tone}`;
+          const dot = document.createElement('i');
+          const copy = document.createElement('span');
+          copy.textContent = text;
+          line.append(dot, copy);
+          monitor.append(line);
+        }
+        function renderModeControls() {
+          modeButtons.forEach((button) => button.classList.toggle('selected', button.dataset.checkMode === mode));
+          stageButtons.forEach((button) => button.classList.toggle('selected', Number(button.dataset.stage) === stage));
+          stageOne.hidden = stage !== 1;
+          stageTwo.hidden = stage !== 2;
+          stepControls.hidden = stage !== 1;
+          mainInput.maxLength = String(currentData().length);
+          document.querySelector('#stage-two-title').textContent = `ตรวจสอบว่าชุดตัวเลข ${currentData().label} นี้ถูกต้องหรือไม่`;
+          stageDescription.innerHTML = mode === 'upc'
+            ? 'กำหนดเลขหลักข้อมูลได้ตามต้องการ หลักสุดท้าย (<strong>Check Digit</strong>) จะคำนวณได้จากเลขหลักข้างหน้าโดยอัตโนมัติ'
+            : 'กำหนดเลขหลักข้อมูลได้ตามต้องการ หลักสุดท้าย (<strong>Check Digit</strong>) จะคำนวณได้จากเลข ISBN-10 ที่กรอกโดยอัตโนมัติ';
+        }
+        function renderBarcode() {
+          const currentWeights = weights();
+          const visible = Math.min(step, inputDigits.length);
+          barcodeRow.replaceChildren();
+          [...inputDigits].forEach((digit, index) => {
+            const block = document.createElement('div');
+            block.className = 'digit-block';
+            const button = document.createElement('span');
+            button.className = `digit-button ${index < visible ? 'done' : 'pending'} ${index === step - 1 ? 'active' : ''}`;
+            button.textContent = digit;
+            const weight = document.createElement('span');
+            weight.className = 'weight-tag';
+            weight.textContent = `×${currentWeights[index]}`;
+            block.append(button, weight);
+            barcodeRow.append(block);
+          });
+          const result = calculate(inputDigits, currentWeights);
+          const checkBlock = document.createElement('div');
+          checkBlock.className = 'digit-block';
+          const check = document.createElement('span');
+          check.className = `digit-button check ${step >= inputDigits.length + 1 ? 'done' : 'pending'}`;
+          check.textContent = step >= inputDigits.length + 1 && inputDigits.length === currentData().length ? currentData().checkText(result.check) : '?';
+          const checkWeight = document.createElement('span');
+          checkWeight.className = 'weight-tag';
+          checkWeight.textContent = 'check';
+          checkBlock.append(check, checkWeight);
+          barcodeRow.append(checkBlock);
+        }
+        function renderStageOne() {
+          const length = currentData().length;
+          const completeInput = inputDigits.length === length;
+          const currentWeights = weights();
+          const result = calculate(inputDigits, currentWeights);
+          const visible = Math.min(step, inputDigits.length);
+          const partialSum = [...inputDigits.slice(0, visible)].reduce((total, digit, index) => total + Number(digit) * currentWeights[index], 0);
+          incompleteNote.textContent = completeInput ? '' : `ต้องมีข้อมูล ${length} หลัก (ตอนนี้ ${inputDigits.length} หลัก)`;
+          renderBarcode();
+          sumReadout.textContent = visible ? `ผลรวมที่เปิดดูแล้ว = ${partialSum}${visible < inputDigits.length ? ' …' : ''}` : 'ยังไม่ได้คูณน้ำหนักของหลักใด';
+          checkResult.className = 'result-banner';
+          if (!completeInput) checkResult.textContent = 'กรอกข้อมูลให้ครบก่อนจึงจะสร้าง check digit ได้';
+          else if (step < inputDigits.length + 1) checkResult.textContent = 'กด ▶ เพื่อคำนวณต่อทีละหลัก';
+          else { checkResult.textContent = `check digit = ${currentData().checkText(result.check)} · (${result.sum} + ${result.check}) mod ${currentData().modulus} = 0`; checkResult.classList.add('good'); }
+          progressFill.style.width = `${step / (length + 1) * 100}%`;
+          stepLabel.textContent = `${step}/${length + 1}`;
+        }
+        function renderChallenge() {
+          const item = currentData().challenges[challenge];
+          const expected = calculate(item.digits, currentData().weights(item.digits.length)).check;
+          challengeDigits.replaceChildren();
+          [...item.digits].forEach((digit, index) => {
+            const block = document.createElement('div');
+            block.className = 'digit-block';
+            const button = document.createElement('span');
+            button.className = 'digit-button';
+            button.textContent = digit;
+            const weight = document.createElement('span');
+            weight.className = 'weight-tag';
+            weight.textContent = `×${currentData().weights(item.digits.length)[index]}`;
+            block.append(button, weight);
+            challengeDigits.append(block);
+          });
+          const received = document.createElement('span');
+          received.className = 'digit-button received';
+          received.textContent = currentData().checkText(item.received);
+          challengeDigits.append(received);
+          document.querySelectorAll('[data-verdict]').forEach((button) => button.classList.toggle('selected', button.dataset.verdict === verdict));
+          verifyButton.disabled = verdict === null || challengeVerified;
+          verifyPanel.hidden = !challengeVerified;
+          if (challengeVerified) verifyPanel.dataset.expected = currentData().checkText(expected);
+        }
+        function renderMonitor() {
+          monitor.replaceChildren();
+          if (stage === 2 && !challengeVerified) {
+            monitorHint.textContent = 'โปรดเลือกคำตอบว่าชุดตัวเลขนี้ถูกต้องหรือไม่ ก่อนกดตรวจสอบ';
+            return;
+          }
+          if (stage === 2) {
+            const item = currentData().challenges[challenge];
+            const expected = calculate(item.digits, currentData().weights(item.digits.length)).check;
+            monitorHint.textContent = 'ตรวจสอบผลรวมและ Check Digit ที่ได้รับเพื่อยืนยันผล';
+            addMonitorLine(`${currentData().label}: คำนวณจากข้อมูล ${item.digits}`, '');
+            addMonitorLine(`check ที่ควรได้ = ${currentData().checkText(expected)}`, 'good');
+            addMonitorLine(`check ที่ได้รับ = ${currentData().checkText(item.received)}`, expected === item.received ? 'good' : 'warn');
+            return;
+          }
+          monitorHint.textContent = currentData().length === inputDigits.length
+            ? `คูณเลขแต่ละหลักด้วยน้ำหนักที่กำหนด แล้วรวมผลคูณทั้งหมด (mod ${currentData().modulus}) — กด ▶ เพื่อเริ่ม`
+            : `กรอกเลขให้ครบ ${currentData().length} หลักก่อน จึงจะเริ่มคำนวณ Check Digit ได้`;
+          addMonitorLine(`${currentData().label} · modulus ${currentData().modulus}`, '');
+          const currentWeights = weights();
+          const visible = Math.min(step, inputDigits.length);
+          for (let index = 0; index < visible; index += 1) addMonitorLine(`${inputDigits[index]} × ${currentWeights[index]} = ${Number(inputDigits[index]) * currentWeights[index]}`, '');
+          if (step >= inputDigits.length + 1 && inputDigits.length === currentData().length) {
+            const result = calculate(inputDigits, currentWeights);
+            addMonitorLine(`sum = ${result.sum}; check = ${currentData().checkText(result.check)}`, 'good');
+          }
+        }
+        function render() { renderModeControls(); if (stage === 1) renderStageOne(); else renderChallenge(); renderMonitor(); }
+        function setStage(nextStage) { stage = nextStage; verdict = null; challengeVerified = false; verifyPanel.textContent = ''; verifyPanel.hidden = true; stopPlaying(); render(); }
+        function setMode(nextMode) { mode = nextMode; stage = 1; inputDigits = currentData().defaultDigits; mainInput.value = inputDigits; step = 0; challenge = 0; verdict = null; challengeVerified = false; verifyPanel.textContent = ''; verifyPanel.hidden = true; stopPlaying(); render(); }
+        function setStep(nextStep) { step = Math.min(Math.max(nextStep, 0), inputDigits.length + 1); render(); if (step >= inputDigits.length + 1) stopPlaying(); }
+        function setInput(value) { inputDigits = value.replace(/\D/g, '').slice(0, currentData().length); mainInput.value = inputDigits; step = 0; stopPlaying(); render(); }
+        function randomizeChallenge() {
+          const challenges = currentData().challenges;
+          let nextChallenge = Math.floor(Math.random() * challenges.length);
+          if (challenges.length > 1 && nextChallenge === challenge) nextChallenge = (nextChallenge + 1) % challenges.length;
+          challenge = nextChallenge;
+          verdict = null;
+          challengeVerified = false;
+          verifyPanel.textContent = '';
+          verifyPanel.hidden = true;
+          render();
+        }
+
+        mainInput.addEventListener('input', () => setInput(mainInput.value));
+        modeButtons.forEach((button) => button.addEventListener('click', () => setMode(button.dataset.checkMode)));
+        stageButtons.forEach((button) => button.addEventListener('click', () => setStage(Number(button.dataset.stage))));
+        document.querySelector('#advance-stage').addEventListener('click', () => setStage(2));
+        document.querySelector('#check-prev').addEventListener('click', () => { stopPlaying(); setStep(step - 1); });
+        document.querySelector('#check-next').addEventListener('click', () => { stopPlaying(); setStep(step + 1); });
+        document.querySelector('#check-reset-step').addEventListener('click', () => { stopPlaying(); setStep(0); });
+        playButton.addEventListener('click', () => {
+          if (timer !== null) { stopPlaying(); return; }
+          if (step >= inputDigits.length + 1) setStep(0);
+          playButton.textContent = 'Ⅱ';
+          playButton.setAttribute('aria-label', 'หยุดขั้นตอน');
+          timer = window.setInterval(() => setStep(step + 1), 360);
+        });
+        document.querySelectorAll('[data-verdict]').forEach((button) => button.addEventListener('click', () => { verdict = button.dataset.verdict; render(); }));
+        randomChallengeButton.addEventListener('click', randomizeChallenge);
+        verifyButton.addEventListener('click', () => {
+          if (verdict === null) return;
+          const item = currentData().challenges[challenge];
+          const expected = calculate(item.digits, currentData().weights(item.digits.length)).check;
+          const actualValid = expected === item.received;
+          verifyPanel.className = `verify-panel ${actualValid ? 'ok' : 'bad'}`;
+          verifyPanel.innerHTML = `<span class="verify-verdict">${actualValid ? 'VALID' : 'INVALID'}</span><br><span class="verify-note">${actualValid ? `เพราะ check ที่ควรได้คือ ${currentData().checkText(expected)}` : `ควรได้ ${currentData().checkText(expected)} แต่ได้รับ ${currentData().checkText(item.received)}`}${verdict ? ((verdict === (actualValid ? 'valid' : 'invalid')) ? ' · คำตอบของคุณถูกต้อง' : ' · คำตอบของคุณยังไม่ถูก') : ''}</span>`;
+          challengeVerified = true;
+          render();
+        });
+
+        render();
+      })();
+    </script>
+  </body>
+</html>

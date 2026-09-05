@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="เรียนรู้ Shift และ Affine cipher ด้วยการแทนตัวอักษรเป็นเลขมอดูลาร์">
+    <title>การเข้ารหัสแบบดั้งเดิม | Number Theory</title>
+    <link rel="stylesheet" href="../../../css/root-lessons/classical-ciphers.css">
+    <script src="../../../js/lesson-shell.js" defer></script>
+  </head>
+  <body data-lesson-id="classical-ciphers">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู" aria-expanded="false">☰</button>
+      </div>
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a data-lesson-id="divisibility" href="../foundations/divisibility.html"><span>01</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a data-lesson-id="integer-representations" href="../foundations/integer-representations.html"><span>02</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a data-lesson-id="primes" href="../foundations/primes.html"><span>03</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a data-lesson-id="sieve-of-eratosthenes" href="../factorization/sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a data-lesson-id="gcd-euclidean" href="../gcd/gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="gcd-prime-factorization" href="../gcd/gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a data-lesson-id="prime-factorization" href="../factorization/prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a data-lesson-id="modular-arithmetic" href="../modular/modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a data-lesson-id="congruence" href="../modular/congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a data-lesson-id="pseudorandom-numbers" href="../modular/pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a data-lesson-id="check-digits" href="../modular/check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a data-lesson-id="fast-modular-exponentiation" href="../modular/fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a data-lesson-id="euler-totient" href="../theorems/euler-totient.html"><span>13</span><span>ฟังก์ชันออยเลอร์ (Euler's Totient Function φ(n))</span></a></li>
+          <li><a data-lesson-id="fermats-little-theorem" href="../theorems/fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มา (Fermat's Little Theorem)</span></a></li>
+          <li><a data-lesson-id="extended-euclidean" href="../gcd/extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="classical-ciphers" href="classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบดั้งเดิม (Classical Ciphers)</span></a></li>
+          <li><a data-lesson-id="chinese-remainder-theorem" href="../theorems/chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a data-lesson-id="rsa-cryptography" href="rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography) — Capstone</span></a></li>
+        </ol>
+      </nav>
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>0/18 หัวข้อ · 0%</span><div><i></i></div></div>
+        <button class="learned-button" type="button" aria-pressed="false">ทำเครื่องหมายว่าเรียนแล้ว</button>
+        <div class="utility-links"><a href="../../tools/playground.html">Playground</a><a href="../../tools/glossary.html">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article>
+        <header class="page-header">
+          <h1>การเข้ารหัสแบบดั้งเดิม (Classical Ciphers)</h1>
+          <p>เข้าใจการเข้ารหัสแบบคลาสสิก (Shift, Affine) ที่ใช้เลขคณิตมอดุลาร์แปลงตัวอักษรเป็นตัวเลขแล้วเข้า/ถอดรหัส</p>
+        </header>
+
+        <div class="lesson-stack">
+          <section class="definition-card" aria-labelledby="definition-title">
+            <h2 id="definition-title"><i></i>นิยาม</h2>
+            <p class="definition-text">วิธีการแปลงข้อความปกติ (Plaintext) ให้กลายเป็นข้อความลับ (Ciphertext) โดยใช้มือหรืออุปกรณ์กลไกง่าย ๆ ในอดีต ก่อนที่จะมีคอมพิวเตอร์และระบบดิจิทัลเข้ามาช่วยคำนวณทางคณิตศาสตร์ที่ซับซ้อน</p>
+            <p class="sub-label">สูตร</p>
+            <div class="formula">Shift: <b>E(p)</b> = (<b>p</b> + <b>b</b>) mod 26 &nbsp;·&nbsp; Affine: <b>E(p)</b> = (<b>a</b><b>p</b> + <b>b</b>) mod 26</div>
+            <div class="definition-note">
+              <p>ให้ตัวอักษรแต่ละตัวถูกแทนด้วยจำนวนเต็ม <code>p</code> โดย A = 0, B = 1, …, Z = 25 และให้ <code>a</code>, <code>b</code> ∈ ℤ เป็นกุญแจ</p>
+              <p>ฟังก์ชันเข้ารหัสด้านบนนิยามไว้สองแบบ คือ<strong>แบบเลื่อน (Shift)</strong> ที่บวกกุญแจ <code>b</code> เข้าไป และ<strong>แบบอัฟฟีน (Affine)</strong> ที่คูณด้วย <code>a</code> ก่อนแล้วจึงบวก <code>b</code></p>
+              <p>โดยแบบอัฟฟีนต้องมีเงื่อนไข <code>gcd(a, 26) = 1</code> เพื่อให้ <code>a</code> มี<strong>ตัวผกผันมอดุลาร์</strong> <code>a<sup>−1</sup></code> และถอดรหัสกลับได้ด้วย <code>D(c) = a<sup>−1</sup>(c − b) mod 26</code></p>
+            </div>
+          </section>
+
+          <section class="lesson-card cipher-workbench" aria-label="ตัวจำลอง Classical Ciphers">
+            <div class="cipher-controls">
+              <label class="message-input-group">ข้อความ
+                <input class="message-input" id="message-input" type="text" value="HELLO WORLD" maxlength="20" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="cipher-mode-toggle" role="group" aria-label="เลือกชนิดการเข้ารหัส">
+                <button class="cipher-mode-button selected" data-mode="shift" type="button">Shift (Caesar)</button>
+                <button class="cipher-mode-button" data-mode="affine" type="button">Affine</button>
+              </div>
+              <div class="cipher-keys">
+                <label class="key-group" id="key-a-group">a <input id="key-a" type="number" min="1" max="25" value="5" aria-label="ค่า a"></label>
+                <label class="key-group">b <input id="key-b" type="number" min="0" max="25" value="3" aria-label="ค่า b"></label>
+              </div>
+            </div>
+
+            <div class="visualizer-layout">
+              <div class="visualizer-canvas cipher-canvas">
+                <div class="cipher-text-rows" aria-label="ข้อความก่อนและหลังการเข้ารหัส">
+                  <div class="cipher-text-row" id="plain-row"></div>
+                  <div class="cipher-text-row" id="cipher-row"></div>
+                </div>
+              </div>
+              <aside class="monitor-panel" aria-label="ตัวติดตามขั้นตอน">
+                <p class="monitor-title">Execution Monitor</p>
+                <p class="monitor-hint">ตัวอักษร A–Z ถูกแทนด้วยเลข 0–25 ส่วนช่องว่างและสัญลักษณ์จะผ่านไปเหมือนเดิม</p>
+                <div class="monitor-log" id="cipher-monitor"></div>
+              </aside>
+            </div>
+
+            <div class="step-controls" aria-label="ควบคุมขั้นตอน">
+              <button id="cipher-prev" type="button" aria-label="ขั้นก่อนหน้า">‹</button>
+              <button id="cipher-play" type="button" aria-label="เล่นขั้นตอน">▶</button>
+              <button id="cipher-next" type="button" aria-label="ขั้นถัดไป">›</button>
+              <button id="cipher-reset-step" type="button" aria-label="รีเซ็ตขั้นตอน">↺</button>
+              <div class="step-progress"><span><i id="cipher-step-fill"></i></span><output id="cipher-step-label">1/12</output></div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+
+    <script>
+      (() => {
+        const messageInput = document.querySelector('#message-input');
+        const modeButtons = document.querySelectorAll('[data-mode]');
+        const keyAInput = document.querySelector('#key-a');
+        const keyAGroup = document.querySelector('#key-a-group');
+        const keyBInput = document.querySelector('#key-b');
+        const plainRow = document.querySelector('#plain-row');
+        const cipherRow = document.querySelector('#cipher-row');
+        const monitor = document.querySelector('#cipher-monitor');
+        const progressFill = document.querySelector('#cipher-step-fill');
+        const stepLabel = document.querySelector('#cipher-step-label');
+        const playButton = document.querySelector('#cipher-play');
+        let message = 'HELLO WORLD';
+        let mode = 'shift';
+        let a = 5;
+        let b = 3;
+        let step = 1;
+        let timer = null;
+
+        const gcd = (left, right) => {
+          let x = Math.abs(left);
+          let y = Math.abs(right);
+          while (y) [x, y] = [y, x % y];
+          return x;
+        };
+        const charToNum = (character) => {
+          const code = character.charCodeAt(0);
+          return code >= 65 && code <= 90 ? code - 65 : null;
+        };
+        const numToChar = (value) => String.fromCharCode(65 + ((value % 26) + 26) % 26);
+        const transformed = () => [...message].map((plainChar) => {
+          const plainNum = charToNum(plainChar);
+          if (plainNum === null) return { plainChar, plainNum: null, cipherNum: null, cipherChar: plainChar };
+          const cipherNum = mode === 'shift' ? (plainNum + b) % 26 : (a * plainNum + b) % 26;
+          return { plainChar, plainNum, cipherNum, cipherChar: numToChar(cipherNum) };
+        });
+
+        function stopPlaying() {
+          if (timer !== null) window.clearInterval(timer);
+          timer = null;
+          playButton.textContent = '▶';
+          playButton.setAttribute('aria-label', 'เล่นขั้นตอน');
+        }
+
+        function addMonitorLine(text, tone = '') {
+          const line = document.createElement('div');
+          line.className = `monitor-line ${tone}`;
+          const dot = document.createElement('i');
+          const copy = document.createElement('span');
+          copy.textContent = text;
+          line.append(dot, copy);
+          monitor.append(line);
+        }
+
+        function renderRows(items) {
+          plainRow.replaceChildren();
+          cipherRow.replaceChildren();
+          plainRow.setAttribute('aria-label', `ต้นฉบับ: ${message}`);
+          cipherRow.setAttribute('aria-label', `รหัส: ${items.map((item) => item.cipherChar).join('')}`);
+          items.forEach((item, index) => {
+            const plain = document.createElement('span');
+            plain.className = `letter-cell ${index === step - 2 ? 'active' : ''}`;
+            plain.textContent = item.plainChar === ' ' ? '' : item.plainChar;
+            plain.title = item.plainNum === null ? 'อักขระนี้ไม่ถูกแปลง' : `${item.plainChar} = ${item.plainNum}`;
+            plainRow.append(plain);
+            const cipher = document.createElement('span');
+            cipher.className = `letter-cell cipher ${index < step - 1 ? 'done' : 'pending'} ${index === step - 2 ? 'active' : ''}`;
+            cipher.textContent = index < step - 1 ? (item.cipherChar === ' ' ? '' : item.cipherChar) : '·';
+            cipher.title = index < step - 1 && item.cipherNum !== null ? `${item.cipherChar} = ${item.cipherNum}` : 'ยังไม่คำนวณ';
+            cipherRow.append(cipher);
+          });
+        }
+
+        function render() {
+          const items = transformed();
+          const total = items.length + 1;
+          const affineValid = mode === 'shift' || gcd(a, 26) === 1;
+          const complete = step >= total;
+          const output = items.map((item) => item.cipherChar).join('');
+          progressFill.style.width = `${total ? step / total * 100 : 100}%`;
+          stepLabel.textContent = `${step}/${total}`;
+          keyAGroup.hidden = mode !== 'affine';
+          renderRows(items);
+          monitor.replaceChildren();
+          for (let index = 0; index < Math.min(Math.max(step - 1, 0), items.length); index += 1) {
+            const item = items[index];
+            addMonitorLine(item.plainNum === null ? `“${item.plainChar}” ผ่านไปโดยไม่เปลี่ยน` : `${item.plainChar} (${item.plainNum}) → ${item.cipherChar} (${item.cipherNum})`, item.plainNum === null ? '' : 'good');
+          }
+          if (complete && affineValid) addMonitorLine(`ผลลัพธ์ ciphertext = ${output}`, 'good');
+          if (!affineValid) addMonitorLine(`หยุดตรวจสอบ: gcd(${a}, 26) = ${gcd(a, 26)} ≠ 1`, 'warn');
+        }
+
+        function resetStep() { step = 1; stopPlaying(); render(); }
+        function setStep(nextStep) { const total = message.length + 1; step = Math.min(Math.max(nextStep, 1), total); render(); if (step >= total) stopPlaying(); }
+        function setMessage(value) { message = value.toUpperCase().replace(/[^A-Z !?.,'-]/g, '').slice(0, 20); messageInput.value = message; resetStep(); }
+        function setKey(input, fallback, min, max) { const value = Math.trunc(Number(input.value)); return Number.isFinite(value) ? Math.min(Math.max(value, min), max) : fallback; }
+
+        messageInput.addEventListener('input', () => setMessage(messageInput.value));
+        keyAInput.addEventListener('change', () => { a = setKey(keyAInput, 5, 1, 25); keyAInput.value = String(a); resetStep(); });
+        keyBInput.addEventListener('change', () => { b = setKey(keyBInput, 3, 0, 25); keyBInput.value = String(b); resetStep(); });
+        modeButtons.forEach((button) => button.addEventListener('click', () => { mode = button.dataset.mode; modeButtons.forEach((item) => item.classList.toggle('selected', item === button)); resetStep(); }));
+        document.querySelector('#cipher-prev').addEventListener('click', () => { stopPlaying(); setStep(step - 1); });
+        document.querySelector('#cipher-next').addEventListener('click', () => { stopPlaying(); setStep(step + 1); });
+        document.querySelector('#cipher-reset-step').addEventListener('click', resetStep);
+        playButton.addEventListener('click', () => {
+          if (timer !== null) { stopPlaying(); return; }
+          if (step >= message.length + 1) setStep(1);
+          playButton.textContent = 'Ⅱ';
+          playButton.setAttribute('aria-label', 'หยุดขั้นตอน');
+          timer = window.setInterval(() => setStep(step + 1), 420);
+        });
+
+        render();
+      })();
+    </script>
+  </body>
+</html>

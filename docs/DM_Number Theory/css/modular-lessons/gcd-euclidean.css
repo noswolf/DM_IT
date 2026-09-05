@@ -1,0 +1,67 @@
+/* Shared converted layout, sidebar, definition card, player, and monitor. */
+@import url("./integer-representations.css");
+
+.execution-title { margin: 0; text-align: center; font-size: 20px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.execution-layout { grid-template-columns: 1fr; }
+.execution-layout.with-monitor { grid-template-columns: minmax(0, 1fr) 240px; }
+.method-toggle { display: inline-flex; gap: 2px; padding: 4px; border-radius: 999px; background: var(--color-border); }
+.method-toggle button { min-height: 44px; padding: 8px 24px; border-radius: 999px; color: var(--color-text-muted); font-size: 14px; font-weight: 600; }
+.method-toggle button.active { background: #38bdf8; color: white; }
+.inputs-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; }
+.inputs-row label { display: flex; align-items: center; gap: 8px; color: var(--color-text-muted); font-size: 14px; }
+.inputs-row input { width: 76px; min-height: 44px; padding: 4px 8px; border: 0; border-radius: 12px; outline: 0; background: var(--color-bg-elevated); box-shadow: 0 2px 12px #0000000f; color: var(--color-text); text-align: center; font: 16px var(--font-mono); }
+.intersection-canvas, .euclidean-canvas { display: flex; flex-direction: column; gap: 24px; }
+[hidden] { display: none !important; }
+
+.scan-wrapper { position: relative; }
+.scan-wrapper > p { margin-bottom: 8px; color: var(--color-text-muted); font-size: 14px; }
+.scan-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); gap: 3px; }
+.scan-cell { display: flex; min-width: 32px; min-height: 32px; align-items: center; justify-content: center; border-radius: 8px; background: var(--color-border); font: 12px var(--font-mono); transition: .2s; }
+.scan-cell.divisor { background: color-mix(in srgb, var(--color-success) 25%, transparent); color: var(--color-success); font-weight: 700; }
+.scan-cell.muted { opacity: .4; }
+.scan-cell.current { z-index: 2; outline: 2px solid var(--color-secondary); outline-offset: 1px; background: var(--color-bg-elevated); opacity: 1; font-weight: 700; transform: scale(1.15); }
+.scan-tooltip { position: absolute; top: -4px; right: 0; padding: 3px 8px; border-radius: 8px; background: var(--color-text); color: var(--color-bg); white-space: nowrap; font: 11px var(--font-mono); }
+.pools-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.pool { display: flex; min-height: 80px; flex-direction: column; gap: 8px; padding: 16px; border: 2px solid; border-radius: 16px; background: var(--color-bg-elevated); }
+.pool-a { border-color: #38bdf8; }
+.pool-b { border-color: var(--color-secondary); }
+.pool h3, .common-panel h3 { margin: 0; font-size: 14px; }
+.pool > div, #common-values { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.value-chip { display: inline-flex; min-width: 32px; height: 32px; align-items: center; justify-content: center; padding: 0 8px; border-radius: 8px; background: var(--color-border); font: 14px var(--font-mono); }
+.value-chip.blue { background: color-mix(in srgb, #38bdf8 25%, transparent); color: #1597c9; font-weight: 700; }
+.value-chip.orange { background: color-mix(in srgb, var(--color-secondary) 30%, transparent); color: var(--color-secondary); font-weight: 700; }
+.value-chip.green { background: color-mix(in srgb, var(--color-success) 28%, transparent); color: var(--color-success); font-weight: 700; }
+.value-chip.winner { background: color-mix(in srgb, var(--color-success) 28%, transparent); color: var(--color-success); font-weight: 700; }
+.common-panel { display: flex; width: 100%; min-height: 96px; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 24px; border: 2px solid var(--color-border); border-radius: 16px; }
+.common-panel.ready { border-color: var(--color-success); }
+.common-panel.done { border-color: var(--color-success); box-shadow: 0 0 28px color-mix(in srgb, var(--color-success) 45%, transparent); }
+.common-panel h3 { color: var(--color-success); }
+#winner-badge { margin-top: 8px; padding: 2px 16px; border-radius: 999px; background: color-mix(in srgb, var(--color-success) 18%, transparent); color: var(--color-success); font-size: 14px; font-weight: 700; }
+.gcd-final-answer { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 6px 12px; padding: 16px 24px; border: 1px solid color-mix(in srgb, var(--color-success) 55%, transparent); border-radius: 12px; background: color-mix(in srgb, var(--color-success) 12%, var(--color-bg-elevated)); color: var(--color-success); }
+.gcd-final-answer span { font-size: 14px; }
+.gcd-final-answer strong { font: 700 20px var(--font-mono); }
+.gcd-final-answer .gcd-final-reason { flex-basis: 100%; color: var(--color-text-muted); text-align: center; }
+
+.euclidean-rules { align-self: flex-start; margin: 0; padding-left: 40px; color: var(--color-text); text-align: left; font-size: 14px; line-height: 1.7; }
+.euclidean-rules ul { margin-top: 4px; padding-left: 40px; color: var(--color-text-muted); list-style: circle; }
+.tile-stage { width: 100%; height: auto; padding: 16px 0; overflow: visible; aspect-ratio: 100 / 64; }
+.axis-label { fill: var(--color-text-muted); font: 3.2px var(--font-mono); }
+.tile-floor { fill: var(--color-bg-elevated); stroke: var(--color-border); stroke-width: .3; filter: drop-shadow(0 2px 12px #0000000f); }
+.tile-floor.done { filter: drop-shadow(0 2px 12px #0000000f) drop-shadow(0 0 3px color-mix(in srgb, var(--color-success) 55%, transparent)); }
+.tile { filter: drop-shadow(0 2px 12px #0000000f); animation: tile-in .3s ease-out both; }
+.tile-leftover { fill: color-mix(in srgb, var(--color-secondary) 12%, transparent); stroke: var(--color-secondary); stroke-width: .5; stroke-dasharray: 1.8 1.2; animation: leftover-pulse 1.6s ease-in-out infinite; }
+.leftover-label { fill: var(--color-text); font: 700 3.2px var(--font-mono); }
+
+@keyframes tile-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+@keyframes leftover-pulse { 50% { opacity: .55; } }
+
+@media (max-width: 640px) {
+  .execution-layout.with-monitor { grid-template-columns: 1fr; }
+  .pools-row { grid-template-columns: 1fr; }
+  .method-toggle { width: 100%; }
+  .method-toggle button { flex: 1; padding-inline: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile, .tile-leftover, .scan-cell { animation: none; transition: none; }
+}

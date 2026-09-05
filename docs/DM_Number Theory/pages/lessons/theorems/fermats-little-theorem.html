@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="เรียนรู้ทฤษฎีบทเล็กของแฟร์มาด้วยนาฬิกาเศษเหลือและการยกกำลังมอดูลาร์">
+    <title>ทฤษฎีบทเล็กของแฟร์มา | Number Theory</title>
+    <link rel="stylesheet" href="../../../css/root-lessons/fermats-little-theorem.css">
+    <script src="../../../js/lesson-shell.js" defer></script>
+  </head>
+  <body data-lesson-id="fermats-little-theorem">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู" aria-expanded="false">☰</button>
+      </div>
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a data-lesson-id="divisibility" href="../foundations/divisibility.html"><span>01</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a data-lesson-id="integer-representations" href="../foundations/integer-representations.html"><span>02</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a data-lesson-id="primes" href="../foundations/primes.html"><span>03</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a data-lesson-id="sieve-of-eratosthenes" href="../factorization/sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a data-lesson-id="gcd-euclidean" href="../gcd/gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="gcd-prime-factorization" href="../gcd/gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a data-lesson-id="prime-factorization" href="../factorization/prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a data-lesson-id="modular-arithmetic" href="../modular/modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a data-lesson-id="congruence" href="../modular/congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a data-lesson-id="pseudorandom-numbers" href="../modular/pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a data-lesson-id="check-digits" href="../modular/check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a data-lesson-id="fast-modular-exponentiation" href="../modular/fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a data-lesson-id="euler-totient" href="euler-totient.html"><span>13</span><span>ฟังก์ชันออยเลอร์ (Euler's Totient Function φ(n))</span></a></li>
+          <li><a data-lesson-id="fermats-little-theorem" href="fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มา (Fermat's Little Theorem)</span></a></li>
+          <li><a data-lesson-id="extended-euclidean" href="../gcd/extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="classical-ciphers" href="../cryptography/classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบดั้งเดิม (Classical Ciphers)</span></a></li>
+          <li><a data-lesson-id="chinese-remainder-theorem" href="chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a data-lesson-id="rsa-cryptography" href="../cryptography/rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography) — Capstone</span></a></li>
+        </ol>
+      </nav>
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>0/18 หัวข้อ · 0%</span><div><i></i></div></div>
+        <button class="learned-button" type="button" aria-pressed="false">ทำเครื่องหมายว่าเรียนแล้ว</button>
+        <div class="utility-links"><a href="../../tools/playground.html">Playground</a><a href="../../tools/glossary.html">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article>
+        <header class="page-header">
+          <h1>ทฤษฎีบทเล็กของแฟร์มา (Fermat's Little Theorem)</h1>
+          <p>เห็น pattern ว่า a<sup>(p−1)</sup> ≡ 1 (mod p) เกิดขึ้นจริงกับหลาย ๆ ค่า ก่อนเชื่อทฤษฎีบท</p>
+        </header>
+
+        <div class="lesson-stack">
+          <section class="definition-card" aria-labelledby="definition-title">
+            <h2 id="definition-title"><i></i>นิยาม</h2>
+            <p class="definition-text">ทฤษฎีทางทฤษฎีจำนวนที่กล่าวว่า หาก <code>p</code> เป็นจำนวนเฉพาะ และ <code>a</code> เป็นจำนวนเต็มใด ๆ แล้ว <code>a<sup>p</sup> − a</code> จะหารด้วย <code>p</code> ลงตัวเสมอ หรือเขียนในรูปสมภาค (Congruence) ได้ว่า <code>a<sup>p</sup> ≡ a (mod p)</code> และในกรณีที่ <code>a</code> กับ <code>p</code> ไม่มีตัวประกอบร่วมกันหรือ ห.ร.ม. เป็น 1 (<code>gcd(a, p) = 1</code>) จะได้รูปแบบที่พบบ่อยคือ <code>a<sup>p−1</sup> ≡ 1 (mod p)</code></p>
+            <p class="sub-label">สูตร</p>
+            <div class="formula"><b>a</b><sup>p−1</sup> ≡ <b>1</b> (mod <b>p</b>)</div>
+            <div class="definition-note">
+              <p>ให้ <code>p</code> เป็นจำนวนเฉพาะ และ <code>a</code> ∈ ℤ โดยที่ <code>p</code> หาร <code>a</code> ไม่ลงตัว (นั่นคือ <code>gcd(a, p) = 1</code>)</p>
+              <p><strong>ทฤษฎีบทเล็กของแฟร์มา</strong> กล่าวว่า การยกกำลัง <code>a</code> ขึ้นไป <code>p−1</code> ครั้งแล้วหารด้วย <code>p</code> จะเหลือเศษเป็น 1 เสมอ ตามสูตรด้านบน</p>
+              <p>และถ้าไม่ต้องมีเงื่อนไข gcd จะได้รูปทั่วไปที่ใช้ได้กับจำนวนเต็ม <code>a</code> ทุกตัวว่า <code>a<sup>p</sup> ≡ a (mod p)</code></p>
+            </div>
+          </section>
+
+          <section class="lesson-card" aria-labelledby="visualizer-title">
+            <div class="lesson-card-header">
+              <div>
+                <h2 id="visualizer-title">FERMAT'S LITTLE THEOREM — วนกลับมาที่ 1 เสมอ</h2>
+              </div>
+            </div>
+
+            <div class="fermat-controls" aria-label="ตัวเลือกของทฤษฎีบทเล็กของแฟร์มา">
+              <div class="chip-row" id="base-chips"><span class="chip-label">a =</span></div>
+              <div class="chip-row" id="modulus-chips"><span class="chip-label">p =</span></div>
+              <button class="break-button" id="break-button" type="button" aria-pressed="false">ลองเงื่อนไขพัง</button>
+            </div>
+
+            <div class="visualizer-layout">
+              <div class="visualizer-canvas fermat-canvas">
+                <svg class="fermat-clock" id="fermat-clock" viewBox="0 0 200 200" role="img" aria-label="นาฬิกาค่าเศษเหลือ">
+                  <circle class="fermat-face" cx="100" cy="100" r="78"></circle>
+                  <g id="clock-arcs"></g>
+                  <g id="clock-target"></g>
+                  <g id="clock-ticks"></g>
+                  <circle id="clock-token" class="clock-token" cx="100" cy="100" r="7"></circle>
+                </svg>
+                <p class="fermat-readout" id="fermat-readout"></p>
+                <div class="exponent-table" id="exponent-table"></div>
+              </div>
+              <aside class="monitor-panel" aria-label="ตัวติดตามขั้นตอน">
+                <p class="monitor-title">Execution Monitor</p>
+                <p class="monitor-hint">ทุกก้าวคือการคูณด้วย <code>a</code> แล้วเก็บเฉพาะเศษที่เหลือจากการหารด้วย <code>p</code></p>
+                <div class="monitor-log" id="fermat-monitor"></div>
+                <div class="fermat-result-pill" id="fermat-result-pill" hidden></div>
+              </aside>
+            </div>
+
+            <div class="step-controls" aria-label="ควบคุมขั้นตอน">
+              <button id="fermat-prev" type="button" aria-label="ขั้นก่อนหน้า">‹</button>
+              <button id="fermat-play" type="button" aria-label="เล่นขั้นตอน">▶</button>
+              <button id="fermat-next" type="button" aria-label="ขั้นถัดไป">›</button>
+              <button id="fermat-reset-step" type="button" aria-label="รีเซ็ตขั้นตอน">↺</button>
+              <div class="step-progress"><span><i id="fermat-step-fill"></i></span><output id="fermat-step-label">0/7</output></div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+
+    <script>
+      (() => {
+        const baseChips = document.querySelector('#base-chips');
+        const modulusChips = document.querySelector('#modulus-chips');
+        const breakButton = document.querySelector('#break-button');
+        const readout = document.querySelector('#fermat-readout');
+        const monitor = document.querySelector('#fermat-monitor');
+        const resultPill = document.querySelector('#fermat-result-pill');
+        const clockTicks = document.querySelector('#clock-ticks');
+        const clockTarget = document.querySelector('#clock-target');
+        const clockArcs = document.querySelector('#clock-arcs');
+        const token = document.querySelector('#clock-token');
+        const exponentTable = document.querySelector('#exponent-table');
+        const progressFill = document.querySelector('#fermat-step-fill');
+        const stepLabel = document.querySelector('#fermat-step-label');
+        const playButton = document.querySelector('#fermat-play');
+        let a = 3;
+        let p = 7;
+        let broken = false;
+        let step = 0;
+        let timer = null;
+
+        const isPrime = (value) => {
+          if (value < 2) return false;
+          for (let divisor = 2; divisor * divisor <= value; divisor += 1) {
+            if (value % divisor === 0) return false;
+          }
+          return true;
+        };
+        const gcd = (left, right) => {
+          let x = Math.abs(left);
+          let y = Math.abs(right);
+          while (y) [x, y] = [y, x % y];
+          return x;
+        };
+        const point = (value, modulus, radius = 62) => {
+          const angle = -Math.PI / 2 + (value % modulus) * Math.PI * 2 / modulus;
+          return { x: 100 + Math.cos(angle) * radius, y: 100 + Math.sin(angle) * radius };
+        };
+        const makeSvg = (name, attributes) => {
+          const element = document.createElementNS('http://www.w3.org/2000/svg', name);
+          Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, String(value)));
+          return element;
+        };
+        const sequence = () => {
+          const values = [];
+          let current = 1 % p;
+          for (let exponent = 1; exponent <= p - 1; exponent += 1) {
+            current = current * a % p;
+            values.push(current);
+          }
+          return values;
+        };
+        const finalIsOne = (values) => values[values.length - 1] === 1;
+        const isTheoremValid = () => isPrime(p) && gcd(a, p) === 1;
+        const totalSteps = () => p;
+
+        function stopPlaying() {
+          if (timer !== null) window.clearInterval(timer);
+          timer = null;
+          playButton.textContent = '▶';
+          playButton.setAttribute('aria-label', 'เล่นขั้นตอน');
+        }
+
+        function addMonitorLine(text, tone = '') {
+          const line = document.createElement('div');
+          line.className = `monitor-line ${tone}`;
+          const dot = document.createElement('i');
+          const copy = document.createElement('span');
+          copy.textContent = text;
+          line.append(dot, copy);
+          monitor.append(line);
+        }
+
+        function renderChips() {
+          baseChips.replaceChildren(Object.assign(document.createElement('span'), { className: 'chip-label', textContent: 'a =' }));
+          [2, 3, 4, 5, 6].forEach((value) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = `chip-button ${value === a ? 'selected' : ''}`;
+            button.textContent = String(value);
+            button.addEventListener('click', () => setParameters(value, p));
+            baseChips.append(button);
+          });
+          modulusChips.replaceChildren(Object.assign(document.createElement('span'), { className: 'chip-label', textContent: 'p =' }));
+          [3, 5, 7, 11, 13].forEach((value) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = `chip-button ${!broken && value === p ? 'selected' : ''}`;
+            button.textContent = String(value);
+            button.addEventListener('click', () => setParameters(a, value));
+            modulusChips.append(button);
+          });
+          breakButton.classList.toggle('selected', broken);
+          breakButton.setAttribute('aria-pressed', String(broken));
+          breakButton.textContent = broken ? 'กลับไปใช้ p เฉพาะ' : 'ลองเงื่อนไขพัง';
+        }
+
+        function renderClock(values) {
+          clockTicks.replaceChildren();
+          for (let value = 0; value < p; value += 1) {
+            const position = point(value, p, 63);
+            const label = makeSvg('text', { x: position.x, y: position.y + 4, class: `tick-label ${value === (step === 0 ? 1 % p : values[Math.min(step - 1, values.length - 1)]) ? 'current' : ''}`, 'text-anchor': 'middle' });
+            label.textContent = String(value);
+            clockTicks.append(label);
+          }
+          const target = point(1 % p, p, 63);
+          clockTarget.replaceChildren(makeSvg('circle', { class: 'target-ring', cx: target.x, cy: target.y, r: 11 }));
+          const visible = [1 % p, ...values.slice(0, Math.min(step, p - 1))];
+          clockArcs.replaceChildren();
+          for (let index = 1; index < visible.length; index += 1) {
+            const from = point(visible[index - 1], p, 63);
+            const to = point(visible[index], p, 63);
+            const arc = makeSvg('path', { class: 'hop-arc', d: `M ${from.x} ${from.y} Q 100 100 ${to.x} ${to.y}`, 'pathLength': 1 });
+            clockArcs.append(arc);
+          }
+          const current = step === 0 ? 1 % p : values[Math.min(step - 1, values.length - 1)];
+          const currentPoint = point(current, p, 63);
+          token.setAttribute('cx', String(currentPoint.x));
+          token.setAttribute('cy', String(currentPoint.y));
+          token.classList.toggle('done', step >= p && finalIsOne(values) && isTheoremValid());
+        }
+
+        function renderTable(values) {
+          exponentTable.hidden = step < p;
+          if (exponentTable.hidden) return;
+          exponentTable.replaceChildren();
+          const heading = document.createElement('h3');
+          heading.textContent = 'ตารางทดลอง';
+          exponentTable.append(heading);
+          const table = document.createElement('table');
+          table.className = 'fermat-summary-table';
+          table.innerHTML = '<thead><tr><th>a</th><th>p</th><th>a^(p−1) mod p</th></tr></thead>';
+          const body = document.createElement('tbody');
+          const row = document.createElement('tr');
+          [a, p, values[p - 2]].forEach((value, index) => {
+            const cell = document.createElement('td');
+            cell.textContent = String(value);
+            if (index === 2) cell.className = values[p - 2] === 1 ? 'one' : 'not-one';
+            row.append(cell);
+          });
+          body.append(row);
+          table.append(body);
+          exponentTable.append(table);
+        }
+
+        function render() {
+          const values = sequence();
+          const total = totalSteps();
+          const current = step === 0 ? 1 % p : values[Math.min(step - 1, values.length - 1)];
+          const valid = isTheoremValid();
+          const theoremResult = valid && finalIsOne(values);
+          progressFill.style.width = `${step / total * 100}%`;
+          stepLabel.textContent = `${step}/${total}`;
+          readout.innerHTML = step === 0 ? 'เริ่มที่ <strong>1</strong>' : `${a}<sup>${Math.min(step, p - 1)}</sup> mod ${p} = <strong>${current}</strong>`;
+          renderChips();
+          renderClock(values);
+          renderTable(values);
+          resultPill.hidden = step < total;
+          resultPill.className = `fermat-result-pill ${theoremResult ? 'valid' : 'invalid'}`;
+          resultPill.textContent = theoremResult ? 'a^(p−1) ≡ 1 (mod p) ✓' : 'เงื่อนไขไม่ครบ — ผลลัพธ์ไม่ใช่ 1';
+          monitor.replaceChildren();
+          for (let exponent = 1; exponent <= Math.min(step, values.length); exponent += 1) addMonitorLine(`${a}^${exponent} mod ${p} = ${values[exponent - 1]}`, values[exponent - 1] === 1 ? 'good' : '');
+          if (step >= p) addMonitorLine(valid ? (theoremResult ? `gcd(${a}, ${p}) = 1 และ p เป็นจำนวนเฉพาะ — กลับมาที่ 1` : `p เป็นจำนวนเฉพาะ แต่ผลลัพธ์ไม่ใช่ 1`) : `เงื่อนไขไม่ครบ: ${isPrime(p) ? '' : `${p} ไม่เป็นจำนวนเฉพาะ`} ${gcd(a, p) === 1 ? '' : `gcd(${a}, ${p}) ≠ 1`}`.trim(), theoremResult ? 'good' : 'warn');
+        }
+
+        function setParameters(nextA, nextP) {
+          a = Math.min(Math.max(Math.trunc(Number(nextA) || 2), 2), 6);
+          p = Math.min(Math.max(Math.trunc(Number(nextP) || 3), 3), 13);
+          broken = !isPrime(p);
+          step = 0;
+          stopPlaying();
+          render();
+        }
+
+        function setStep(nextStep) {
+          step = Math.min(Math.max(nextStep, 0), totalSteps());
+          render();
+          if (step >= totalSteps()) stopPlaying();
+        }
+
+        document.querySelector('#fermat-prev').addEventListener('click', () => { stopPlaying(); setStep(step - 1); });
+        document.querySelector('#fermat-next').addEventListener('click', () => { stopPlaying(); setStep(step + 1); });
+        document.querySelector('#fermat-reset-step').addEventListener('click', () => setStep(0));
+        breakButton.addEventListener('click', () => {
+          broken = !broken;
+          setParameters(a, broken ? 4 : 7);
+        });
+        playButton.addEventListener('click', () => {
+          if (timer !== null) { stopPlaying(); return; }
+          if (step >= totalSteps()) setStep(0);
+          playButton.textContent = 'Ⅱ';
+          playButton.setAttribute('aria-label', 'หยุดขั้นตอน');
+          timer = window.setInterval(() => setStep(step + 1), 520);
+        });
+
+        render();
+      })();
+    </script>
+  </body>
+</html>

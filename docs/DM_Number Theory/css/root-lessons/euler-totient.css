@@ -1,0 +1,91 @@
+@import url("../shared/lesson-shell.css");
+
+.set-formula { line-height: 1.8; }
+
+.totient-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 4px auto 8px;
+}
+
+.totient-slider-label { color: var(--color-secondary); font: 13px var(--font-mono); }
+.totient-range-row { display: flex; width: min(100%, 360px); align-items: center; gap: 16px; }
+#totient-range { flex: 1; accent-color: var(--color-secondary); cursor: pointer; }
+#totient-range:focus-visible,
+.totient-number-input:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.totient-number-input { width: 72px; min-height: 42px; padding: 6px 9px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg); color: var(--color-text); font: 700 15px var(--font-mono); text-align: center; }
+.totient-visualizer-layout { margin-top: 24px; }
+.totient-canvas { min-width: 0; }
+
+.totient-readout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 6px;
+  margin-bottom: 14px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.totient-readout strong { color: var(--color-success); font: 700 18px var(--font-mono); }
+.totient-readout-note { color: var(--color-text-muted); font-size: 12px; }
+
+.candidate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.candidate-cell {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: 13px var(--font-mono);
+  transition: background-color .2s, border-color .2s, opacity .2s, transform .2s;
+}
+
+.candidate-cell.checked { border-color: var(--color-border); }
+.candidate-cell.coprime { border-color: color-mix(in srgb, var(--color-success) 25%, transparent); background: color-mix(in srgb, var(--color-success) 20%, transparent); color: var(--color-success); font-weight: 700; }
+.candidate-cell.not-coprime { background: color-mix(in srgb, var(--color-text-muted) 7%, transparent); color: var(--color-text-muted); opacity: .55; }
+.candidate-cell.current { outline: 2px solid var(--color-accent); outline-offset: 1px; transform: translateY(-2px); }
+
+.factorization-box {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-muted);
+  text-align: center;
+  animation: totient-formula-in .25s ease-out;
+}
+
+.factorization-label { margin-bottom: 10px; font-size: 12px; }
+.factorization-label strong { color: var(--color-accent); font: 700 17px var(--font-mono); }
+.totient-formula-line { display: inline-flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 7px; padding: 10px 14px; border-radius: var(--radius-md); background: var(--color-bg); color: var(--color-text); font: 18px var(--font-mono); }
+.totient-formula-line strong { color: var(--color-success); }
+
+.monitor-hint { line-height: 1.7; }
+.monitor-line.result { color: var(--color-success); font-weight: 700; }
+.monitor-line.result i { background: var(--color-success); }
+
+@keyframes totient-formula-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 640px) {
+  .totient-range-row { width: min(100%, 320px); }
+  .candidate-grid { grid-template-columns: repeat(6, 1fr); }
+  .totient-formula-line { font-size: 15px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .factorization-box { animation: none; }
+}

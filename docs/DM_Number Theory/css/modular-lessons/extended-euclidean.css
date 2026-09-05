@@ -1,0 +1,53 @@
+/* Shared converted layout, sidebar, definition card, player, and monitor. */
+@import url("./integer-representations.css");
+
+.execution-title { margin: 0; text-align: center; font-size: 20px; font-weight: 700; letter-spacing: .05em; }
+.inputs-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; }
+.inputs-row label { display: flex; align-items: center; gap: 8px; color: var(--color-text-muted); font-size: 14px; }
+.inputs-row input { width: 80px; min-height: 44px; padding: 4px 8px; border: 0; border-radius: 12px; outline: 0; background: var(--color-bg-elevated); box-shadow: 0 2px 12px #0000000f; color: var(--color-text); text-align: center; font: 16px var(--font-mono); }
+.extended-canvas { display: flex; flex-direction: column; gap: 16px; padding: 8px 0; }
+[hidden] { display: none !important; }
+
+.phase-card { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 16px; background: var(--color-bg-elevated); box-shadow: 0 2px 12px #0000000f; }
+.phase-card h3 { margin: 0; color: var(--color-text-muted); font-size: 14px; font-weight: 700; }
+.phase-hint { margin: 0; color: var(--color-text-muted); font-size: 14px; opacity: .72; }
+.back-card, .try-card { animation: card-in .3s ease-out; }
+
+.forward-table { display: flex; flex-direction: column; gap: 4px; }
+.forward-row { padding: 6px 10px; border-radius: 6px; font: 14px var(--font-mono); animation: row-in .2s ease-out both; transition: background-color .2s, box-shadow .2s; }
+.forward-row.source { background: #a78bfa29; box-shadow: 0 0 10px #a78bfa59; }
+.gcd-mark { padding: 0 4px; border-radius: 4px; background: color-mix(in srgb, var(--color-secondary) 55%, transparent); color: var(--color-text); }
+
+.back-stack { display: flex; flex-direction: column-reverse; gap: 4px; }
+.back-row { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; opacity: .65; font: 14px var(--font-mono); animation: row-in .3s ease-out both; transition: opacity .2s, background-color .2s; }
+.back-row.active { background: #a78bfa24; opacity: 1; font-weight: 600; }
+.back-arrow { color: #a78bfa; font-weight: 700; }
+.coef-x { color: #1597c9; }
+.coef-y { color: var(--color-secondary); }
+.coefficient-tracker { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.coefficient-tracker strong { padding: 2px 12px; border-radius: 999px; background: #a78bfa2e; font: 700 14px var(--font-mono); }
+.coefficient-tracker span { color: var(--color-text-muted); font-size: 12px; }
+
+.try-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font: 14px var(--font-mono); }
+.try-row input { width: 72px; min-height: 44px; padding: 4px 8px; border: 1px solid var(--color-border); border-radius: 8px; outline: 0; background: var(--color-bg); color: var(--color-text); text-align: center; font: 14px var(--font-mono); }
+.try-card p { margin: 0; font: 700 14px var(--font-mono); }
+.try-ok { color: var(--color-success); }
+.try-no { color: var(--color-danger); }
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes row-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 640px) {
+  .try-row { align-items: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phase-card, .forward-row, .back-row { animation: none; transition: none; }
+}

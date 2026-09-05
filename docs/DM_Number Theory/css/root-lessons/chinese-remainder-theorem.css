@@ -1,0 +1,36 @@
+@import url("../shared/lesson-shell.css");
+
+.crt-controls { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.crt-pairs { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.crt-pair-card { display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-top: 3px solid var(--dial-color, var(--color-accent)); border-radius: var(--radius-md); background: var(--color-bg); box-shadow: 0 2px 12px #0000000f; }
+.crt-pair-label { color: var(--color-text-muted); font: 13px var(--font-mono); }
+.crt-pair-input { width: 52px; min-height: 38px; padding: 4px; border: 0; border-radius: var(--radius-sm); background: var(--color-bg-elevated); color: var(--color-text); font: 700 14px var(--font-mono); text-align: center; }
+.crt-pair-input:focus-visible { outline: 2px solid var(--color-accent); }
+.crt-mode-toggle { min-height: 40px; padding: 4px 14px; border-radius: 999px; background: var(--color-bg); box-shadow: 0 2px 12px #0000000f; color: var(--color-text); font-size: 13px; font-weight: 700; }
+.crt-coprime-warning { color: var(--color-danger, #b34b4b); font-size: 13px; font-weight: 700; }
+.crt-canvas { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 8px 0; }
+.crt-counter { margin: 0; color: var(--color-text-muted); font-size: 14px; }
+.crt-counter strong { color: var(--color-text); font: 700 20px var(--font-mono); }
+.crt-dials { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; width: 100%; }
+.crt-dial-block { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.crt-dial { width: min(150px, 42vw); height: auto; overflow: visible; transition: filter .3s; }
+.crt-dial.locked { filter: drop-shadow(0 0 8px color-mix(in srgb, var(--dial-color) 65%, transparent)); }
+.crt-dial-face { fill: var(--color-bg-elevated); stroke: var(--color-border); stroke-width: 1px; filter: drop-shadow(0 2px 12px #0000000f); }
+.crt-target { fill: color-mix(in srgb, var(--color-secondary) 35%, transparent); stroke: var(--color-secondary); stroke-width: 1px; }
+.crt-tick { fill: var(--color-text-muted); font: 10px var(--font-mono); }
+.crt-hand-group { transform-box: view-box; transform-origin: 50%; transition: transform .3s; }
+.crt-hand { stroke: var(--dial-color, var(--color-secondary)); stroke-width: 3px; stroke-linecap: round; }
+.crt-hub { fill: var(--dial-color, var(--color-secondary)); }
+.crt-lock-tag { padding: 2px 8px; border-radius: 999px; background: var(--color-border); color: var(--color-text-muted); font: 12px var(--font-mono); transition: background-color .2s, color .2s; }
+.crt-lock-tag.locked { background: color-mix(in srgb, var(--color-success) 18%, transparent); color: var(--color-success); font-weight: 700; }
+.crt-number-line { position: relative; width: 100%; height: 48px; margin-top: 8px; }
+.crt-line-base { position: absolute; top: 10px; right: 0; left: 0; height: 2px; border-radius: 1px; background: var(--color-border); }
+.crt-line-tick { position: absolute; z-index: 1; top: 4px; width: 6px; height: 14px; border-radius: 3px; background: var(--tick-color, var(--color-accent)); transform: translateX(-50%); animation: crt-tick-in .25s ease-out both; }
+.crt-line-tick.solution { top: -8px; width: auto; height: auto; padding: 0; background: var(--color-success); color: var(--color-success); font-size: 14px; line-height: 0; text-align: center; }
+.crt-line-label { position: absolute; top: 18px; left: 50%; color: var(--color-text-muted); font: 9px var(--font-mono); transform: translateX(-50%); }
+.crt-line-tick.solution .crt-line-label { top: 24px; color: var(--color-success); font-weight: 700; }
+.crt-line-end { position: absolute; top: 26px; right: 0; color: var(--color-text-muted); font: 10px var(--font-mono); }
+.crt-no-solution { max-width: 620px; padding: 10px 14px; border: 1px dashed var(--color-danger, #b34b4b); border-radius: var(--radius-md); background: color-mix(in srgb, var(--color-danger, #b34b4b) 8%, transparent); color: var(--color-danger, #b34b4b); font-size: 13px; text-align: center; }
+.standalone-formula { margin: 14px 0; color: var(--color-text); font: 16px var(--font-mono); text-align: center; }
+
+@keyframes crt-tick-in { from { opacity: 0; transform: translate(-50%, -6px); } to { opacity: 1; transform: translate(-50%, 0); } }

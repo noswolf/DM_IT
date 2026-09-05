@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232D6E6E'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='sans-serif' font-weight='700' font-size='26' fill='%23FAF7F2'%3EDM%3C/text%3E%3C/svg%3E">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="แผนที่การเรียนรู้ทฤษฎีจำนวนแบบโต้ตอบ">
+    <title>Number Theory Roadmap | Discrete Math</title>
+    <style>
+      :root {
+        --color-bg: #faf7f2;
+        --color-bg-elevated: #fff;
+        --color-text: #2a2724;
+        --color-text-muted: #6b655d;
+        --color-accent: #2d6e6e;
+        --color-accent-hover: #255c5c;
+        --color-accent-contrast: #fff;
+        --color-secondary: #e8a33d;
+        --color-secondary-contrast: #2a2724;
+        --color-border: #00000014;
+        --color-focus-ring: #2d6e6e;
+        --font-ui: "Inter", "Nunito", system-ui, -apple-system, sans-serif;
+        --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+        --shadow-soft: 0 2px 12px #0000000f;
+        --shadow-elevated: 0 4px 20px #0000001a;
+        --transition-fast: .2s ease-out;
+        --transition-base: .3s ease-out;
+      }
+
+      [data-theme="dark"] {
+        --color-bg: #1c1a18;
+        --color-bg-elevated: #262320;
+        --color-text: #f3efe9;
+        --color-text-muted: #a69e93;
+        --color-accent: #3a8a8a;
+        --color-accent-hover: #4a9a9a;
+        --color-border: #ffffff1a;
+        --color-focus-ring: #4a9a9a;
+        --shadow-soft: 0 2px 12px #0000004d;
+        --shadow-elevated: 0 4px 20px #00000073;
+      }
+
+      * { box-sizing: border-box; margin: 0; }
+      html, body { min-height: 100%; }
+      body {
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: var(--font-ui);
+        font-size: 16px;
+        line-height: 1.5;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        transition: background-color var(--transition-base), color var(--transition-base);
+      }
+      a { color: inherit; text-decoration: none; }
+      button { border: 0; background: none; color: inherit; cursor: pointer; font: inherit; }
+      :focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; border-radius: 8px; }
+
+      .site-header {
+        position: sticky;
+        z-index: 20;
+        top: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--color-border);
+        background: var(--color-bg-elevated);
+      }
+      .logo {
+        display: flex;
+        min-height: 44px;
+        align-items: center;
+        gap: 8px;
+        color: var(--color-accent);
+        font-weight: 700;
+      }
+      .logo-mark {
+        display: flex;
+        width: 32px;
+        height: 32px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background: var(--color-accent);
+        color: var(--color-accent-contrast);
+        font-size: 13px;
+        letter-spacing: -.5px;
+      }
+      .main-nav { display: flex; align-items: center; gap: 24px; }
+      .main-nav a {
+        display: flex;
+        min-height: 44px;
+        align-items: center;
+        padding: 4px 8px;
+        border-radius: 8px;
+        color: var(--color-text-muted);
+        font-size: 14px;
+        transition: color var(--transition-fast);
+      }
+      .main-nav a:hover { color: var(--color-accent); }
+      .theme-toggle {
+        display: flex;
+        min-width: 44px;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-size: 20px;
+        transition: background-color var(--transition-fast);
+      }
+      .theme-toggle:hover { background: var(--color-border); }
+
+      .page { padding-bottom: 64px; }
+      .hero {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 40px 40px 24px;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .hero-text { max-width: 640px; }
+      .hero h1 { margin-bottom: 4px; color: var(--color-text); font-size: 36px; line-height: 1.2; }
+      .unit { display: inline-block; margin-bottom: 8px; color: var(--color-accent); font-size: 20px; font-weight: 600; }
+      .tagline { color: var(--color-text-muted); }
+      .stats { display: flex; gap: 24px; }
+      .stat {
+        min-width: 88px;
+        padding: 8px 24px;
+        border-radius: 12px;
+        background: var(--color-bg-elevated);
+        box-shadow: var(--shadow-soft);
+        text-align: center;
+      }
+      .stat-value { color: var(--color-accent); font: 700 28px var(--font-mono); }
+      .stat-label { color: var(--color-text-muted); font-size: 14px; }
+
+      .roadmap-section { padding: 24px 40px 0; }
+      .roadmap-section h2 { margin-bottom: 4px; font-size: 20px; }
+      .roadmap-hint { margin-bottom: 8px; color: var(--color-text-muted); font-size: 14px; }
+      .legend { display: flex; flex-wrap: wrap; gap: 24px; padding: 16px 0 24px; color: var(--color-text-muted); font-size: 14px; }
+      .legend-item { display: flex; align-items: center; gap: 8px; }
+      .legend-dot {
+        width: 14px;
+        height: 14px;
+        border: 2px solid var(--color-border);
+        border-radius: 4px;
+        background: var(--color-bg-elevated);
+      }
+      .legend-dot.completed { border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg-elevated)); }
+      .legend-dot.next { border-color: var(--color-secondary); }
+      .legend-dot.locked { opacity: .55; }
+
+      .roadmap-scroll { padding-bottom: 8px; overflow-x: auto; }
+      .roadmap-canvas { position: relative; width: 836px; height: 1420px; margin: 0 auto; }
+      .roadmap-lines { position: absolute; top: 0; left: 0; width: 836px; height: 1420px; overflow: visible; }
+      .roadmap-line { fill: none; stroke: var(--color-border); stroke-width: 2.5px; transition: stroke var(--transition-base), opacity var(--transition-base); }
+      .roadmap-line.active { stroke: var(--color-accent); opacity: .6; }
+      .roadmap-node {
+        position: absolute;
+        display: flex;
+        width: 260px;
+        min-height: 68px;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 2px;
+        padding: 8px 16px;
+        border: 2px solid var(--color-border);
+        border-radius: 12px;
+        background: var(--color-bg-elevated);
+        box-shadow: var(--shadow-soft);
+        text-align: center;
+        font-size: 16px;
+        line-height: 1.3;
+        transform: translate(-50%, -50%);
+        transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), opacity var(--transition-fast);
+      }
+      .roadmap-node.branch { width: 200px; min-height: 56px; border-style: dashed; font-size: 14px; }
+      .roadmap-node:hover, .roadmap-node:focus-visible {
+        z-index: 2;
+        border-color: var(--color-accent);
+        box-shadow: var(--shadow-elevated);
+        transform: translate(-50%, -50%) translateY(-3px);
+      }
+      .roadmap-node.is-completed { border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg-elevated)); }
+      .roadmap-node.is-next { border-color: var(--color-secondary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-secondary) 30%, transparent); }
+      .roadmap-node.is-locked { opacity: .55; }
+      .node-check { color: var(--color-accent); font-weight: 700; }
+      .next-badge {
+        position: absolute;
+        top: -10px;
+        padding: 1px 8px;
+        border-radius: 999px;
+        background: var(--color-secondary);
+        color: var(--color-secondary-contrast);
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .mobile-roadmap { display: none; flex-direction: column; gap: 8px; }
+      .mobile-node {
+        display: flex;
+        min-height: 52px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 12px 16px;
+        border: 2px solid var(--color-border);
+        border-radius: 12px;
+        background: var(--color-bg-elevated);
+        text-align: left;
+      }
+      .mobile-node.is-completed { border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg-elevated)); }
+      .mobile-node.is-next { border-color: var(--color-secondary); }
+      .mobile-node.is-locked { opacity: .55; }
+      .mobile-state { flex-shrink: 0; color: var(--color-accent); font-weight: 700; }
+      .mobile-state.next { padding: 2px 8px; border-radius: 999px; background: var(--color-secondary); color: var(--color-secondary-contrast); font-size: 11px; }
+
+      @media (max-width: 640px) {
+        .site-header { padding: 12px 16px; }
+        .logo-word { display: none; }
+        .main-nav { gap: 8px; }
+        .hero { padding: 24px 16px; }
+        .hero h1 { font-size: 30px; }
+        .stats { width: 100%; gap: 8px; }
+        .stat { flex: 1; min-width: 72px; padding: 8px 12px; }
+        .roadmap-section { padding: 16px 16px 0; }
+        .legend, .desktop-roadmap { display: none; }
+        .mobile-roadmap { display: flex; margin-top: 16px; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0s !important; animation-duration: 0s !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="logo" href="index.html" aria-label="Number Theory หน้าแรก"><span class="logo-mark" aria-hidden="true">DM</span><span class="logo-word">Number Theory</span></a>
+      <nav class="main-nav" aria-label="เมนูหลัก">
+        <a href="pages/tools/playground.html">Playground</a>
+        <a href="pages/tools/glossary.html">Glossary</a>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button>
+      </nav>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-text">
+          <h1>Discrete Math</h1>
+          <p class="unit">Number Theory</p>
+          <p class="tagline">แผนที่การเรียนรู้แบบ interactive — เลือกหัวข้อจาก roadmap ด้านล่าง เรียนรู้ผ่านการเล่นและลงมือทำ ไม่ใช่แค่อ่านทฤษฎีบท</p>
+        </div>
+        <div class="stats" aria-label="ความคืบหน้าการเรียน">
+          <div class="stat"><div class="stat-value" id="completed-count">0</div><div class="stat-label">/ 18 หัวข้อ</div></div>
+          <div class="stat"><div class="stat-value" id="completed-percent">0%</div><div class="stat-label">ความคืบหน้า</div></div>
+        </div>
+      </section>
+
+      <section class="roadmap-section">
+        <h2>Number Theory Roadmap</h2>
+        <p class="roadmap-hint">คลิกที่หัวข้อเพื่อเริ่มเรียน — เส้นเชื่อมแสดงว่าต้องเรียนหัวข้อไหนมาก่อน</p>
+
+        <div class="desktop-roadmap">
+          <div class="legend" aria-label="คำอธิบายสถานะ">
+            <span class="legend-item"><i class="legend-dot completed"></i>เรียนแล้ว</span>
+            <span class="legend-item"><i class="legend-dot next"></i>แนะนำให้เรียนต่อ</span>
+            <span class="legend-item"><i class="legend-dot"></i>เรียนได้แล้ว</span>
+            <span class="legend-item"><i class="legend-dot locked"></i>ยังไม่ปลดล็อก</span>
+          </div>
+          <div class="roadmap-scroll">
+            <div class="roadmap-canvas" id="roadmap-canvas"><svg class="roadmap-lines" id="roadmap-lines" viewBox="0 0 836 1420" aria-hidden="true"></svg></div>
+          </div>
+        </div>
+
+        <div class="mobile-roadmap" id="mobile-roadmap" aria-label="รายการหัวข้อ"></div>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        const topics = [
+          { id: "divisibility", title: "การหารลงตัว (Divisibility)", dependsOn: [] },
+          { id: "integer-representations", title: "การแทนจำนวนเต็ม (Integer Representations)", dependsOn: ["divisibility"] },
+          { id: "primes", title: "จำนวนเฉพาะ (Prime Numbers)", dependsOn: ["divisibility"] },
+          { id: "sieve-of-eratosthenes", title: "ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)", dependsOn: ["primes"] },
+          { id: "gcd-euclidean", title: "ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)", dependsOn: ["divisibility"] },
+          { id: "gcd-prime-factorization", title: "GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)", dependsOn: ["gcd-euclidean"] },
+          { id: "prime-factorization", title: "การแยกตัวประกอบเฉพาะ (Prime Factorization)", dependsOn: ["primes"] },
+          { id: "modular-arithmetic", title: "เลขคณิตมอดูลาร์ (Modular Arithmetic)", dependsOn: ["divisibility"] },
+          { id: "congruence", title: "สมภาค (Congruence)", dependsOn: ["modular-arithmetic"] },
+          { id: "pseudorandom-numbers", title: "จำนวนสุ่มเทียม (Pseudorandom Numbers)", dependsOn: ["congruence"] },
+          { id: "check-digits", title: "เลขตรวจสอบ (Check Digits)", dependsOn: ["congruence"] },
+          { id: "fast-modular-exponentiation", title: "การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)", dependsOn: ["modular-arithmetic"] },
+          { id: "euler-totient", title: "ฟังก์ชันออยเลอร์ (Euler's Totient Function φ(n))", dependsOn: ["gcd-euclidean", "prime-factorization"] },
+          { id: "fermats-little-theorem", title: "ทฤษฎีบทเล็กของแฟร์มา (Fermat's Little Theorem)", dependsOn: ["fast-modular-exponentiation", "euler-totient"] },
+          { id: "extended-euclidean", title: "ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)", dependsOn: ["gcd-euclidean"] },
+          { id: "classical-ciphers", title: "การเข้ารหัสแบบดั้งเดิม (Classical Ciphers)", dependsOn: ["modular-arithmetic", "extended-euclidean"] },
+          { id: "chinese-remainder-theorem", title: "ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)", dependsOn: ["congruence", "extended-euclidean"] },
+          { id: "rsa-cryptography", title: "การเข้ารหัส RSA (RSA Cryptography) — Capstone", dependsOn: ["fermats-little-theorem", "euler-totient", "extended-euclidean", "chinese-remainder-theorem"] }
+        ];
+
+        const spine = [
+          { id: "divisibility", branches: [{ id: "integer-representations", side: "right" }] },
+          { id: "primes", branches: [{ id: "sieve-of-eratosthenes", side: "right" }, { id: "prime-factorization", side: "left" }] },
+          { id: "gcd-euclidean", branches: [{ id: "gcd-prime-factorization", side: "right" }, { id: "extended-euclidean", side: "left" }] },
+          { id: "modular-arithmetic", branches: [] },
+          { id: "congruence", branches: [{ id: "pseudorandom-numbers", side: "right" }, { id: "check-digits", side: "left" }] },
+          { id: "fast-modular-exponentiation", branches: [] },
+          { id: "euler-totient", branches: [] },
+          { id: "fermats-little-theorem", branches: [] },
+          { id: "classical-ciphers", branches: [] },
+          { id: "chinese-remainder-theorem", branches: [] },
+          { id: "rsa-cryptography", branches: [] }
+        ];
+
+        const progressKey = "dm2026:progress";
+        const legacyProgressKey = "dm-completed-lessons-v1";
+        const migrationKey = "dm2026:progress-migrated-v1";
+        const themeKey = "dm2026:theme";
+        const validTopicIds = new Set(topics.map((topic) => topic.id));
+        const topicPathById = {
+          "divisibility": "pages/lessons/foundations/",
+          "integer-representations": "pages/lessons/foundations/",
+          "primes": "pages/lessons/foundations/",
+          "sieve-of-eratosthenes": "pages/lessons/factorization/",
+          "prime-factorization": "pages/lessons/factorization/",
+          "gcd-euclidean": "pages/lessons/gcd/",
+          "gcd-prime-factorization": "pages/lessons/gcd/",
+          "extended-euclidean": "pages/lessons/gcd/",
+          "modular-arithmetic": "pages/lessons/modular/",
+          "congruence": "pages/lessons/modular/",
+          "pseudorandom-numbers": "pages/lessons/modular/",
+          "check-digits": "pages/lessons/modular/",
+          "fast-modular-exponentiation": "pages/lessons/modular/",
+          "euler-totient": "pages/lessons/theorems/",
+          "fermats-little-theorem": "pages/lessons/theorems/",
+          "classical-ciphers": "pages/lessons/cryptography/",
+          "chinese-remainder-theorem": "pages/lessons/theorems/",
+          "rsa-cryptography": "pages/lessons/cryptography/"
+        };
+
+        function topicHref(id) {
+          return topicPathById[id] + id + ".html";
+        }
+
+        function normalizeTopicId(value) {
+          return String(value).split("/").pop().replace(/\.html$/, "");
+        }
+
+        function loadProgress() {
+          try {
+            const saved = localStorage.getItem(progressKey);
+            const values = saved === null ? [] : JSON.parse(saved);
+            const completed = new Set(Array.isArray(values) ? values.map(normalizeTopicId).filter((id) => validTopicIds.has(id)) : []);
+            if (localStorage.getItem(migrationKey) !== "1") {
+              const legacy = localStorage.getItem(legacyProgressKey);
+              const legacyValues = legacy === null ? [] : JSON.parse(legacy);
+              if (Array.isArray(legacyValues)) legacyValues.map(normalizeTopicId).filter((id) => validTopicIds.has(id)).forEach((id) => completed.add(id));
+              localStorage.setItem(migrationKey, "1");
+            }
+            localStorage.setItem(progressKey, JSON.stringify([...completed]));
+            return completed;
+          } catch {
+            return new Set();
+          }
+        }
+
+        let completed = loadProgress();
+
+        function topicById(id) {
+          return topics.find((topic) => topic.id === id);
+        }
+
+        function nextTopicId() {
+          const topic = topics.find((item) => !completed.has(item.id) && item.dependsOn.every((id) => completed.has(id)));
+          return topic ? topic.id : null;
+        }
+
+        function statusFor(topic, nextId) {
+          if (completed.has(topic.id)) return "completed";
+          if (topic.id === nextId) return "next";
+          if (topic.dependsOn.every((id) => completed.has(id))) return "available";
+          return "locked";
+        }
+
+        function addSvgLine(x1, y1, x2, y2, fromId) {
+          const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          line.setAttribute("x1", x1);
+          line.setAttribute("y1", y1);
+          line.setAttribute("x2", x2);
+          line.setAttribute("y2", y2);
+          line.dataset.from = fromId;
+          line.classList.add("roadmap-line");
+          document.querySelector("#roadmap-lines").append(line);
+        }
+
+        function createDesktopNode(id, kind, x, y) {
+          const topic = topicById(id);
+          const link = document.createElement("a");
+          link.href = topicHref(id);
+          link.className = "roadmap-node" + (kind === "branch" ? " branch" : "");
+          link.dataset.topicId = id;
+          link.dataset.kind = kind;
+          link.style.left = x + "px";
+          link.style.top = y + "px";
+          link.setAttribute("aria-label", topic.title);
+          document.querySelector("#roadmap-canvas").append(link);
+        }
+
+        function buildRoadmap() {
+          const centerX = 418;
+          const top = 60;
+          const rowGap = 130;
+          spine.forEach((entry, index) => {
+            const y = top + index * rowGap;
+            createDesktopNode(entry.id, "spine", centerX, y);
+            if (index > 0) addSvgLine(centerX, y - rowGap, centerX, y, spine[index - 1].id);
+            entry.branches.forEach((branch) => {
+              const x = branch.side === "left" ? 140 : 696;
+              createDesktopNode(branch.id, "branch", x, y);
+              addSvgLine(branch.side === "left" ? 288 : 548, y, branch.side === "left" ? 240 : 596, y, entry.id);
+            });
+          });
+
+          topics.forEach((topic) => {
+            const link = document.createElement("a");
+            link.href = topicHref(topic.id);
+            link.className = "mobile-node";
+            link.dataset.topicId = topic.id;
+            document.querySelector("#mobile-roadmap").append(link);
+          });
+        }
+
+        function fillNode(link, topic, status, mobile) {
+          link.classList.remove("is-completed", "is-next", "is-available", "is-locked");
+          link.classList.add("is-" + status);
+          link.replaceChildren();
+
+          if (!mobile && status === "next") {
+            const badge = document.createElement("span");
+            badge.className = "next-badge";
+            badge.textContent = "เริ่มตรงนี้";
+            link.append(badge);
+          }
+
+          const title = document.createElement("span");
+          title.textContent = topic.title;
+          link.append(title);
+
+          if (status === "completed") {
+            const check = document.createElement("span");
+            check.className = mobile ? "mobile-state" : "node-check";
+            check.textContent = mobile ? "✓" : "✓ เรียนแล้ว";
+            link.append(check);
+          } else if (mobile && status === "next") {
+            const badge = document.createElement("span");
+            badge.className = "mobile-state next";
+            badge.textContent = "ถัดไป";
+            link.append(badge);
+          }
+
+          const labels = { completed: "เรียนแล้ว", next: "แนะนำให้เรียนต่อ", available: "เรียนได้แล้ว", locked: "ยังไม่ปลดล็อก" };
+          link.setAttribute("aria-label", topic.title + " (" + labels[status] + ")");
+        }
+
+        function renderProgress() {
+          const knownCompleted = topics.filter((topic) => completed.has(topic.id)).length;
+          const percent = Math.round(knownCompleted / topics.length * 100);
+          document.querySelector("#completed-count").textContent = knownCompleted;
+          document.querySelector("#completed-percent").textContent = percent + "%";
+          const nextId = nextTopicId();
+
+          document.querySelectorAll(".roadmap-node").forEach((link) => {
+            const topic = topicById(link.dataset.topicId);
+            fillNode(link, topic, statusFor(topic, nextId), false);
+          });
+          document.querySelectorAll(".mobile-node").forEach((link) => {
+            const topic = topicById(link.dataset.topicId);
+            fillNode(link, topic, statusFor(topic, nextId), true);
+          });
+          document.querySelectorAll(".roadmap-line").forEach((line) => line.classList.toggle("active", completed.has(line.dataset.from)));
+        }
+
+        function preferredTheme() {
+          try {
+            const saved = localStorage.getItem(themeKey);
+            if (saved === "light" || saved === "dark") return saved;
+          } catch { /* Use the system preference. */ }
+          return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+
+        function setTheme(theme) {
+          document.documentElement.dataset.theme = theme;
+          const button = document.querySelector("#theme-toggle");
+          button.textContent = theme === "dark" ? "☀️" : "🌙";
+          button.setAttribute("aria-label", theme === "dark" ? "เปลี่ยนเป็นธีมสว่าง" : "เปลี่ยนเป็นธีมมืด");
+        }
+
+        document.querySelector("#theme-toggle").addEventListener("click", () => {
+          const theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+          try { localStorage.setItem(themeKey, theme); } catch { /* Theme still works in this tab. */ }
+          setTheme(theme);
+        });
+
+        window.addEventListener("storage", (event) => {
+          if (event.key === progressKey || event.key === null) {
+            completed = loadProgress();
+            renderProgress();
+          }
+          if (event.key === themeKey || event.key === null) setTheme(preferredTheme());
+        });
+        window.addEventListener("pageshow", () => {
+          completed = loadProgress();
+          setTheme(preferredTheme());
+          renderProgress();
+        });
+
+        buildRoadmap();
+        setTheme(preferredTheme());
+        renderProgress();
+      })();
+    </script>
+  </body>
+</html>

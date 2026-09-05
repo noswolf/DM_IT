@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="เรียนรู้ทฤษฎีบทเศษเหลือจีนด้วยวงล้อเศษเหลือและเส้นจำนวนผู้สมัครคำตอบ">
+    <title>ทฤษฎีบทเศษเหลือจีน | Number Theory</title>
+    <link rel="stylesheet" href="../../../css/root-lessons/chinese-remainder-theorem.css">
+    <script src="../../../js/lesson-shell.js" defer></script>
+  </head>
+  <body data-lesson-id="chinese-remainder-theorem">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู" aria-expanded="false">☰</button>
+      </div>
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a data-lesson-id="divisibility" href="../foundations/divisibility.html"><span>01</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a data-lesson-id="integer-representations" href="../foundations/integer-representations.html"><span>02</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a data-lesson-id="primes" href="../foundations/primes.html"><span>03</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a data-lesson-id="sieve-of-eratosthenes" href="../factorization/sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a data-lesson-id="gcd-euclidean" href="../gcd/gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="gcd-prime-factorization" href="../gcd/gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a data-lesson-id="prime-factorization" href="../factorization/prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a data-lesson-id="modular-arithmetic" href="../modular/modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a data-lesson-id="congruence" href="../modular/congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a data-lesson-id="pseudorandom-numbers" href="../modular/pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a data-lesson-id="check-digits" href="../modular/check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a data-lesson-id="fast-modular-exponentiation" href="../modular/fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a data-lesson-id="euler-totient" href="euler-totient.html"><span>13</span><span>ฟังก์ชันออยเลอร์ (Euler's Totient Function φ(n))</span></a></li>
+          <li><a data-lesson-id="fermats-little-theorem" href="fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มา (Fermat's Little Theorem)</span></a></li>
+          <li><a data-lesson-id="extended-euclidean" href="../gcd/extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="classical-ciphers" href="../cryptography/classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบดั้งเดิม (Classical Ciphers)</span></a></li>
+          <li><a data-lesson-id="chinese-remainder-theorem" href="chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a data-lesson-id="rsa-cryptography" href="../cryptography/rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography) — Capstone</span></a></li>
+        </ol>
+      </nav>
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>0/18 หัวข้อ · 0%</span><div><i></i></div></div>
+        <button class="learned-button" type="button" aria-pressed="false">ทำเครื่องหมายว่าเรียนแล้ว</button>
+        <div class="utility-links"><a href="../../tools/playground.html">Playground</a><a href="../../tools/glossary.html">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article>
+        <header class="page-header">
+          <h1>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</h1>
+          <p>เข้าใจว่าระบบ congruence หลายสมการ (ที่ moduli coprime กัน) มีคำตอบเดียวที่ไม่ซ้ำใน mod (m<sub>1</sub>×m<sub>2</sub>×...)</p>
+        </header>
+
+        <div class="lesson-stack">
+          <section class="definition-card" aria-labelledby="definition-title">
+            <h2 id="definition-title"><i></i>นิยาม</h2>
+            <p class="definition-text">ทฤษฎีบทในทางทฤษฎีจำนวนที่กล่าวถึงการหาจำนวนเต็ม <code>x</code> ซึ่งสอดคล้องกับระบบสมการสมภาค (Modular Equations) หลาย ๆ สมการพร้อมกัน โดยที่ตัวหาร (Modulus) ในแต่ละสมการเป็นจำนวนเฉพาะสัมพัทธ์กัน (Pairwise Coprime) และการันตีว่าจะมีผลเฉลยชุดเดียวเมื่อคิดแบบมอดูโลด้วยผลคูณของตัวหารทั้งหมด</p>
+            <p class="sub-label">สูตร</p>
+            <div class="formula"><b>x</b> ≡ a<sub>1</sub> (mod m<sub>1</sub>), &nbsp;<b>x</b> ≡ a<sub>2</sub> (mod m<sub>2</sub>), &nbsp;…, &nbsp;<b>x</b> ≡ a<sub>k</sub> (mod m<sub>k</sub>)</div>
+            <div class="definition-note">
+              <p>ให้ <code>m<sub>1</sub>, m<sub>2</sub>, …, m<sub>k</sub></code> เป็นจำนวนเต็มบวกที่เป็นจำนวนเฉพาะสัมพัทธ์กันเป็นคู่ ๆ (คือ <code>gcd(m<sub>i</sub>, m<sub>j</sub>) = 1</code> ทุกครั้งที่ <code>i ≠ j</code>)</p>
+              <p><strong>ทฤษฎีบทเศษเหลือจีน</strong> รับประกันว่าระบบสมภาคด้านบนมีคำตอบเสมอ และมีคำตอบเพียงชุดเดียวเมื่อคิดมอดุโลผลคูณของตัวหารทั้งหมด</p>
+              <p class="standalone-formula">M = m<sub>1</sub> × m<sub>2</sub> × … × m<sub>k</sub></p>
+              <p>หรือกล่าวได้ว่า คำตอบทุกตัวของระบบนี้สมภาคกันหมดมอดุโล <code>M</code></p>
+            </div>
+          </section>
+
+          <section class="lesson-card" aria-labelledby="visualizer-title">
+            <div class="lesson-card-header">
+              <div>
+                <h2 id="visualizer-title">Chinese Remainder Theorem — Combination Lock</h2>
+                <p>ลองค่า <code>x</code> ทีละตัว แล้วดูว่าเศษเหลือเข้าล็อกพร้อมกันเมื่อใด</p>
+              </div>
+              <div class="crt-controls" aria-label="ชุดสมการ CRT">
+                <div class="crt-pairs" id="crt-pairs"></div>
+                <button class="crt-mode-toggle" id="crt-mode-toggle" type="button" aria-pressed="true">⚡ โหมดกระโดด (ฉลาด) — กดสลับ</button>
+                <span class="crt-coprime-warning" id="crt-coprime-warning" hidden>⚠️ moduli ต้อง coprime กันทุกคู่</span>
+              </div>
+            </div>
+
+            <div class="visualizer-layout">
+              <div class="visualizer-canvas crt-canvas">
+                <p class="crt-counter" id="crt-counter">ตั้งเป้าไว้ที่ช่องส้มของแต่ละวง</p>
+                <div class="crt-dials" id="crt-dials" aria-label="วงล้อเศษเหลือ"></div>
+                <div class="crt-number-line" id="crt-number-line" aria-label="เส้นจำนวนผู้สมัครคำตอบ"></div>
+                <div class="crt-no-solution" id="crt-no-solution" hidden></div>
+              </div>
+              <aside class="monitor-panel" aria-label="ตัวติดตามขั้นตอน">
+                <p class="monitor-title">Execution Monitor</p>
+                <p class="monitor-hint" id="crt-monitor-hint">หา x ที่ทำให้ทุกวงล็อกพร้อมกัน — กด ▶</p>
+                <div class="monitor-log" id="crt-monitor"></div>
+              </aside>
+            </div>
+
+            <div class="step-controls" aria-label="ควบคุมขั้นตอน">
+              <button id="crt-prev" type="button" aria-label="ขั้นก่อนหน้า">‹</button>
+              <button id="crt-play" type="button" aria-label="เล่นขั้นตอน">▶</button>
+              <button id="crt-next" type="button" aria-label="ขั้นถัดไป">›</button>
+              <button id="crt-reset-step" type="button" aria-label="รีเซ็ตขั้นตอน">↺</button>
+              <div class="step-progress"><span><i id="crt-step-fill"></i></span><output id="crt-step-label">0/35</output></div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+
+    <script>
+      (() => {
+        const colors = ['#38bdf8', 'var(--color-success)', '#a78bfa'];
+        const pairContainer = document.querySelector('#crt-pairs');
+        const modeButton = document.querySelector('#crt-mode-toggle');
+        const coprimeWarning = document.querySelector('#crt-coprime-warning');
+        const counter = document.querySelector('#crt-counter');
+        const dials = document.querySelector('#crt-dials');
+        const numberLine = document.querySelector('#crt-number-line');
+        const noSolution = document.querySelector('#crt-no-solution');
+        const monitorHint = document.querySelector('#crt-monitor-hint');
+        const monitor = document.querySelector('#crt-monitor');
+        const fill = document.querySelector('#crt-step-fill');
+        const label = document.querySelector('#crt-step-label');
+        const playButton = document.querySelector('#crt-play');
+        let pairs = [{ a: 2, m: 3 }, { a: 3, m: 5 }, { a: 2, m: 7 }];
+        let jumpMode = true;
+        let step = 0;
+        let timer = null;
+        const center = 60;
+        const radius = 52;
+        const tickRadius = 34;
+
+        const gcd = (left, right) => { let x = Math.abs(left); let y = Math.abs(right); while (y) [x, y] = [y, x % y]; return x; };
+        const normalized = (value, modulus) => (value % modulus + modulus) % modulus;
+        const pairwiseCoprime = () => pairs.every((left, index) => pairs.slice(index + 1).every((right) => gcd(left.m, right.m) === 1));
+        function solve() {
+          const normalizedPairs = pairs.map((pair) => ({ a: normalized(pair.a, pair.m), m: pair.m }));
+          const M = normalizedPairs.reduce((product, pair) => product * pair.m, 1);
+          const coprime = pairwiseCoprime();
+          const candidates = [];
+          let lockedBefore = 0;
+          let stride = 1;
+          for (let x = 0; x < M; x += stride) {
+            const matched = normalizedPairs.map((pair) => x % pair.m === pair.a);
+            candidates.push({ x, matched });
+            if (matched.every(Boolean)) return { candidates, solution: x, M, coprime };
+            let firstMissing = 0;
+            while (firstMissing < matched.length && matched[firstMissing]) firstMissing += 1;
+            if (firstMissing > lockedBefore) { lockedBefore = firstMissing; stride = normalizedPairs.slice(0, lockedBefore).reduce((product, pair) => product * pair.m, 1); }
+          }
+          return { candidates, solution: null, M, coprime };
+        }
+        function bruteCandidates(solution) { return solution === null ? [] : Array.from({ length: solution + 1 }, (_, x) => ({ x, matched: pairs.map((pair) => x % pair.m === normalized(pair.a, pair.m)) })); }
+        function makeSvg(name, attributes) { const element = document.createElementNS('http://www.w3.org/2000/svg', name); Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, String(value))); return element; }
+        function angle(value, modulus) { return value / modulus * Math.PI * 2 - Math.PI / 2; }
+        function addMonitorLine(text, tone = '') { const line = document.createElement('div'); line.className = `monitor-line ${tone}`; const dot = document.createElement('i'); const copy = document.createElement('span'); copy.textContent = text; line.append(dot, copy); monitor.append(line); }
+        function renderControls() {
+          pairContainer.replaceChildren();
+          pairs.forEach((pair, index) => {
+            const card = document.createElement('div'); card.className = 'crt-pair-card'; card.style.setProperty('--dial-color', colors[index]);
+            const prefix = document.createElement('span'); prefix.className = 'crt-pair-label'; prefix.textContent = 'x ≡';
+            const residue = document.createElement('input'); residue.className = 'crt-pair-input'; residue.type = 'number'; residue.min = '0'; residue.max = '12'; residue.value = String(pair.a); residue.setAttribute('aria-label', `ค่า a${index + 1}`);
+            const middle = document.createElement('span'); middle.className = 'crt-pair-label'; middle.textContent = '(mod';
+            const modulusInput = document.createElement('input'); modulusInput.className = 'crt-pair-input'; modulusInput.type = 'number'; modulusInput.min = '2'; modulusInput.max = '13'; modulusInput.value = String(pair.m); modulusInput.setAttribute('aria-label', `ค่า m${index + 1}`);
+            const suffix = document.createElement('span'); suffix.className = 'crt-pair-label'; suffix.textContent = ')';
+            residue.addEventListener('change', () => updatePair(index, 'a', residue.value));
+            modulusInput.addEventListener('change', () => updatePair(index, 'm', modulusInput.value));
+            card.append(prefix, residue, middle, modulusInput, suffix); pairContainer.append(card);
+          });
+          coprimeWarning.hidden = pairwiseCoprime();
+          modeButton.textContent = jumpMode ? '⚡ โหมดกระโดด (ฉลาด) — กดสลับ' : '🐢 โหมดไล่ทีละค่า — กดสลับ';
+          modeButton.setAttribute('aria-pressed', String(jumpMode));
+        }
+        function renderDials(items, current) {
+          dials.replaceChildren();
+          pairs.forEach((pair, index) => {
+            const matched = current ? current.matched[index] : false;
+            const currentRemainder = current ? current.x % pair.m : 0;
+            const target = normalized(pair.a, pair.m);
+            const svg = makeSvg('svg', { class: `crt-dial ${matched ? 'locked' : ''}`, viewBox: '0 0 120 120', role: 'img', 'aria-label': `วงล้อ mod ${pair.m}` });
+            svg.style.setProperty('--dial-color', colors[index]);
+            svg.append(makeSvg('circle', { class: 'crt-dial-face', cx: center, cy: center, r: 52 }));
+            for (let value = 0; value < pair.m; value += 1) {
+              const tickAngle = angle(value, pair.m);
+              const x = center + tickRadius * Math.cos(tickAngle); const y = center + tickRadius * Math.sin(tickAngle);
+              if (value === target) svg.append(makeSvg('circle', { class: 'crt-target', cx: x, cy: y, r: 8.5 }));
+              const text = makeSvg('text', { class: 'crt-tick', x, y, 'text-anchor': 'middle', 'dominant-baseline': 'middle' }); text.textContent = String(value); svg.append(text);
+            }
+            const handGroup = makeSvg('g', { class: 'crt-hand-group' }); handGroup.style.transform = `rotate(${current ? currentRemainder / pair.m * 360 : 0}deg)`; handGroup.append(makeSvg('line', { class: 'crt-hand', x1: center, y1: center, x2: center, y2: center - tickRadius * .66 })); svg.append(handGroup, makeSvg('circle', { class: 'crt-hub', cx: center, cy: center, r: 3.5 }));
+            const tag = document.createElement('span'); tag.className = `crt-lock-tag ${matched ? 'locked' : ''}`; tag.textContent = matched ? `🔒 ${currentRemainder} = ${target}` : `mod ${pair.m} → ${target}`;
+            const block = document.createElement('div'); block.className = 'crt-dial-block'; block.append(svg, tag); dials.append(block);
+          });
+        }
+        function renderNumberLine(items, visible, solution, M) {
+          numberLine.replaceChildren();
+          const base = document.createElement('span'); base.className = 'crt-line-base'; numberLine.append(base);
+          if (M > 0) items.slice(0, visible).forEach((candidate) => { const tick = document.createElement('span'); const complete = candidate.matched.every(Boolean); tick.className = `crt-line-tick ${complete ? 'solution' : ''}`; tick.style.left = `${candidate.x / M * 100}%`; tick.style.setProperty('--tick-color', colors[Math.max(candidate.matched.filter(Boolean).length - 1, 0)]); if (complete) { tick.textContent = '♛'; const text = document.createElement('span'); text.className = 'crt-line-label'; text.textContent = String(candidate.x); tick.append(text); } else { const text = document.createElement('span'); text.className = 'crt-line-label'; text.textContent = String(candidate.x); tick.append(text); } numberLine.append(tick); });
+          const end = document.createElement('span'); end.className = 'crt-line-end'; end.textContent = `M = ${M}`; numberLine.append(end);
+        }
+        function render() {
+          const result = solve();
+          const candidates = jumpMode ? result.candidates : bruteCandidates(result.solution);
+          const total = candidates.length + 2;
+          const visible = Math.min(step, candidates.length);
+          const current = visible > 0 ? candidates[visible - 1] : null;
+          const solved = step >= candidates.length + 1 && result.solution !== null;
+          const locked = current ? current.matched.filter(Boolean).length : 0;
+          renderControls(); renderDials(candidates, current); renderNumberLine(candidates, visible, result.solution, result.M);
+          counter.innerHTML = current ? `กำลังลอง <strong>x = ${current.x}</strong> · ล็อกได้ ${locked}/${pairs.length} วง` : 'ตั้งเป้าไว้ที่ช่องส้มของแต่ละวง';
+          noSolution.hidden = result.solution !== null || pairwiseCoprime(); noSolution.textContent = 'moduli ชุดนี้ไม่ coprime กัน จึงไม่รับประกันคำตอบเดียวในรูปแบบ CRT';
+          monitorHint.textContent = solved ? `ปลดล็อกแล้ว: x ≡ ${result.solution} (mod ${result.M})` : `หา x ที่ทำให้ทุกวงล็อกพร้อมกัน (M = ${result.M}) — กด ▶`;
+          fill.style.width = `${step / total * 100}%`; label.textContent = `${step}/${total}`;
+          monitor.replaceChildren();
+          if (!result.coprime) addMonitorLine('moduli ไม่ coprime กัน — CRT ไม่การันตีคำตอบเดียว!', 'warn');
+          candidates.slice(0, visible).forEach((candidate) => { const count = candidate.matched.filter(Boolean).length; addMonitorLine(`x = ${candidate.x}: ล็อกได้ ${count}/${pairs.length} วง`, count === pairs.length ? 'good' : ''); });
+          if (solved && result.solution !== null) { addMonitorLine(`คำตอบถัดไป = ${result.solution} + ${result.M} → x ≡ ${result.solution} (mod ${result.M})`, 'good'); addMonitorLine(jumpMode ? `โหมดกระโดด: ลองแค่ ${candidates.length} ค่า` : `โหมดไล่ทีละค่า: ลองถึง ${candidates.length} ค่า`, 'good'); }
+        }
+        function stopPlaying() { if (timer !== null) window.clearInterval(timer); timer = null; playButton.textContent = '▶'; playButton.setAttribute('aria-label', 'เล่นขั้นตอน'); }
+        function updatePair(index, key, rawValue) { const value = Number(rawValue); const min = key === 'm' ? 2 : 0; const max = key === 'm' ? 13 : 12; pairs[index][key] = Number.isFinite(value) ? Math.min(Math.max(Math.trunc(value), min), max) : (key === 'm' ? 2 : 0); step = 0; stopPlaying(); render(); }
+        function setStep(nextStep) { const { candidates } = solve(); const visibleCandidates = jumpMode ? candidates : bruteCandidates(solve().solution); step = Math.min(Math.max(nextStep, 0), visibleCandidates.length + 2); render(); if (step >= visibleCandidates.length + 2) stopPlaying(); }
+        modeButton.addEventListener('click', () => { jumpMode = !jumpMode; step = 0; stopPlaying(); render(); });
+        document.querySelector('#crt-prev').addEventListener('click', () => { stopPlaying(); setStep(step - 1); });
+        document.querySelector('#crt-next').addEventListener('click', () => { stopPlaying(); setStep(step + 1); });
+        document.querySelector('#crt-reset-step').addEventListener('click', () => { stopPlaying(); setStep(0); });
+        playButton.addEventListener('click', () => { if (timer !== null) { stopPlaying(); return; } const { candidates } = solve(); const visibleCandidates = jumpMode ? candidates : bruteCandidates(solve().solution); if (step >= visibleCandidates.length + 2) setStep(0); playButton.textContent = 'Ⅱ'; playButton.setAttribute('aria-label', 'หยุดขั้นตอน'); timer = window.setInterval(() => setStep(step + 1), 300); });
+        render();
+      })();
+    </script>
+  </body>
+</html>

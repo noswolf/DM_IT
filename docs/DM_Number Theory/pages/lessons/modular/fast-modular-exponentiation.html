@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="เรียนรู้การยกกำลังมอดูลาร์แบบเร็วด้วยอัลกอริทึม Square and Multiply">
+    <title>การยกกำลังมอดูลาร์แบบเร็ว | Number Theory</title>
+    <link rel="stylesheet" href="../../../css/root-lessons/fast-modular-exponentiation.css">
+    <script src="../../../js/lesson-shell.js" defer></script>
+  </head>
+  <body data-lesson-id="fast-modular-exponentiation">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู" aria-expanded="false">☰</button>
+      </div>
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a data-lesson-id="divisibility" href="../foundations/divisibility.html"><span>01</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a data-lesson-id="integer-representations" href="../foundations/integer-representations.html"><span>02</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a data-lesson-id="primes" href="../foundations/primes.html"><span>03</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a data-lesson-id="sieve-of-eratosthenes" href="../factorization/sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a data-lesson-id="gcd-euclidean" href="../gcd/gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="gcd-prime-factorization" href="../gcd/gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a data-lesson-id="prime-factorization" href="../factorization/prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a data-lesson-id="modular-arithmetic" href="modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a data-lesson-id="congruence" href="congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a data-lesson-id="pseudorandom-numbers" href="pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a data-lesson-id="check-digits" href="check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a data-lesson-id="fast-modular-exponentiation" href="fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a data-lesson-id="euler-totient" href="../theorems/euler-totient.html"><span>13</span><span>ฟังก์ชันออยเลอร์ (Euler's Totient Function φ(n))</span></a></li>
+          <li><a data-lesson-id="fermats-little-theorem" href="../theorems/fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มา (Fermat's Little Theorem)</span></a></li>
+          <li><a data-lesson-id="extended-euclidean" href="../gcd/extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="classical-ciphers" href="../cryptography/classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบดั้งเดิม (Classical Ciphers)</span></a></li>
+          <li><a data-lesson-id="chinese-remainder-theorem" href="../theorems/chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a data-lesson-id="rsa-cryptography" href="../cryptography/rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography) — Capstone</span></a></li>
+        </ol>
+      </nav>
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>0/18 หัวข้อ · 0%</span><div><i></i></div></div>
+        <button class="learned-button" type="button" aria-pressed="false">ทำเครื่องหมายว่าเรียนแล้ว</button>
+        <div class="utility-links"><a href="../../tools/playground.html">Playground</a><a href="../../tools/glossary.html">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article>
+        <header class="page-header">
+          <h1>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</h1>
+          <p>เข้าใจว่าทำไม a<sup>b</sup> mod n คำนวณได้เร็วด้วย “ยกกำลังสองซ้ำ” แทนการคูณทีละครั้ง</p>
+        </header>
+
+        <div class="lesson-stack">
+          <section class="definition-card" aria-labelledby="definition-title">
+            <h2 id="definition-title"><i></i>นิยาม</h2>
+            <p class="definition-text">อัลกอริทึมในการคำนวณหาค่าของ <code>a<sup>b</sup> mod n</code> อย่างมีประสิทธิภาพ โดยมีจุดเด่นคือช่วยให้คำนวณผลลัพธ์ได้รวดเร็วมากและประหยัดหน่วยความจำ แม้ว่าตัวเลขฐาน (<code>a</code>) หรือตัวเลขชี้กำลัง (<code>b</code>) จะมีขนาดใหญ่โตมหาศาลก็ตาม อัลกอริทึมนี้มักถูกนำไปใช้ในระบบวิทยาการรหัสลับ (Cryptography) เช่น RSA Encryption และ Diffie-Hellman Key Exchange ซึ่งจำเป็นต้องจัดการกับตัวเลขที่มีความยาวหลายร้อยหลายพันบิต</p>
+            <p class="sub-label">สูตร</p>
+            <div class="formula"><b>a<sup>b</sup> mod n</b> &nbsp;—&nbsp; คำนวณด้วยการยกกำลังสองซ้ำ (repeated squaring)</div>
+            <div class="definition-note">
+              <p>ให้ <code>a</code> ∈ ℤ, <code>b</code> เป็นจำนวนเต็มที่ไม่เป็นลบ และ <code>n</code> เป็นจำนวนเต็มบวก โดยเขียน <code>b</code> ในรูปเลขฐานสองได้เป็น <code>b = b<sub>0</sub>·2<sup>0</sup> + b<sub>1</sub>·2<sup>1</sup> + … + b<sub>t</sub>·2<sup>t</sup></code> เมื่อแต่ละบิต <code>b<sub>i</sub></code> เป็น 0 หรือ 1</p>
+              <p>เนื่องจากกำลังของ <code>a</code> แตกตามหลักฐานสองของ <code>b</code> ได้ เราจึงคูณเฉพาะกำลังที่ตรงกับบิต 1 เท่านั้น</p>
+              <div class="definition-equation"><code>a<sup>b</sup> mod n</code> = ผลคูณของ <code>a<sup>2<sup>i</sup></sup> mod n</code> เฉพาะ <code>i</code> ที่ <code>b<sub>i</sub> = 1</code></div>
+              <p>หรือกล่าวได้ว่า แทนที่จะคูณ <code>a</code> ซ้ำ <code>b</code> ครั้ง เราสร้าง <code>a<sup>2<sup>i</sup></sup></code> ด้วยการยกกำลังสองซ้ำ ๆ แล้วหยิบมาคูณเฉพาะตัวที่ตรงกับบิต 1 <strong>จากประมาณ b ขั้นตอน จึงเหลือเพียง log<sub>2</sub>(b) ขั้นตอน</strong></p>
+            </div>
+          </section>
+
+          <section class="lesson-card" aria-labelledby="visualizer-title">
+            <div class="lesson-card-header">
+              <div>
+                <h2 id="visualizer-title">Fast Modular Exponentiation — Square &amp; Multiply</h2>
+                <p>ดูการทำงานของ loop ทีละรอบ จนกว่า <code>exponent = 0</code></p>
+              </div>
+              <div class="fast-inputs" aria-label="ค่าที่ใช้คำนวณ">
+                <label class="fast-input-group">a <input class="fast-number-input" id="fast-a" type="number" min="2" max="12" value="3"></label>
+                <label class="fast-input-group">b <input class="fast-number-input" id="fast-e" type="number" min="1" max="64" value="13"></label>
+                <label class="fast-input-group">mod n <input class="fast-number-input" id="fast-n" type="number" min="2" max="50" value="17"></label>
+              </div>
+            </div>
+
+            <div class="fast-visualizer-layout">
+              <div class="visualizer-canvas fast-canvas">
+                <div class="fast-overview">
+                  <div>
+                    <p class="fast-overline">กำลังคำนวณ</p>
+                    <p class="fast-problem" id="fast-problem">3<sup>13</sup> mod 17</p>
+                  </div>
+                  <p class="fast-binary" id="fast-binary">13 = 1101<sub>2</sub></p>
+                </div>
+                <section class="fast-round-card" aria-live="polite" aria-label="การทำงานของ loop รอบปัจจุบัน">
+                  <p class="fast-card-kicker" id="fast-action-kicker">INITIALIZE</p>
+                  <h3 id="fast-action-title">เริ่มต้น loop</h3>
+                  <p class="fast-action-copy" id="fast-action-copy">ตั้งค่า result, base และ exponent ก่อนเริ่มวนซ้ำ</p>
+                  <div class="fast-action-calculation" id="fast-action-calculation"></div>
+                  <button class="fast-advance-button" id="fast-advance" type="button">เริ่มรอบที่ 1 →</button>
+                </section>
+
+                <section class="fast-code-panel" aria-label="สูตรและอัลกอริทึม">
+                  <p class="fast-panel-label">FORMULA / ALGORITHM</p>
+                  <pre class="fast-static-code"><code>result = 1
+
+base = a
+
+exponent = b
+
+mod = n
+
+if exponent % 2 == 1:
+    result = (result × base) mod n
+
+base = (base × base) mod n
+exponent = exponent // 2</code></pre>
+                </section>
+
+                <section class="fast-state-strip" aria-label="ค่าปัจจุบัน">
+                  <div class="fast-state-cell">
+                    <span class="fast-state-label">result</span>
+                    <strong class="fast-value-number" id="fast-result-value">1</strong>
+                  </div>
+                  <div class="fast-state-cell">
+                    <span class="fast-state-label">base</span>
+                    <strong class="fast-value-number" id="fast-base-value">3</strong>
+                  </div>
+                  <div class="fast-state-cell">
+                    <span class="fast-state-label">exponent</span>
+                    <strong class="fast-value-number" id="fast-exponent-value">13</strong>
+                  </div>
+                  <div class="fast-state-cell fast-state-cell-muted">
+                    <span class="fast-state-label">mod</span>
+                    <strong class="fast-value-number" id="fast-mod-value">17</strong>
+                  </div>
+                </section>
+
+                <section class="fast-trace-panel" aria-label="ตารางการวนซ้ำของ loop">
+                  <div class="fast-panel-heading">
+                    <div>
+                      <p class="fast-panel-label">Loop trace</p>
+                      <p class="fast-panel-subtitle">หนึ่งแถว = หนึ่งรอบของ repeated squaring</p>
+                    </div>
+                    <span class="fast-trace-note" id="fast-trace-note">0 รอบที่เสร็จแล้ว</span>
+                  </div>
+                  <div class="fast-trace-wrap">
+                    <table class="fast-trace">
+                      <thead>
+                        <tr><th>รอบ</th><th>exponent</th><th>การทำงาน</th><th>result ใหม่</th><th>base ใหม่</th><th>exponent ใหม่</th></tr>
+                      </thead>
+                      <tbody id="fast-loop-trace"></tbody>
+                    </table>
+                  </div>
+                </section>
+                <div class="fast-final" id="fast-final" hidden></div>
+              </div>
+            </div>
+
+            <div class="step-controls" aria-label="ควบคุมขั้นตอน">
+              <button id="fast-prev" type="button" aria-label="ขั้นก่อนหน้า">‹</button>
+              <button id="fast-play" type="button" aria-label="เล่นขั้นตอน">▶</button>
+              <button id="fast-next" type="button" aria-label="ขั้นถัดไป">›</button>
+              <button id="fast-reset-step" type="button" aria-label="รีเซ็ตขั้นตอน">↺</button>
+              <div class="step-progress"><span><i id="fast-step-fill"></i></span><output id="fast-step-label">0/4 รอบ</output></div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+
+    <script>
+      (() => {
+        const problem = document.querySelector('#fast-problem');
+        const binary = document.querySelector('#fast-binary');
+        const actionKicker = document.querySelector('#fast-action-kicker');
+        const actionTitle = document.querySelector('#fast-action-title');
+        const actionCopy = document.querySelector('#fast-action-copy');
+        const actionCalculation = document.querySelector('#fast-action-calculation');
+        const advanceButton = document.querySelector('#fast-advance');
+        const traceNote = document.querySelector('#fast-trace-note');
+        const traceBody = document.querySelector('#fast-loop-trace');
+        const finalBlock = document.querySelector('#fast-final');
+        const fill = document.querySelector('#fast-step-fill');
+        const label = document.querySelector('#fast-step-label');
+        const playButton = document.querySelector('#fast-play');
+        const inputs = { a: document.querySelector('#fast-a'), e: document.querySelector('#fast-e'), n: document.querySelector('#fast-n') };
+        let a = 3;
+        let exponent = 13;
+        let modulus = 17;
+        let step = 0;
+        let timer = null;
+
+        const normalize = (value, min, max, fallback) => Number.isFinite(value) ? Math.min(Math.max(Math.trunc(value), min), max) : fallback;
+        const mod = (value, divisor) => (value % divisor + divisor) % divisor;
+        function computeSteps() {
+          const steps = [];
+          let result = 1 % modulus;
+          let base = mod(a, modulus);
+          let remaining = exponent;
+          let round = 1;
+          while (remaining > 0) {
+            const resultBefore = result;
+            const baseBefore = base;
+            const exponentBefore = remaining;
+            const isOdd = remaining % 2 === 1;
+            const resultAfter = isOdd ? result * base % modulus : result;
+            const baseSquared = base * base;
+            const baseAfter = baseSquared % modulus;
+            const exponentAfter = Math.floor(remaining / 2);
+            steps.push({ round, resultBefore, baseBefore, exponentBefore, isOdd, resultAfter, baseSquared, baseAfter, exponentAfter });
+            result = resultAfter;
+            base = baseAfter;
+            remaining = exponentAfter;
+            round += 1;
+          }
+          return { steps, result };
+        }
+        function currentState(steps) {
+          const last = steps[steps.length - 1];
+          if (step === 0) return { result: 1 % modulus, base: mod(a, modulus), exponent, mod: modulus };
+          if (step >= steps.length) return { result: last.resultAfter, base: last.baseAfter, exponent: 0, mod: modulus };
+          const previousRound = steps[step - 1];
+          return { result: previousRound.resultAfter, base: previousRound.baseAfter, exponent: previousRound.exponentAfter, mod: modulus };
+        }
+        function renderActionLines(lines) {
+          actionCalculation.replaceChildren();
+          lines.forEach((text, index) => {
+            const line = document.createElement('p');
+            line.className = `fast-action-line ${index === 0 ? 'primary' : ''}`;
+            line.textContent = text;
+            actionCalculation.append(line);
+          });
+        }
+        function renderAction(steps, result) {
+          if (step === 0) {
+            actionKicker.textContent = 'INITIALIZE';
+            actionTitle.textContent = 'เริ่มต้น loop';
+            actionCopy.textContent = `ตั้งค่า result = 1, base = ${mod(a, modulus)} และ exponent = ${exponent}`;
+            renderActionLines(['ตรวจ exponent ในรอบที่ 1', `while exponent > 0 · ${exponent} > 0`]);
+            advanceButton.textContent = 'เริ่มรอบที่ 1 →';
+            advanceButton.disabled = false;
+            return;
+          }
+          if (step >= steps.length) {
+            actionKicker.textContent = 'LOOP COMPLETE';
+            actionTitle.textContent = 'exponent = 0 → หยุด loop';
+            actionCopy.textContent = 'ไม่มีรอบถัดไป เพราะเงื่อนไข exponent > 0 ไม่เป็นจริงแล้ว';
+            renderActionLines([`ผลลัพธ์สุดท้าย: ${a}^${exponent} mod ${modulus} = ${result}`]);
+            advanceButton.textContent = 'จบการคำนวณแล้ว';
+            advanceButton.disabled = true;
+            return;
+          }
+          const round = steps[step - 1];
+          actionKicker.textContent = `ROUND ${round.round} / ${steps.length}`;
+          actionTitle.textContent = `รอบที่ ${round.round}: ${round.isOdd ? 'คี่ → คูณ result' : 'คู่ → ข้ามการคูณ'}`;
+          actionCopy.textContent = `exponent = ${round.exponentBefore} → ${round.isOdd ? 'ใช้ base คูณเข้า result' : 'result ไม่เปลี่ยนในรอบนี้'}`;
+          const resultLine = round.isOdd
+            ? `result = (${round.resultBefore} × ${round.baseBefore}) mod ${modulus} = ${round.resultAfter}`
+            : `result = ${round.resultBefore} (ข้ามการคูณ)`;
+          renderActionLines([resultLine, `base = (${round.baseBefore} × ${round.baseBefore}) mod ${modulus} = ${round.baseAfter}`, `exponent = ${round.exponentBefore} // 2 = ${round.exponentAfter}`]);
+          advanceButton.textContent = step < steps.length - 1 ? `ไปยังรอบที่ ${round.round + 1} →` : 'ดูผลลัพธ์สุดท้าย →';
+          advanceButton.disabled = false;
+        }
+        function renderFinal(result, visible) {
+          finalBlock.replaceChildren();
+          finalBlock.hidden = !visible;
+          if (!visible) return;
+          const equation = document.createElement('p'); equation.className = 'fast-flow-line'; equation.innerHTML = `${a}<sup>${exponent}</sup> mod ${modulus} = ${result}`;
+          const value = document.createElement('p'); value.className = 'fast-final-result'; value.textContent = String(result);
+          const tag = document.createElement('p'); tag.className = 'fast-final-tag'; tag.textContent = `RESULT = ${result}`;
+          finalBlock.append(equation, value, tag);
+        }
+        function renderValues(state) {
+          const values = { result: document.querySelector('#fast-result-value'), base: document.querySelector('#fast-base-value'), exponent: document.querySelector('#fast-exponent-value'), mod: document.querySelector('#fast-mod-value') };
+          Object.entries(values).forEach(([key, element]) => { element.textContent = String(state[key]); element.classList.remove('changed'); });
+        }
+        function renderTrace(steps) {
+          traceBody.replaceChildren();
+          steps.forEach((round, index) => {
+            const row = document.createElement('tr');
+            row.className = index < step ? 'complete' : index === step && step < steps.length ? 'current' : 'future';
+            const action = round.isOdd ? 'คี่ · คูณ result' : 'คู่ · ข้ามการคูณ';
+            [round.round, round.exponentBefore, action, round.resultAfter, round.baseAfter, round.exponentAfter].forEach((value) => {
+              const cell = document.createElement('td');
+              cell.textContent = String(value);
+              row.append(cell);
+            });
+            traceBody.append(row);
+          });
+          traceNote.textContent = step >= steps.length ? 'loop จบแล้ว' : `${step} / ${steps.length} รอบเสร็จแล้ว`;
+        }
+        function render() {
+          const { steps, result } = computeSteps();
+          const state = currentState(steps);
+          problem.innerHTML = `${a}<sup>${exponent}</sup> mod ${modulus}`;
+          binary.innerHTML = `${exponent} = ${exponent.toString(2)}<sub>2</sub>`;
+          fill.style.width = `${steps.length ? step / steps.length * 100 : 0}%`;
+          label.textContent = `${step}/${steps.length} รอบ`;
+          renderValues(state);
+          renderAction(steps, result);
+          renderTrace(steps);
+          renderFinal(result, step >= steps.length);
+        }
+        function stopPlaying() { if (timer !== null) window.clearInterval(timer); timer = null; playButton.textContent = '▶'; playButton.setAttribute('aria-label', 'เล่นขั้นตอน'); }
+        function setStep(nextStep) { const { steps } = computeSteps(); step = Math.min(Math.max(nextStep, 0), steps.length); render(); if (step >= steps.length) stopPlaying(); }
+        function setInputs(nextA, nextE, nextN) { a = normalize(nextA, 2, 12, 3); exponent = normalize(nextE, 1, 64, 13); modulus = normalize(nextN, 2, 50, 17); inputs.a.value = String(a); inputs.e.value = String(exponent); inputs.n.value = String(modulus); step = 0; stopPlaying(); render(); }
+        function readInput(name, min, max, fallback) { return normalize(Number(inputs[name].value), min, max, fallback); }
+        inputs.a.addEventListener('change', () => setInputs(readInput('a', 2, 12, 3), exponent, modulus));
+        inputs.e.addEventListener('change', () => setInputs(a, readInput('e', 1, 64, 13), modulus));
+        inputs.n.addEventListener('change', () => setInputs(a, exponent, readInput('n', 2, 50, 17)));
+        document.querySelector('#fast-prev').addEventListener('click', () => { stopPlaying(); setStep(step - 1); });
+        document.querySelector('#fast-next').addEventListener('click', () => { stopPlaying(); setStep(step + 1); });
+        document.querySelector('#fast-reset-step').addEventListener('click', () => { stopPlaying(); setStep(0); });
+        advanceButton.addEventListener('click', () => { stopPlaying(); setStep(step + 1); });
+        playButton.addEventListener('click', () => { if (timer !== null) { stopPlaying(); return; } const { steps } = computeSteps(); if (step >= steps.length) setStep(0); playButton.textContent = 'Ⅱ'; playButton.setAttribute('aria-label', 'หยุดขั้นตอน'); timer = window.setInterval(() => setStep(step + 1), 900); });
+        render();
+      })();
+    </script>
+  </body>
+</html>

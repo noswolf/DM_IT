@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="เรียนรู้การหา GCD ด้วยการแยกตัวประกอบเฉพาะ">
+    <title>GCD ด้วยการแยกตัวประกอบเฉพาะ | Number Theory</title>
+    <link rel="stylesheet" href="../../../css/modular-lessons/gcd-prime-factorization.css">
+    <script src="../../../js/index-modular-shell.js"></script>
+  </head>
+  <body>
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู">☰</button>
+      </div>
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a href="../foundations/divisibility.html"><span class="done">✓</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a href="../foundations/integer-representations.html"><span class="done">✓</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a href="../foundations/primes.html"><span class="done">✓</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a href="../factorization/sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a href="gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a class="active" href="gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a href="../factorization/prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a href="../modular/modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a href="../modular/congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a href="../modular/pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a href="../modular/check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a href="../modular/fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a href="../theorems/euler-totient.html"><span>13</span><span>ฟังก์ชันทอเทียนต์ของออยเลอร์ (Euler's Totient)</span></a></li>
+          <li><a href="../theorems/fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มาต์ (Fermat's Little Theorem)</span></a></li>
+          <li><a href="extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a href="../cryptography/classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบคลาสสิก (Classical Ciphers)</span></a></li>
+          <li><a href="../theorems/chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a href="../cryptography/rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography)</span></a></li>
+        </ol>
+      </nav>
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>3/18 หัวข้อ · 17%</span><div><i></i></div></div>
+        <button class="learned-button" type="button">ทำเครื่องหมายว่าเรียนแล้ว</button>
+        <div class="utility-links"><a href="../../tools/playground.html">Playground</a><a href="../../tools/glossary.html">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article>
+        <header class="page-header">
+          <h1>GCD ด้วยการแยกตัวประกอบเฉพาะ</h1>
+          <p>หา GCD อีกวิธีหนึ่งด้วยการแยกตัวประกอบเฉพาะ แล้วเลือกเลขชี้กำลังต่ำสุดของ prime ที่ตรงกัน</p>
+        </header>
+
+        <div class="lesson-stack">
+          <section class="definition-card" aria-labelledby="definition-title">
+            <h2 id="definition-title"><i></i>นิยาม</h2>
+            <p class="definition-text">การหาตัวหารร่วมมากของจำนวนเต็มบวกสองจำนวน โดยแยกแต่ละจำนวนเป็นผลคูณของจำนวนเฉพาะ แล้วเลือกจำนวนเฉพาะที่ปรากฏร่วมกันทั้งสองฝั่งด้วยเลขชี้กำลังที่น้อยที่สุด</p>
+            <p class="sub-label">สูตร</p>
+            <div class="formula">gcd(<b>a</b>, <b>b</b>) = p<sub>1</sub><sup>min(e₁,f₁)</sup> × … × p<sub>k</sub><sup>min(eₖ,fₖ)</sup></div>
+            <div class="definition-note">
+              <p>ให้ a และ b เป็นจำนวนเต็มบวก โดยเขียนด้วยจำนวนเฉพาะชุดเดียวกันเป็น <code>a = p₁<sup>e₁</sup> ··· pₖ<sup>eₖ</sup></code> และ <code>b = p₁<sup>f₁</sup> ··· pₖ<sup>fₖ</sup></code></p>
+              <p>ตัวหารร่วมมากหาได้จาก prime ที่มีร่วมกัน แล้วเลือก<strong>เลขชี้กำลังที่น้อยกว่า</strong>ของแต่ละตัวมาคูณกัน</p>
+              <p>เช่น <code>24 = 2³×3¹</code> และ <code>36 = 2²×3²</code> จะได้ <code>2²×3¹ = 12</code></p>
+            </div>
+          </section>
+
+          <section class="execution" aria-labelledby="visualizer-title">
+            <h2 class="execution-title" id="visualizer-title">GCD by Prime Factorisation</h2>
+            <div class="execution-header">
+              <div class="inputs-row">
+                <label for="number-a">a<input id="number-a" type="number" min="1" max="1000" value="120"></label>
+                <label for="number-b">b<input id="number-b" type="number" min="1" max="1000" value="500"></label>
+              </div>
+            </div>
+
+            <div class="execution-layout">
+              <div class="canvas-area factor-canvas">
+                <div class="factor-header"><p id="factor-line-a"></p><p id="factor-line-b"></p></div>
+                <p class="empty-note" id="empty-note" hidden>มีจำนวนหนึ่งเท่ากับ 1 จึงไม่มีตัวประกอบเฉพาะร่วมกัน และ GCD เท่ากับ 1</p>
+                <section class="worked-solution" aria-label="วิธีหา GCD จากเลขชี้กำลังของตัวประกอบเฉพาะ">
+                  <h3>เลือกเลขชี้กำลังที่น้อยที่สุดของจำนวนเฉพาะแต่ละตัว</h3>
+                  <div class="solution-line min-line">
+                    <span class="equation-prefix" id="gcd-expression-label"></span>
+                    <div class="expression-terms" id="min-expression"></div>
+                  </div>
+                  <div class="solution-line" id="minimum-power-line" hidden>
+                    <span class="equation-prefix">=</span>
+                    <div class="expression-terms" id="minimum-power-expression"></div>
+                  </div>
+                  <div class="solution-line" id="numeric-product-line" hidden>
+                    <span class="equation-prefix">=</span>
+                    <div class="expression-terms" id="numeric-product-expression"></div>
+                  </div>
+                  <strong class="result-badge" id="result-badge" hidden></strong>
+                </section>
+              </div>
+
+              <aside class="monitor-panel">
+                <p class="monitor-title">Execution Monitor</p>
+                <p class="monitor-hint" id="monitor-hint">Step 1: แยกตัวประกอบเฉพาะทั้งสองจำนวน แล้วเปรียบเทียบเลขชี้กำลังด้วยค่า min ทีละจำนวนเฉพาะ — กด ▶</p>
+                <div class="monitor-log" id="monitor-log"></div>
+                <span class="monitor-badge" id="monitor-badge" hidden></span>
+              </aside>
+            </div>
+
+            <div class="player">
+              <button id="previous" type="button" aria-label="ขั้นก่อนหน้า">‹</button>
+              <button id="play" type="button" aria-label="เล่นขั้นตอน">▶</button>
+              <button id="next" type="button" aria-label="ขั้นถัดไป">›</button>
+              <div class="player-progress"><span><i id="progress-fill"></i></span><output id="step-label"></output></div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+
+    <script>
+      (() => {
+        const numberA = document.querySelector('#number-a');
+        const numberB = document.querySelector('#number-b');
+        const playButton = document.querySelector('#play');
+        let currentStep = 0;
+        let playTimer = null;
+
+        function clamp(value) {
+          const number = Math.trunc(Number(value));
+          return Number.isNaN(number) ? 1 : Math.min(Math.max(number, 1), 1000);
+        }
+
+        function primeFactors(value) {
+          let remaining = value;
+          const factors = [];
+          for (let prime = 2; prime * prime <= remaining; prime += 1) {
+            if (remaining % prime !== 0) continue;
+            let exponent = 0;
+            while (remaining % prime === 0) {
+              remaining /= prime;
+              exponent += 1;
+            }
+            factors.push({ prime, exponent });
+          }
+          if (remaining > 1) factors.push({ prime: remaining, exponent: 1 });
+          return factors;
+        }
+
+        function factorText(value, factors) {
+          if (factors.length === 0) return `${value} = 1`;
+          const expanded = factors.flatMap((factor) => Array(factor.exponent).fill(factor.prime)).join(' × ');
+          const powered = factors.map((factor) => `${factor.prime}<sup>${factor.exponent}</sup>`).join(' × ');
+          return `<strong>${value}</strong> = ${expanded} = ${powered}`;
+        }
+
+        function combineFactors(factorsA, factorsB) {
+          const factors = new Map();
+          factorsA.forEach(({ prime, exponent }) => factors.set(prime, { expA: exponent, expB: factors.get(prime)?.expB ?? 0 }));
+          factorsB.forEach(({ prime, exponent }) => factors.set(prime, { expA: factors.get(prime)?.expA ?? 0, expB: exponent }));
+          return [...factors.entries()]
+            .map(([prime, exponents]) => ({ prime, ...exponents, expMin: Math.min(exponents.expA, exponents.expB), isMatch: exponents.expA > 0 && exponents.expB > 0 }))
+            .sort((first, second) => first.prime - second.prime);
+        }
+
+        function stopPlaying() {
+          clearInterval(playTimer);
+          playTimer = null;
+          playButton.textContent = '▶';
+        }
+
+        function termList(factors, formatter) {
+          if (factors.length === 0) return [document.createTextNode('1')];
+          return factors.flatMap((factor, index) => {
+            const term = document.createElement('span');
+            term.className = 'solution-term';
+            term.innerHTML = formatter(factor, index);
+            return index === 0 ? [term] : [document.createTextNode(' × '), term];
+          });
+        }
+
+        function renderWorkedSolution(a, b, combined, checkedCount, gcd, complete) {
+          document.querySelector('#gcd-expression-label').textContent = `gcd(${a}, ${b}) =`;
+          const minTerms = termList(combined, (factor, index) => {
+            const state = index < checkedCount ? ' checked' : ' pending';
+            return `<span class="min-term${state}">${factor.prime}<sup>min(<b class="exponent-a">${factor.expA}</b>,<b class="exponent-b">${factor.expB}</b>)</sup></span>`;
+          });
+          document.querySelector('#min-expression').replaceChildren(...minTerms);
+
+          const checkedFactors = combined.slice(0, checkedCount);
+          const minimumLine = document.querySelector('#minimum-power-line');
+          minimumLine.hidden = checkedFactors.length === 0;
+          document.querySelector('#minimum-power-expression').replaceChildren(...termList(checkedFactors, (factor) => `${factor.prime}<sup>${factor.expMin}</sup>`));
+
+          document.querySelector('#numeric-product-line').hidden = !complete;
+          document.querySelector('#numeric-product-expression').replaceChildren(...termList(combined, (factor) => String(factor.prime ** factor.expMin)));
+          document.querySelector('#result-badge').hidden = !complete;
+          document.querySelector('#result-badge').textContent = `= ${gcd}`;
+        }
+
+        function renderMonitor(combined, checkedCount, gcd, complete) {
+          document.querySelector('#monitor-hint').hidden = checkedCount > 0 || complete;
+          const lines = combined.slice(0, checkedCount).map((factor) => {
+            const line = document.createElement('div');
+            line.className = 'monitor-line';
+            line.innerHTML = `<i style="background:${factor.expMin > 0 ? 'var(--color-success)' : 'var(--color-border)'}"></i><span>p=${factor.prime}: min(${factor.expA}, ${factor.expB}) = ${factor.expMin} → ใช้ ${factor.prime}^${factor.expMin}${factor.expMin === 0 ? ' = 1 จึงไม่เพิ่มค่าให้ GCD' : ''}</span>`;
+            return line;
+          });
+          if (complete) {
+            const expression = combined.map((factor) => `${factor.prime}^${factor.expMin}`).join(' × ') || '1';
+            const summary = document.createElement('div');
+            summary.className = 'monitor-line emphasis';
+            summary.innerHTML = `<span>GCD = ${expression} = ${gcd}</span>`;
+            lines.push(summary);
+          }
+          document.querySelector('#monitor-log').replaceChildren(...lines);
+          document.querySelector('#monitor-badge').hidden = !complete;
+          document.querySelector('#monitor-badge').textContent = `GCD(${numberA.value}, ${numberB.value}) = ${gcd}`;
+        }
+
+        function render() {
+          const a = clamp(numberA.value);
+          const b = clamp(numberB.value);
+          const factorsA = primeFactors(a);
+          const factorsB = primeFactors(b);
+          const combined = combineFactors(factorsA, factorsB);
+          const totalSteps = combined.length + 2;
+          const lastStep = totalSteps - 1;
+          numberA.value = a;
+          numberB.value = b;
+          currentStep = Math.min(currentStep, lastStep);
+          const checkedCount = Math.min(currentStep, combined.length);
+          const complete = currentStep >= combined.length + 1;
+          const common = combined.filter((factor) => factor.isMatch);
+          const gcd = common.reduce((value, factor) => value * factor.prime ** factor.expMin, 1);
+
+          document.querySelector('#factor-line-a').innerHTML = factorText(a, factorsA);
+          document.querySelector('#factor-line-b').innerHTML = factorText(b, factorsB);
+          document.querySelector('#empty-note').hidden = a !== 1 && b !== 1;
+          renderWorkedSolution(a, b, combined, checkedCount, gcd, complete);
+          renderMonitor(combined, checkedCount, gcd, complete);
+          document.querySelector('#step-label').textContent = `${currentStep + 1}/${totalSteps}`;
+          document.querySelector('#progress-fill').style.width = `${(currentStep / (lastStep || 1)) * 100}%`;
+        }
+
+        [numberA, numberB].forEach((input) => input.addEventListener('change', () => { currentStep = 0; stopPlaying(); render(); }));
+        document.querySelector('#previous').addEventListener('click', () => { stopPlaying(); currentStep = Math.max(0, currentStep - 1); render(); });
+        document.querySelector('#next').addEventListener('click', () => { stopPlaying(); currentStep += 1; render(); });
+        playButton.addEventListener('click', () => {
+          if (playTimer) { stopPlaying(); return; }
+          playButton.textContent = '❚❚';
+          playTimer = setInterval(() => {
+            const lastStep = combineFactors(primeFactors(clamp(numberA.value)), primeFactors(clamp(numberB.value))).length + 1;
+            if (currentStep >= lastStep) { stopPlaying(); return; }
+            currentStep += 1;
+            render();
+            if (currentStep >= lastStep) stopPlaying();
+          }, 700);
+        });
+        document.querySelector('#sidebar-toggle').addEventListener('click', () => document.querySelector('#sidebar').classList.toggle('open'));
+        DMModularShell.initTheme(document.querySelector('#theme-toggle'));
+const completedLessonsStorageKey = 'dm2026:progress';
+const legacyCompletedLessonsStorageKey = 'dm-completed-lessons-v1';
+      const progressMigrationStorageKey = 'dm2026:progress-migrated-v1';
+      const defaultCompletedLessons = ['divisibility', 'integer-representations', 'primes'];
+
+      function normalizeTopicId(value) {
+        return String(value).split('/').pop().replace(/\.html$/, '');
+      }
+
+      function loadCompletedLessons() {
+        try {
+          const saved = localStorage.getItem(completedLessonsStorageKey);
+          const completed = new Set(saved === null ? [] : JSON.parse(saved).map(normalizeTopicId));
+          let hasStoredProgress = saved !== null;
+
+          if (localStorage.getItem(progressMigrationStorageKey) !== '1') {
+            const legacySaved = localStorage.getItem(legacyCompletedLessonsStorageKey);
+            if (legacySaved !== null) {
+              JSON.parse(legacySaved).map(normalizeTopicId).forEach((id) => completed.add(id));
+              hasStoredProgress = true;
+            }
+            localStorage.setItem(progressMigrationStorageKey, '1');
+          }
+
+          return hasStoredProgress ? completed : new Set(defaultCompletedLessons);
+        } catch {
+          return new Set(defaultCompletedLessons);
+        }
+      }
+
+      let completedLessons = loadCompletedLessons();
+
+      function saveCompletedLessons() {
+        try {
+          localStorage.setItem(completedLessonsStorageKey, JSON.stringify([...completedLessons]));
+        } catch {
+          // The button still works for this page if storage is unavailable.
+        }
+      }
+      saveCompletedLessons();
+
+      function renderLessonProgress() {
+        const links = [...document.querySelectorAll('.lesson-nav a')];
+        const lessonIds = links.map((link) => normalizeTopicId(link.getAttribute('href')));
+        links.forEach((link, index) => {
+          const marker = link.querySelector('span:first-child');
+          const isCompleted = completedLessons.has(lessonIds[index]);
+          marker.classList.toggle('done', isCompleted);
+          marker.textContent = isCompleted ? '✓' : String(index + 1).padStart(2, '0');
+        });
+
+        const completedCount = lessonIds.filter((id) => completedLessons.has(id)).length;
+        const percentage = Math.round(completedCount / lessonIds.length * 100);
+        const progress = document.querySelector('.lesson-progress');
+        progress.querySelector('span').textContent = `${completedCount}/${lessonIds.length} หัวข้อ · ${percentage}%`;
+        progress.querySelector('i').style.width = `${percentage}%`;
+
+        const currentLink = document.querySelector('.lesson-nav a.active');
+        const currentLesson = normalizeTopicId(currentLink.getAttribute('href'));
+        const learnedButton = document.querySelector('.learned-button');
+        const isCurrentCompleted = completedLessons.has(currentLesson);
+        learnedButton.classList.toggle('selected', isCurrentCompleted);
+        learnedButton.setAttribute('aria-pressed', String(isCurrentCompleted));
+        learnedButton.textContent = isCurrentCompleted ? '✓ เรียนหัวข้อนี้แล้ว' : 'ทำเครื่องหมายว่าเรียนแล้ว';
+      }
+
+      const learnedButton = document.querySelector('.learned-button');
+      learnedButton.addEventListener('click', () => {
+        const currentLesson = normalizeTopicId(document.querySelector('.lesson-nav a.active').getAttribute('href'));
+        if (completedLessons.has(currentLesson)) completedLessons.delete(currentLesson);
+        else completedLessons.add(currentLesson);
+        saveCompletedLessons();
+        renderLessonProgress();
+      });
+
+      window.addEventListener('storage', (event) => {
+        if (event.key === completedLessonsStorageKey || event.key === null) {
+          completedLessons = loadCompletedLessons();
+          renderLessonProgress();
+        }
+      });
+      renderLessonProgress();
+        render();
+      })();
+    </script>
+  </body>
+</html>

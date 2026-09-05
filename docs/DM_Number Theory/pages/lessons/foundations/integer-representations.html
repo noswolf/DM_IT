@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="เรียนรู้การแทนจำนวนเต็มในฐาน 2 ฐาน 8 และฐาน 16">
+    <title>การแทนจำนวนเต็ม | Number Theory</title>
+    <link rel="stylesheet" href="../../../css/modular-lessons/integer-representations.css">
+    <script src="../../../js/index-modular-shell.js"></script>
+  </head>
+  <body>
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู">☰</button>
+      </div>
+
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a href="divisibility.html"><span class="done">✓</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a class="active" href="integer-representations.html"><span class="done">✓</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a href="primes.html"><span class="done">✓</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a href="../factorization/sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a href="../gcd/gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a href="../gcd/gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a href="../factorization/prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a href="../modular/modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a href="../modular/congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a href="../modular/pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a href="../modular/check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a href="../modular/fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a href="../theorems/euler-totient.html"><span>13</span><span>ฟังก์ชันทอเทียนต์ของออยเลอร์ (Euler's Totient)</span></a></li>
+          <li><a href="../theorems/fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มาต์ (Fermat's Little Theorem)</span></a></li>
+          <li><a href="../gcd/extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a href="../cryptography/classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบคลาสสิก (Classical Ciphers)</span></a></li>
+          <li><a href="../theorems/chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a href="../cryptography/rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography)</span></a></li>
+        </ol>
+      </nav>
+
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>3/18 หัวข้อ · 17%</span><div><i></i></div></div>
+        <button class="learned-button" type="button">✓ เรียนหัวข้อนี้แล้ว</button>
+        <div class="utility-links"><a href="../../tools/playground.html">Playground</a><a href="../../tools/glossary.html">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article>
+        <header class="page-header">
+          <h1>การแทนจำนวนเต็ม (Integer Representations)</h1>
+          <p>เข้าใจการแทนจำนวนในฐานต่าง ๆ (2, 8, 16) และแปลงเลขไปมาระหว่างฐานด้วยอัลกอริทึมหารซ้ำ</p>
+        </header>
+
+        <div class="lesson-stack">
+          <section class="definition-card" aria-labelledby="definition-title">
+            <h2 id="definition-title"><i></i>นิยาม</h2>
+            <p class="definition-text">วิธีการจัดเก็บและแสดงค่าจำนวนเต็มในระบบเลขฐานต่าง ๆ เช่น ฐาน 2 ฐาน 8 และฐาน 16 โดยแปลงจากฐาน 10 ด้วยการหารซ้ำด้วยฐานที่ต้องการ แล้วเก็บเศษในแต่ละรอบ</p>
+            <p class="sub-label">สูตร</p>
+            <div class="formula"><b>n</b> ÷ <b>b</b> = q<sub>0</sub> เศษ a<sub>0</sub>, &nbsp;q<sub>0</sub> ÷ <b>b</b> = q<sub>1</sub> เศษ a<sub>1</sub>, ...</div>
+            <div class="definition-note">
+              <p>ให้ <code>b</code> ∈ ℤ และ <code>b</code> &gt; 1 และให้ <code>n</code> เป็นจำนวนเต็มบวก</p>
+              <p>เราสามารถแปลงจำนวนเต็มฐาน 10 ไปเป็นฐาน b ได้โดยหาร n ด้วย b ซ้ำ ๆ แล้วเก็บเศษที่ได้ในแต่ละรอบ</p>
+              <p class="statement-equation">n ÷ b = q<sub>0</sub> เศษ a<sub>0</sub>, q<sub>0</sub> ÷ b = q<sub>1</sub> เศษ a<sub>1</sub>, ...</p>
+              <p>เมื่อหารจนผลหารเป็น 0 แล้ว ให้นำเศษที่ได้มาอ่านจากรอบสุดท้ายย้อนกลับไปยังรอบแรก เพื่อได้คำตอบในฐาน <strong>b</strong></p>
+            </div>
+          </section>
+
+          <section class="execution" aria-label="ตัวแปลงเลขฐาน">
+            <div class="execution-header">
+              <label class="input-group" for="decimal-input">n (ฐาน 10)<input id="decimal-input" type="number" min="0" max="999" value="156"></label>
+              <div class="base-options" role="group" aria-label="เลือกฐานปลายทาง">
+                <span>แปลงเป็นฐาน</span>
+                <button class="active" type="button" data-base="2">2 (Binary)</button>
+                <button type="button" data-base="8">8 (Octal)</button>
+                <button type="button" data-base="16">16 (Hex)</button>
+              </div>
+            </div>
+
+            <div class="execution-layout">
+              <div class="canvas-area">
+                <div class="division-table" id="division-table"></div>
+                <div class="answer-panel" id="answer-panel" hidden>
+                  <p>อ่านเศษย้อนกลับ (รอบสุดท้าย → รอบแรก)</p>
+                  <div class="answer-digits" id="answer-digits"></div>
+                  <p class="answer-equation" id="answer-equation"></p>
+                </div>
+              </div>
+
+              <aside class="monitor-panel">
+                <p class="monitor-title">Execution Monitor</p>
+                <p class="monitor-hint" id="monitor-hint"></p>
+                <div class="monitor-log" id="monitor-log"></div>
+                <span class="monitor-badge" id="monitor-badge" hidden></span>
+              </aside>
+            </div>
+
+            <div class="player">
+              <button id="previous" type="button" aria-label="ขั้นก่อนหน้า">‹</button>
+              <button id="play" type="button" aria-label="เล่นขั้นตอน">▶</button>
+              <button id="next" type="button" aria-label="ขั้นถัดไป">›</button>
+              <div class="player-progress"><span><i id="progress-fill"></i></span><output id="step-label"></output></div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+    <script>
+      (() => {
+        const digits = '0123456789ABCDEF';
+        const decimalInput = document.querySelector('#decimal-input');
+        const baseButtons = [...document.querySelectorAll('[data-base]')];
+        const divisionTable = document.querySelector('#division-table');
+        const answerPanel = document.querySelector('#answer-panel');
+        const answerDigits = document.querySelector('#answer-digits');
+        const answerEquation = document.querySelector('#answer-equation');
+        const monitorHint = document.querySelector('#monitor-hint');
+        const monitorLog = document.querySelector('#monitor-log');
+        const monitorBadge = document.querySelector('#monitor-badge');
+        const progressFill = document.querySelector('#progress-fill');
+        const stepLabel = document.querySelector('#step-label');
+        const playButton = document.querySelector('#play');
+
+        let selectedBase = 2;
+        let currentStep = 0;
+        let playTimer = null;
+
+        function clamp(value) {
+          const number = Math.trunc(Number(value));
+          return Number.isNaN(number) ? 0 : Math.min(Math.max(number, 0), 999);
+        }
+
+        function calculateSteps(number, base) {
+          if (number === 0) {
+            return [{ dividend: 0, quotient: 0, remainder: 0 }];
+          }
+
+          const steps = [];
+          let dividend = number;
+
+          while (dividend > 0) {
+            const remainder = dividend % base;
+            const quotient = Math.floor(dividend / base);
+            steps.push({ dividend, quotient, remainder });
+            dividend = quotient;
+          }
+
+          return steps;
+        }
+
+        function convertToBase(steps) {
+          return steps
+            .slice()
+            .reverse()
+            .map((step) => digits[step.remainder])
+            .join('');
+        }
+
+        function stopPlaying() {
+          clearInterval(playTimer);
+          playTimer = null;
+          playButton.textContent = '▶';
+        }
+
+        function renderDivisionRows(visibleSteps) {
+          const elements = visibleSteps.map((step, index) => {
+            const row = document.createElement('div');
+            row.className = 'division-row';
+            row.innerHTML = `
+              <span class="division-equation">
+                ${step.dividend} ÷ ${selectedBase} = <strong>${step.quotient}</strong>
+                เศษ <strong>${step.remainder}</strong>
+              </span>
+              <span class="digit-tag">หลักที่ ${index + 1}: ${digits[step.remainder]}</span>
+            `;
+            return row;
+          });
+
+          divisionTable.replaceChildren(...elements);
+        }
+
+        function renderMonitor(number, visibleSteps, converted, isComplete) {
+          monitorHint.hidden = visibleSteps.length > 0;
+          monitorHint.textContent = `หาร ${number} ด้วย ${selectedBase} ซ้ำ ๆ แล้วเก็บเศษในแต่ละรอบ — กด ▶`;
+
+          const logLines = visibleSteps.map((step) => {
+            const line = document.createElement('div');
+            line.className = 'monitor-line';
+            line.innerHTML = `<i></i><span>${step.dividend} ÷ ${selectedBase} = ${step.quotient} เศษ ${step.remainder} → หลัก ${digits[step.remainder]}</span>`;
+            return line;
+          });
+
+          if (isComplete) {
+            const summary = document.createElement('div');
+            summary.className = 'monitor-line emphasis';
+            summary.innerHTML = `<span>${number} (ฐาน 10) = ${converted} (ฐาน ${selectedBase})</span>`;
+            logLines.push(summary);
+          }
+
+          monitorLog.replaceChildren(...logLines);
+          monitorBadge.hidden = !isComplete;
+          monitorBadge.textContent = `${number} = ${converted} ในฐาน ${selectedBase}`;
+        }
+
+        function renderAnswer(number, steps, converted, isComplete) {
+          answerPanel.hidden = !isComplete;
+          if (!isComplete) return;
+
+          const digitElements = steps.slice().reverse().map((step) => {
+            const chip = document.createElement('span');
+            chip.textContent = digits[step.remainder];
+            return chip;
+          });
+
+          answerDigits.replaceChildren(...digitElements);
+          answerEquation.innerHTML = `${number}<sub>10</sub> = ${converted}<sub>${selectedBase}</sub>`;
+        }
+
+        function render() {
+          const number = clamp(decimalInput.value);
+          const steps = calculateSteps(number, selectedBase);
+          const converted = convertToBase(steps);
+          const totalSteps = steps.length + 1;
+
+          decimalInput.value = number;
+          currentStep = Math.min(currentStep, totalSteps - 1);
+
+          const visibleSteps = steps.slice(0, currentStep);
+          const isComplete = currentStep >= steps.length;
+
+          renderDivisionRows(visibleSteps);
+          renderMonitor(number, visibleSteps, converted, isComplete);
+          renderAnswer(number, steps, converted, isComplete);
+
+          stepLabel.textContent = `${currentStep + 1}/${totalSteps}`;
+          progressFill.style.width = `${(currentStep / (totalSteps - 1 || 1)) * 100}%`;
+        }
+
+        decimalInput.addEventListener('change', () => {
+          currentStep = 0;
+          stopPlaying();
+          render();
+        });
+
+        baseButtons.forEach((button) => {
+          button.addEventListener('click', () => {
+            selectedBase = Number(button.dataset.base);
+            baseButtons.forEach((item) => item.classList.toggle('active', item === button));
+            currentStep = 0;
+            stopPlaying();
+            render();
+          });
+        });
+
+        document.querySelector('#previous').addEventListener('click', () => {
+          stopPlaying();
+          currentStep = Math.max(0, currentStep - 1);
+          render();
+        });
+
+        document.querySelector('#next').addEventListener('click', () => {
+          stopPlaying();
+          currentStep += 1;
+          render();
+        });
+
+        playButton.addEventListener('click', () => {
+          if (playTimer) {
+            stopPlaying();
+            return;
+          }
+
+          playButton.textContent = '❚❚';
+          playTimer = setInterval(() => {
+            const lastStep = calculateSteps(clamp(decimalInput.value), selectedBase).length;
+
+            if (currentStep >= lastStep) {
+              stopPlaying();
+              return;
+            }
+
+            currentStep += 1;
+            render();
+
+            if (currentStep >= lastStep) {
+              stopPlaying();
+            }
+          }, 700);
+        });
+
+        document.querySelector('#sidebar-toggle').addEventListener('click', () => {
+          document.querySelector('#sidebar').classList.toggle('open');
+        });
+
+        DMModularShell.initTheme(document.querySelector('#theme-toggle'));
+
+const completedLessonsStorageKey = 'dm2026:progress';
+const legacyCompletedLessonsStorageKey = 'dm-completed-lessons-v1';
+      const progressMigrationStorageKey = 'dm2026:progress-migrated-v1';
+      const defaultCompletedLessons = ['divisibility', 'integer-representations', 'primes'];
+
+      function normalizeTopicId(value) {
+        return String(value).split('/').pop().replace(/\.html$/, '');
+      }
+
+      function loadCompletedLessons() {
+        try {
+          const saved = localStorage.getItem(completedLessonsStorageKey);
+          const completed = new Set(saved === null ? [] : JSON.parse(saved).map(normalizeTopicId));
+          let hasStoredProgress = saved !== null;
+
+          if (localStorage.getItem(progressMigrationStorageKey) !== '1') {
+            const legacySaved = localStorage.getItem(legacyCompletedLessonsStorageKey);
+            if (legacySaved !== null) {
+              JSON.parse(legacySaved).map(normalizeTopicId).forEach((id) => completed.add(id));
+              hasStoredProgress = true;
+            }
+            localStorage.setItem(progressMigrationStorageKey, '1');
+          }
+
+          return hasStoredProgress ? completed : new Set(defaultCompletedLessons);
+        } catch {
+          return new Set(defaultCompletedLessons);
+        }
+      }
+
+      let completedLessons = loadCompletedLessons();
+
+      function saveCompletedLessons() {
+        try {
+          localStorage.setItem(completedLessonsStorageKey, JSON.stringify([...completedLessons]));
+        } catch {
+          // The button still works for this page if storage is unavailable.
+        }
+      }
+      saveCompletedLessons();
+
+      function renderLessonProgress() {
+        const links = [...document.querySelectorAll('.lesson-nav a')];
+        const lessonIds = links.map((link) => normalizeTopicId(link.getAttribute('href')));
+        links.forEach((link, index) => {
+          const marker = link.querySelector('span:first-child');
+          const isCompleted = completedLessons.has(lessonIds[index]);
+          marker.classList.toggle('done', isCompleted);
+          marker.textContent = isCompleted ? '✓' : String(index + 1).padStart(2, '0');
+        });
+
+        const completedCount = lessonIds.filter((id) => completedLessons.has(id)).length;
+        const percentage = Math.round(completedCount / lessonIds.length * 100);
+        const progress = document.querySelector('.lesson-progress');
+        progress.querySelector('span').textContent = `${completedCount}/${lessonIds.length} หัวข้อ · ${percentage}%`;
+        progress.querySelector('i').style.width = `${percentage}%`;
+
+        const currentLink = document.querySelector('.lesson-nav a.active');
+        const currentLesson = normalizeTopicId(currentLink.getAttribute('href'));
+        const learnedButton = document.querySelector('.learned-button');
+        const isCurrentCompleted = completedLessons.has(currentLesson);
+        learnedButton.classList.toggle('selected', isCurrentCompleted);
+        learnedButton.setAttribute('aria-pressed', String(isCurrentCompleted));
+        learnedButton.textContent = isCurrentCompleted ? '✓ เรียนหัวข้อนี้แล้ว' : 'ทำเครื่องหมายว่าเรียนแล้ว';
+      }
+
+      const learnedButton = document.querySelector('.learned-button');
+      learnedButton.addEventListener('click', () => {
+        const currentLesson = normalizeTopicId(document.querySelector('.lesson-nav a.active').getAttribute('href'));
+        if (completedLessons.has(currentLesson)) completedLessons.delete(currentLesson);
+        else completedLessons.add(currentLesson);
+        saveCompletedLessons();
+        renderLessonProgress();
+      });
+
+      window.addEventListener('storage', (event) => {
+        if (event.key === completedLessonsStorageKey || event.key === null) {
+          completedLessons = loadCompletedLessons();
+          renderLessonProgress();
+        }
+      });
+      renderLessonProgress();
+
+        render();
+      })();
+    </script>
+  </body>
+</html>

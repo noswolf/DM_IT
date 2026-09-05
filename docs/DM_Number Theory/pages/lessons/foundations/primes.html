@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="เรียนรู้นิยามและวิธีตรวจจำนวนเฉพาะแบบโต้ตอบ">
+    <title>จำนวนเฉพาะ | Number Theory</title>
+    <link rel="stylesheet" href="../../../css/modular-lessons/primes.css">
+    <script src="../../../js/index-modular-shell.js"></script>
+  </head>
+  <body>
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู">☰</button>
+      </div>
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a href="divisibility.html"><span class="done">✓</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a href="integer-representations.html"><span class="done">✓</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a class="active" href="primes.html"><span class="done">✓</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a href="../factorization/sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a href="../gcd/gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a href="../gcd/gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a href="../factorization/prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a href="../modular/modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a href="../modular/congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a href="../modular/pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a href="../modular/check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a href="../modular/fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a href="../theorems/euler-totient.html"><span>13</span><span>ฟังก์ชันทอเทียนต์ของออยเลอร์ (Euler's Totient)</span></a></li>
+          <li><a href="../theorems/fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มาต์ (Fermat's Little Theorem)</span></a></li>
+          <li><a href="../gcd/extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a href="../cryptography/classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบคลาสสิก (Classical Ciphers)</span></a></li>
+          <li><a href="../theorems/chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a href="../cryptography/rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography)</span></a></li>
+        </ol>
+      </nav>
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>3/18 หัวข้อ · 17%</span><div><i></i></div></div>
+        <button class="learned-button" type="button">✓ เรียนหัวข้อนี้แล้ว</button>
+        <div class="utility-links"><a href="../../tools/playground.html">Playground</a><a href="../../tools/glossary.html">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article>
+        <header class="page-header">
+          <h1>จำนวนเฉพาะ (Prime Numbers)</h1>
+          <p>เข้าใจนิยาม prime และทำไม prime ถึงพิเศษ ผ่านการเห็นว่าตัวประกอบมีแค่ 1 กับตัวมันเอง</p>
+        </header>
+
+        <div class="lesson-stack">
+          <section class="definition-card" aria-labelledby="definition-title">
+            <h2 id="definition-title"><i></i>นิยาม</h2>
+            <p class="definition-text">จำนวนเต็มบวกที่มากกว่า 1 และมีตัวหารที่เป็นบวกเพียง 2 จำนวนเท่านั้น คือ <code>1</code> และตัวมันเอง</p>
+            <p class="sub-label">สูตร</p>
+            <div class="formula"><b>n</b> เป็น prime ⇔ ไม่มีจำนวนเฉพาะ <b>p</b> ≤ √<b>n</b> ที่หาร <b>n</b> ลงตัว</div>
+            <div class="definition-note">
+              <p>ให้ <code>p</code> ∈ ℤ และ <code>p</code> &gt; 1</p>
+              <p>เรากล่าวว่า <strong>p เป็นจำนวนเฉพาะ</strong> ก็ต่อเมื่อตัวหารที่เป็นบวกของ p มีเพียง 1 และ p เอง</p>
+              <p class="statement-equation">ถ้า d | p และ d &gt; 0 แล้ว d = 1 หรือ d = p</p>
+              <p>ในทางปฏิบัติไม่ต้องตรวจตัวหารทุกตัว เพราะถ้า p ไม่เป็นจำนวนเฉพาะ จะต้องมีตัวประกอบอย่างน้อยหนึ่งตัวไม่เกิน <code>√p</code></p>
+            </div>
+          </section>
+
+          <section class="execution" aria-labelledby="tester-title">
+            <h2 class="execution-title" id="tester-title">Prime or Not?</h2>
+            <div class="execution-header">
+              <div class="input-row">
+                <label class="input-group" for="number-input">n<input id="number-input" type="number" min="2" max="100" value="12"></label>
+                <button class="random-button" id="random-button" type="button">🎲 สุ่มเลขใหม่</button>
+              </div>
+              <p class="sqrt-hint" id="sqrt-hint"></p>
+              <div class="guess-section" id="guess-section">
+                <span>ทายก่อนกด ▶:</span>
+                <button type="button" data-guess="prime">Prime</button>
+                <button type="button" data-guess="composite">Composite</button>
+                <small>เมื่อเลือกเสร็จให้กดปุ่ม Play ด้านล่าง</small>
+              </div>
+              <p class="guess-feedback" id="guess-feedback" hidden></p>
+            </div>
+
+            <div class="execution-layout">
+              <div class="canvas-area prime-canvas">
+                <ul class="rules">
+                  <li>เงื่อนไข:
+                    <ul>
+                      <li>ถ้าหารลงตัว (ไม่มี <i></i> จุดสีแดง) → <strong>n เป็น composite</strong></li>
+                      <li>ถ้าหารไม่ลงตัว (มี <i></i> จุดสีแดง) → ลองจำนวนเฉพาะตัวถัดไป</li>
+                    </ul>
+                  </li>
+                </ul>
+                <p class="arrangement-label" id="arrangement-label" hidden></p>
+                <div class="prime-chips" id="prime-chips"></div>
+                <svg class="dot-stage" id="dot-stage" viewBox="0 0 100 56" role="img" aria-label="จัดเรียงจุดเป็นสี่เหลี่ยม"></svg>
+                <div class="factor-gallery" id="factor-gallery" hidden>
+                  <p>ตัวประกอบที่พบ</p>
+                  <div><span id="factor-rectangle"></span><small id="factor-label"></small></div>
+                </div>
+              </div>
+
+              <aside class="monitor-panel">
+                <p class="monitor-title">Execution Monitor</p>
+                <p class="monitor-hint" id="monitor-hint"></p>
+                <div class="monitor-log" id="monitor-log"></div>
+                <span class="monitor-badge" id="monitor-badge" hidden></span>
+              </aside>
+            </div>
+
+            <div class="player">
+              <button id="previous" type="button" aria-label="ขั้นก่อนหน้า">‹</button>
+              <button id="play" type="button" aria-label="เล่นขั้นตอน">▶</button>
+              <button id="next" type="button" aria-label="ขั้นถัดไป">›</button>
+              <div class="player-progress"><span><i id="progress-fill"></i></span><output id="step-label"></output></div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+  </body>
+  
+  <script>
+    (() => {
+      const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+      const numberInput = document.querySelector('#number-input');
+      const sqrtHint = document.querySelector('#sqrt-hint');
+      const guessSection = document.querySelector('#guess-section');
+      const guessFeedback = document.querySelector('#guess-feedback');
+      const primeChips = document.querySelector('#prime-chips');
+      const arrangementLabel = document.querySelector('#arrangement-label');
+      const dotStage = document.querySelector('#dot-stage');
+      const factorGallery = document.querySelector('#factor-gallery');
+      const factorRectangle = document.querySelector('#factor-rectangle');
+      const factorLabel = document.querySelector('#factor-label');
+      const monitorHint = document.querySelector('#monitor-hint');
+      const monitorLog = document.querySelector('#monitor-log');
+      const monitorBadge = document.querySelector('#monitor-badge');
+      const progressFill = document.querySelector('#progress-fill');
+      const stepLabel = document.querySelector('#step-label');
+      const playButton = document.querySelector('#play');
+
+      let currentStep = 0;
+      let selectedGuess = null;
+      let streak = 0;
+      let roundEvaluated = false;
+      let playTimer = null;
+
+      function clamp(value) {
+        const number = Math.trunc(Number(value));
+        return Number.isNaN(number) ? 2 : Math.min(Math.max(number, 2), 100);
+      }
+
+      function listPrimes(limit) {
+        const primes = [];
+        for (let number = 2; number <= limit; number += 1) {
+          if (primes.every((prime) => prime > Math.sqrt(number) || number % prime !== 0)) {
+            primes.push(number);
+          }
+        }
+        return primes;
+      }
+
+      function getChecks(number) {
+        const candidates = listPrimes(Math.floor(Math.sqrt(number)));
+        const checks = [];
+
+        for (const prime of candidates) {
+          const divides = number % prime === 0;
+          checks.push({ prime, divides, remainder: number % prime });
+          if (divides) break;
+        }
+
+        return { candidates, checks };
+      }
+
+      function stopPlaying() {
+        clearInterval(playTimer);
+        playTimer = null;
+        playButton.textContent = '▶';
+      }
+
+      function resetRound(number) {
+        numberInput.value = clamp(number);
+        currentStep = 0;
+        selectedGuess = null;
+        roundEvaluated = false;
+        stopPlaying();
+        document.querySelectorAll('[data-guess]').forEach((button) => button.classList.remove('active'));
+        render();
+      }
+
+      function getArrangement(number, checks, isComplete) {
+        const factor = checks.find((check) => check.divides)?.prime;
+
+        if (isComplete) {
+          return factor
+            ? { rows: factor, columns: number / factor, exact: true }
+            : { rows: 1, columns: number, exact: true };
+        }
+
+        if (currentStep > 0) {
+          const check = checks[currentStep - 1];
+          return {
+            rows: check.prime,
+            columns: check.divides ? number / check.prime : Math.ceil(number / check.prime),
+            exact: check.divides,
+          };
+        }
+
+        return { rows: 1, columns: number, exact: true };
+      }
+
+      function renderDots(number, arrangement, isPrime, isComplete) {
+        const dotSize = Math.min(88 / arrangement.columns, 44 / arrangement.rows, 6);
+        const offsetX = (100 - arrangement.columns * dotSize) / 2;
+        const offsetY = (56 - arrangement.rows * dotSize) / 2;
+        const firstOverflow = Math.floor(number / arrangement.columns) * arrangement.columns;
+
+        const circles = Array.from({ length: number }, (_, index) => {
+          const circle = document.createElementNS(SVG_NAMESPACE, 'circle');
+          circle.setAttribute('cx', offsetX + (index % arrangement.columns) * dotSize + dotSize / 2);
+          circle.setAttribute('cy', offsetY + Math.floor(index / arrangement.columns) * dotSize + dotSize / 2);
+          circle.setAttribute('r', Math.max(dotSize * .32, .8));
+
+          if (!arrangement.exact && index >= firstOverflow) circle.classList.add('overflow');
+          if (isComplete && isPrime) circle.classList.add('prime');
+          return circle;
+        });
+
+        dotStage.replaceChildren(...circles);
+      }
+
+      function renderChips(candidates, checks, checkedCount) {
+        primeChips.classList.toggle('spotlight', currentStep === 0 && candidates.length > 0);
+
+        const columns = candidates.map((prime, index) => {
+          const checked = index < checkedCount ? checks[index] : null;
+          const column = document.createElement('div');
+          column.className = 'prime-chip-column';
+
+          const chip = document.createElement('span');
+          chip.className = `prime-chip${checked?.divides ? ' hit' : checked ? ' clear' : ''}`;
+          chip.style.setProperty('--index', index);
+          chip.textContent = prime;
+          column.append(chip);
+
+          if (checked) {
+            const result = document.createElement('span');
+            result.className = `chip-result${checked.divides ? ' hit' : ''}`;
+            result.textContent = checked.divides ? 'ลงตัว!' : `เศษ ${checked.remainder}`;
+            column.append(result);
+          }
+
+          return column;
+        });
+
+        primeChips.replaceChildren(...columns);
+      }
+
+      function renderMonitor(number, checks, checkedCount, isPrime, isComplete) {
+        monitorHint.hidden = checkedCount > 0 || isComplete;
+        monitorHint.textContent = `กด ▶ เพื่อเริ่มคำนวณ √${number} แล้วทดลองหารด้วยจำนวนเฉพาะทีละตัว`;
+
+        const lines = checks.slice(0, checkedCount).map((check) => {
+          const line = document.createElement('div');
+          line.className = 'monitor-line';
+          line.innerHTML = `<i style="background:${check.divides ? '#c1503d' : 'var(--color-success)'}"></i><span>${
+            check.divides
+              ? `${number} ÷ ${check.prime} = ${number / check.prime} — ลงตัว! พบตัวประกอบ`
+              : `${number} ÷ ${check.prime} — เศษ ${check.remainder}, ไม่ลงตัว`
+          }</span>`;
+          return line;
+        });
+
+        if (isComplete) {
+          const factor = checks.find((check) => check.divides)?.prime;
+          const summary = document.createElement('div');
+          summary.className = 'monitor-line emphasis';
+          summary.innerHTML = `<span>${isPrime ? 'ไม่มีตัวหารเฉพาะไหนหารลงตัวเลย → จำนวนเฉพาะ' : `หารลงตัวด้วย ${factor} → ไม่ใช่จำนวนเฉพาะ`}</span>`;
+          lines.push(summary);
+        }
+
+        monitorLog.replaceChildren(...lines);
+        monitorBadge.hidden = !isComplete;
+        monitorBadge.textContent = isPrime ? `${number} เป็น PRIME ✓` : `${number} เป็น COMPOSITE`;
+      }
+
+      function renderGuess(isPrime, isComplete) {
+        guessSection.hidden = isComplete;
+        guessFeedback.hidden = !isComplete || selectedGuess === null;
+        if (!isComplete || selectedGuess === null) return;
+
+        const guessedCorrectly = (selectedGuess === 'prime') === isPrime;
+        if (!roundEvaluated) {
+          streak = guessedCorrectly ? streak + 1 : 0;
+          roundEvaluated = true;
+        }
+
+        guessFeedback.className = `guess-feedback ${guessedCorrectly ? 'correct' : 'wrong'}`;
+        guessFeedback.textContent = guessedCorrectly
+          ? `ทายถูก! 🔥 streak ${streak}`
+          : 'ยังไม่ใช่ ลองเลขต่อไป';
+      }
+
+      function renderGallery(number, factor, isComplete) {
+        const show = isComplete && Boolean(factor);
+        factorGallery.hidden = !show;
+        if (!show) return;
+
+        const columns = number / factor;
+        const ratio = columns / factor;
+        factorRectangle.style.aspectRatio = `${columns} / ${factor}`;
+        factorRectangle.style.width = `${columns >= factor ? 72 : 72 * ratio}px`;
+        factorLabel.textContent = `${factor}×${columns}`;
+      }
+
+      function render() {
+        const number = clamp(numberInput.value);
+        const { candidates, checks } = getChecks(number);
+        const totalSteps = checks.length + 2;
+        const finalStep = totalSteps - 1;
+
+        numberInput.value = number;
+        currentStep = Math.min(currentStep, finalStep);
+
+        const isComplete = currentStep >= checks.length + 1;
+        const checkedCount = currentStep === 0 ? 0 : isComplete ? checks.length : currentStep;
+        const factor = checks.find((check) => check.divides)?.prime;
+        const isPrime = !factor;
+        const arrangement = getArrangement(number, checks, isComplete);
+        const root = Math.sqrt(number);
+
+        sqrtHint.textContent = candidates.length
+          ? `√${number} ≈ ${root.toFixed(2)} → เช็คตัวหารเฉพาะได้ถึง ${Math.floor(root)}: ${candidates.join(', ')}`
+          : `√${number} ≈ ${root.toFixed(2)} → ไม่มีตัวหารเฉพาะให้เช็ค (n เล็กเกินไป)`;
+
+        arrangementLabel.hidden = currentStep === 0;
+        arrangementLabel.textContent = isComplete
+          ? factor ? `พบตัวประกอบ ${factor} × ${number / factor}` : 'ไม่มีตัวหารเฉพาะไหนหารลงตัว'
+          : `ลองหาร ${number} ด้วยจำนวนเฉพาะ ${checks[currentStep - 1]?.prime}`;
+
+        renderChips(candidates, checks, checkedCount);
+        renderDots(number, arrangement, isPrime, isComplete);
+        renderMonitor(number, checks, checkedCount, isPrime, isComplete);
+        renderGuess(isPrime, isComplete);
+        renderGallery(number, factor, isComplete);
+
+        stepLabel.textContent = `${currentStep + 1}/${totalSteps}`;
+        progressFill.style.width = `${(currentStep / finalStep) * 100}%`;
+      }
+
+      numberInput.addEventListener('change', () => resetRound(numberInput.value));
+      document.querySelector('#random-button').addEventListener('click', () => resetRound(2 + Math.floor(Math.random() * 99)));
+
+      document.querySelectorAll('[data-guess]').forEach((button) => {
+        button.addEventListener('click', () => {
+          selectedGuess = button.dataset.guess;
+          document.querySelectorAll('[data-guess]').forEach((item) => item.classList.toggle('active', item === button));
+        });
+      });
+
+      document.querySelector('#previous').addEventListener('click', () => {
+        stopPlaying();
+        currentStep = Math.max(0, currentStep - 1);
+        render();
+      });
+
+      document.querySelector('#next').addEventListener('click', () => {
+        stopPlaying();
+        currentStep += 1;
+        render();
+      });
+
+      playButton.addEventListener('click', () => {
+        if (playTimer) {
+          stopPlaying();
+          return;
+        }
+
+        playButton.textContent = '❚❚';
+        playTimer = setInterval(() => {
+          const lastStep = getChecks(clamp(numberInput.value)).checks.length + 1;
+
+          if (currentStep >= lastStep) {
+            stopPlaying();
+            return;
+          }
+
+          currentStep += 1;
+          render();
+
+          if (currentStep >= lastStep) {
+            stopPlaying();
+          }
+        }, 700);
+      });
+
+      document.querySelector('#sidebar-toggle').addEventListener('click', () => {
+        document.querySelector('#sidebar').classList.toggle('open');
+      });
+
+      DMModularShell.initTheme(document.querySelector('#theme-toggle'));
+
+const completedLessonsStorageKey = 'dm2026:progress';
+const legacyCompletedLessonsStorageKey = 'dm-completed-lessons-v1';
+      const progressMigrationStorageKey = 'dm2026:progress-migrated-v1';
+      const defaultCompletedLessons = ['divisibility', 'integer-representations', 'primes'];
+
+      function normalizeTopicId(value) {
+        return String(value).split('/').pop().replace(/\.html$/, '');
+      }
+
+      function loadCompletedLessons() {
+        try {
+          const saved = localStorage.getItem(completedLessonsStorageKey);
+          const completed = new Set(saved === null ? [] : JSON.parse(saved).map(normalizeTopicId));
+          let hasStoredProgress = saved !== null;
+
+          if (localStorage.getItem(progressMigrationStorageKey) !== '1') {
+            const legacySaved = localStorage.getItem(legacyCompletedLessonsStorageKey);
+            if (legacySaved !== null) {
+              JSON.parse(legacySaved).map(normalizeTopicId).forEach((id) => completed.add(id));
+              hasStoredProgress = true;
+            }
+            localStorage.setItem(progressMigrationStorageKey, '1');
+          }
+
+          return hasStoredProgress ? completed : new Set(defaultCompletedLessons);
+        } catch {
+          return new Set(defaultCompletedLessons);
+        }
+      }
+
+      let completedLessons = loadCompletedLessons();
+
+      function saveCompletedLessons() {
+        try {
+          localStorage.setItem(completedLessonsStorageKey, JSON.stringify([...completedLessons]));
+        } catch {
+          // The button still works for this page if storage is unavailable.
+        }
+      }
+      saveCompletedLessons();
+
+      function renderLessonProgress() {
+        const links = [...document.querySelectorAll('.lesson-nav a')];
+        const lessonIds = links.map((link) => normalizeTopicId(link.getAttribute('href')));
+        links.forEach((link, index) => {
+          const marker = link.querySelector('span:first-child');
+          const isCompleted = completedLessons.has(lessonIds[index]);
+          marker.classList.toggle('done', isCompleted);
+          marker.textContent = isCompleted ? '✓' : String(index + 1).padStart(2, '0');
+        });
+
+        const completedCount = lessonIds.filter((id) => completedLessons.has(id)).length;
+        const percentage = Math.round(completedCount / lessonIds.length * 100);
+        const progress = document.querySelector('.lesson-progress');
+        progress.querySelector('span').textContent = `${completedCount}/${lessonIds.length} หัวข้อ · ${percentage}%`;
+        progress.querySelector('i').style.width = `${percentage}%`;
+
+        const currentLink = document.querySelector('.lesson-nav a.active');
+        const currentLesson = normalizeTopicId(currentLink.getAttribute('href'));
+        const learnedButton = document.querySelector('.learned-button');
+        const isCurrentCompleted = completedLessons.has(currentLesson);
+        learnedButton.classList.toggle('selected', isCurrentCompleted);
+        learnedButton.setAttribute('aria-pressed', String(isCurrentCompleted));
+        learnedButton.textContent = isCurrentCompleted ? '✓ เรียนหัวข้อนี้แล้ว' : 'ทำเครื่องหมายว่าเรียนแล้ว';
+      }
+
+      const learnedButton = document.querySelector('.learned-button');
+      learnedButton.addEventListener('click', () => {
+        const currentLesson = normalizeTopicId(document.querySelector('.lesson-nav a.active').getAttribute('href'));
+        if (completedLessons.has(currentLesson)) completedLessons.delete(currentLesson);
+        else completedLessons.add(currentLesson);
+        saveCompletedLessons();
+        renderLessonProgress();
+      });
+
+      window.addEventListener('storage', (event) => {
+        if (event.key === completedLessonsStorageKey || event.key === null) {
+          completedLessons = loadCompletedLessons();
+          renderLessonProgress();
+        }
+      });
+      renderLessonProgress();
+
+      render();
+    })();
+
+  </script>
+</html>

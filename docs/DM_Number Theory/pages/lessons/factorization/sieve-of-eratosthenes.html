@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="เรียนรู้ตะแกรงเอราทอสเทนีสแบบโต้ตอบ">
+    <title>ตะแกรงเอราทอสเทนีส | Number Theory</title>
+    <link rel="stylesheet" href="../../../css/modular-lessons/sieve-of-eratosthenes.css">
+    <script src="../../../js/index-modular-shell.js"></script>
+  </head>
+  <body>
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู">☰</button>
+      </div>
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a href="../foundations/divisibility.html"><span class="done">✓</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a href="../foundations/integer-representations.html"><span class="done">✓</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a href="../foundations/primes.html"><span class="done">✓</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a class="active" href="sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a href="../gcd/gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a href="../gcd/gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a href="prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a href="../modular/modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a href="../modular/congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a href="../modular/pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a href="../modular/check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a href="../modular/fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a href="../theorems/euler-totient.html"><span>13</span><span>ฟังก์ชันทอเทียนต์ของออยเลอร์ (Euler's Totient)</span></a></li>
+          <li><a href="../theorems/fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มาต์ (Fermat's Little Theorem)</span></a></li>
+          <li><a href="../gcd/extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a href="../cryptography/classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบคลาสสิก (Classical Ciphers)</span></a></li>
+          <li><a href="../theorems/chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a href="../cryptography/rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography)</span></a></li>
+        </ol>
+      </nav>
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>3/18 หัวข้อ · 17%</span><div><i></i></div></div>
+        <button class="learned-button" type="button">ทำเครื่องหมายว่าเรียนแล้ว</button>
+        <div class="utility-links"><a href="../../tools/playground.html">Playground</a><a href="../../tools/glossary.html">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article>
+        <header class="page-header">
+          <h1>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</h1>
+          <p>เข้าใจ algorithm การ “กรอง” composite numbers ออกอย่างเป็นระบบ</p>
+        </header>
+
+        <div class="lesson-stack">
+          <section class="definition-card" aria-labelledby="definition-title">
+            <h2 id="definition-title"><i></i>นิยาม</h2>
+            <p class="definition-text">ขั้นตอนวิธีโบราณที่ใช้ค้นหาจำนวนเฉพาะทั้งหมดที่มีค่าน้อยกว่าหรือเท่ากับจำนวนเต็ม <code>n</code> ที่กำหนด</p>
+            <p class="sub-label">สูตร</p>
+            <div class="formula"><b>C</b> = { k·p : p เป็นจำนวนเฉพาะ, p ≤ √n, k ≥ 2, k·p ≤ n }</div>
+            <div class="definition-note">
+              <p>ให้ <code>n</code> ∈ ℤ, <code>n</code> ≥ 2 และให้ <code>S</code> = { 2, 3, …, n }</p>
+              <p>เริ่มจากเซต <code>S</code> ซึ่งประกอบด้วยจำนวนเต็มตั้งแต่ 2 ถึง <code>n</code> จากนั้นพิจารณาจำนวนเฉพาะแต่ละตัวเริ่มไล่ตั้งแต่ 2 ที่ไม่เกิน √n แล้วตัดตัวที่จำนวนเฉพาะนั้น ๆ หารได้ออกไป เช่น 4, 6, 8, ... เพราะจำนวนเหล่านี้หารด้วย 2 ลงตัว จึงไม่ใช่จำนวนเฉพาะ เมื่อตัดของ 2 หมดแล้ว ก็ไปดูที่จำนวนเฉพาะต่อไปคือ 3 ทำแบบนี้เรื่อย ๆ จนถึงจำนวนเฉพาะตัวสุดท้ายที่ไม่เกิน √n ตัวเลขทั้งหมดที่ถูกตัดออกนี้รวมเรียกว่าเซต <code>C</code></p>
+              <p>เมื่อคัดเลขใน <code>C</code> ออกครบแล้ว ตัวเลขที่ยังเหลืออยู่ใน <code>S</code> คือจำนวนเฉพาะทั้งหมดที่ไม่เกิน <code>n</code> วิธีคัดจำนวนประกอบออกทีละชุดเช่นนี้คือหลักการของตะแกรงเอราทอสเทนีส</p>
+            </div>
+          </section>
+
+          <section class="execution" aria-labelledby="sieve-title">
+            <h2 class="execution-title" id="sieve-title">Sieve of Eratosthenes</h2>
+            <div class="execution-header">
+              <div class="input-row">
+                <label class="input-group" for="limit-input">ตะแกรงถึง<input id="limit-input" type="number" min="10" max="120" value="60"></label>
+                <button class="random-button" id="random-button" type="button">🎲 สุ่มเลขใหม่</button>
+              </div>
+              <p class="sqrt-hint" id="sqrt-hint"></p>
+            </div>
+
+            <div class="execution-layout">
+              <div class="canvas-area sieve-canvas"><div class="sieve-grid" id="sieve-grid" aria-label="ตารางตะแกรงจำนวน"></div></div>
+              <aside class="monitor-panel">
+                <p class="monitor-title">Execution Monitor</p>
+                <p class="monitor-hint" id="monitor-hint"></p>
+                <div class="monitor-log" id="monitor-log"></div>
+                <span class="monitor-badge" id="monitor-badge" hidden></span>
+              </aside>
+            </div>
+
+            <div class="player">
+              <button id="previous" type="button" aria-label="ขั้นก่อนหน้า">‹</button>
+              <button id="play" type="button" aria-label="เล่นขั้นตอน">▶</button>
+              <button id="next" type="button" aria-label="ขั้นถัดไป">›</button>
+              <div class="player-progress"><span><i id="progress-fill"></i></span><output id="step-label"></output></div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+
+    <script>
+      (() => {
+        const roundColors = ['#38bdf8', 'var(--color-success)', '#a78bfa', '#f472b6', '#fb923c', '#22d3ee'];
+        const limitInput = document.querySelector('#limit-input');
+        const sqrtHint = document.querySelector('#sqrt-hint');
+        const sieveGrid = document.querySelector('#sieve-grid');
+        const monitorHint = document.querySelector('#monitor-hint');
+        const monitorLog = document.querySelector('#monitor-log');
+        const monitorBadge = document.querySelector('#monitor-badge');
+        const progressFill = document.querySelector('#progress-fill');
+        const stepLabel = document.querySelector('#step-label');
+        const playButton = document.querySelector('#play');
+        let currentStep = 0;
+        let playTimer = null;
+
+        function clamp(value) {
+          const number = Math.trunc(Number(value));
+          return Number.isNaN(number) ? 30 : Math.min(Math.max(number, 10), 120);
+        }
+
+        function calculateRounds(limit) {
+          const markedBy = Array(limit + 1).fill(0);
+          const rounds = [];
+          for (let prime = 2; prime * prime <= limit; prime += 1) {
+            if (markedBy[prime] !== 0) continue;
+            const crossed = [];
+            for (let number = prime * prime; number <= limit; number += prime) {
+              if (markedBy[number] === 0) {
+                markedBy[number] = prime;
+                crossed.push(number);
+              }
+            }
+            rounds.push({ prime, crossed, firstCross: crossed[0] ?? null });
+          }
+          return rounds;
+        }
+
+        function listPrimes(limit) {
+          const composite = Array(limit + 1).fill(false);
+          const primes = [];
+          for (let number = 2; number <= limit; number += 1) {
+            if (composite[number]) continue;
+            primes.push(number);
+            for (let multiple = number * number; multiple <= limit; multiple += number) composite[multiple] = true;
+          }
+          return primes;
+        }
+
+        function stopPlaying() {
+          clearInterval(playTimer);
+          playTimer = null;
+          playButton.textContent = '▶';
+        }
+
+        function reset(limit) {
+          limitInput.value = clamp(limit);
+          currentStep = 0;
+          stopPlaying();
+          render();
+        }
+
+        function getCellState(number, rounds, activeRound, isComplete, primes) {
+          const state = { className: '', color: '', title: '' };
+          rounds.forEach((round, index) => {
+            if (index > activeRound) return;
+            if (number === round.prime) state.className = index === activeRound && !isComplete ? 'current' : 'prime';
+            if (round.crossed.includes(number)) {
+              state.className = 'crossed';
+              state.color = roundColors[index % roundColors.length];
+              state.title = `โดนตัดโดย ${round.prime} (รอบที่ ${index + 1})`;
+            }
+          });
+          if (isComplete && primes.includes(number)) {
+            state.className = 'prime';
+            state.title = `${number} เป็นจำนวนเฉพาะ`;
+          }
+          return state;
+        }
+
+        function renderGrid(limit, rounds, activeRound, isComplete, primes) {
+          const cells = [];
+          for (let number = 2; number <= limit; number += 1) {
+            const state = getCellState(number, rounds, activeRound, isComplete, primes);
+            const cell = document.createElement('span');
+            cell.className = `sieve-cell ${state.className}`;
+            cell.textContent = number;
+            cell.title = state.title;
+            if (state.color) cell.style.setProperty('--round-color', state.color);
+            cells.push(cell);
+          }
+          sieveGrid.replaceChildren(...cells);
+        }
+
+        function renderMonitor(limit, rounds, visibleRoundCount, isComplete, primeCount) {
+          monitorHint.hidden = visibleRoundCount > 0 || isComplete;
+          monitorHint.textContent = `ตาราง 2–${limit} — กด ▶ เพื่อเริ่มกรองทีละรอบ`;
+          const lines = rounds.slice(0, visibleRoundCount).map((round, index) => {
+            const line = document.createElement('div');
+            line.className = 'monitor-line';
+            line.innerHTML = `<i style="background:${roundColors[index % roundColors.length]}"></i><span>${round.crossed.length ? `รอบ p=${round.prime}: ตัด ${round.crossed.length} ตัว (เริ่มที่ ${round.prime}²=${round.firstCross})` : `รอบ p=${round.prime}: ไม่เหลืออะไรให้ตัด`}</span>`;
+            return line;
+          });
+          if (isComplete) {
+            const summary = document.createElement('div');
+            summary.className = 'monitor-line emphasis';
+            summary.innerHTML = `<span>หยุดได้เพราะ p ถัดไป &gt; √${limit} — ที่เหลือคือจำนวนเฉพาะทั้งหมด</span>`;
+            lines.push(summary);
+          }
+          monitorLog.replaceChildren(...lines);
+          monitorBadge.hidden = !isComplete;
+          monitorBadge.textContent = `เหลือ ${primeCount} จำนวนเฉพาะ!`;
+        }
+
+        function render() {
+          const limit = clamp(limitInput.value);
+          const rounds = calculateRounds(limit);
+          const primes = listPrimes(limit);
+          const totalSteps = rounds.length + 2;
+          const lastStep = totalSteps - 1;
+          limitInput.value = limit;
+          currentStep = Math.min(currentStep, lastStep);
+          const activeRound = Math.min(currentStep - 1, rounds.length - 1);
+          const isComplete = currentStep >= rounds.length + 1;
+          const visibleRoundCount = Math.max(activeRound + 1, 0);
+          const root = Math.sqrt(limit);
+          const roundPrimes = rounds.map((round) => round.prime);
+
+          sqrtHint.textContent = roundPrimes.length
+            ? `√${limit} ≈ ${root.toFixed(2)} → เช็คตัวหารเฉพาะได้ถึง ${Math.floor(root)}: ${roundPrimes.join(', ')}`
+            : `√${limit} ≈ ${root.toFixed(2)} → ไม่มีตัวหารเฉพาะให้เช็ค`;
+          renderGrid(limit, rounds, activeRound, isComplete, primes);
+          renderMonitor(limit, rounds, visibleRoundCount, isComplete, primes.length);
+          stepLabel.textContent = `${currentStep + 1}/${totalSteps}`;
+          progressFill.style.width = `${(currentStep / lastStep) * 100}%`;
+        }
+
+        limitInput.addEventListener('change', () => reset(limitInput.value));
+        document.querySelector('#random-button').addEventListener('click', () => reset(10 + Math.floor(Math.random() * 111)));
+        document.querySelector('#previous').addEventListener('click', () => { stopPlaying(); currentStep = Math.max(0, currentStep - 1); render(); });
+        document.querySelector('#next').addEventListener('click', () => { stopPlaying(); currentStep += 1; render(); });
+        playButton.addEventListener('click', () => {
+          if (playTimer) { stopPlaying(); return; }
+          playButton.textContent = '❚❚';
+          playTimer = setInterval(() => {
+            const lastStep = calculateRounds(clamp(limitInput.value)).length + 1;
+            if (currentStep >= lastStep) { stopPlaying(); return; }
+            currentStep += 1;
+            render();
+            if (currentStep >= lastStep) stopPlaying();
+          }, 700);
+        });
+        document.querySelector('#sidebar-toggle').addEventListener('click', () => document.querySelector('#sidebar').classList.toggle('open'));
+        DMModularShell.initTheme(document.querySelector('#theme-toggle'));
+const completedLessonsStorageKey = 'dm2026:progress';
+const legacyCompletedLessonsStorageKey = 'dm-completed-lessons-v1';
+      const progressMigrationStorageKey = 'dm2026:progress-migrated-v1';
+      const defaultCompletedLessons = ['divisibility', 'integer-representations', 'primes'];
+
+      function normalizeTopicId(value) {
+        return String(value).split('/').pop().replace(/\.html$/, '');
+      }
+
+      function loadCompletedLessons() {
+        try {
+          const saved = localStorage.getItem(completedLessonsStorageKey);
+          const completed = new Set(saved === null ? [] : JSON.parse(saved).map(normalizeTopicId));
+          let hasStoredProgress = saved !== null;
+
+          if (localStorage.getItem(progressMigrationStorageKey) !== '1') {
+            const legacySaved = localStorage.getItem(legacyCompletedLessonsStorageKey);
+            if (legacySaved !== null) {
+              JSON.parse(legacySaved).map(normalizeTopicId).forEach((id) => completed.add(id));
+              hasStoredProgress = true;
+            }
+            localStorage.setItem(progressMigrationStorageKey, '1');
+          }
+
+          return hasStoredProgress ? completed : new Set(defaultCompletedLessons);
+        } catch {
+          return new Set(defaultCompletedLessons);
+        }
+      }
+
+      let completedLessons = loadCompletedLessons();
+
+      function saveCompletedLessons() {
+        try {
+          localStorage.setItem(completedLessonsStorageKey, JSON.stringify([...completedLessons]));
+        } catch {
+          // The button still works for this page if storage is unavailable.
+        }
+      }
+      saveCompletedLessons();
+
+      function renderLessonProgress() {
+        const links = [...document.querySelectorAll('.lesson-nav a')];
+        const lessonIds = links.map((link) => normalizeTopicId(link.getAttribute('href')));
+        links.forEach((link, index) => {
+          const marker = link.querySelector('span:first-child');
+          const isCompleted = completedLessons.has(lessonIds[index]);
+          marker.classList.toggle('done', isCompleted);
+          marker.textContent = isCompleted ? '✓' : String(index + 1).padStart(2, '0');
+        });
+
+        const completedCount = lessonIds.filter((id) => completedLessons.has(id)).length;
+        const percentage = Math.round(completedCount / lessonIds.length * 100);
+        const progress = document.querySelector('.lesson-progress');
+        progress.querySelector('span').textContent = `${completedCount}/${lessonIds.length} หัวข้อ · ${percentage}%`;
+        progress.querySelector('i').style.width = `${percentage}%`;
+
+        const currentLink = document.querySelector('.lesson-nav a.active');
+        const currentLesson = normalizeTopicId(currentLink.getAttribute('href'));
+        const learnedButton = document.querySelector('.learned-button');
+        const isCurrentCompleted = completedLessons.has(currentLesson);
+        learnedButton.classList.toggle('selected', isCurrentCompleted);
+        learnedButton.setAttribute('aria-pressed', String(isCurrentCompleted));
+        learnedButton.textContent = isCurrentCompleted ? '✓ เรียนหัวข้อนี้แล้ว' : 'ทำเครื่องหมายว่าเรียนแล้ว';
+      }
+
+      const learnedButton = document.querySelector('.learned-button');
+      learnedButton.addEventListener('click', () => {
+        const currentLesson = normalizeTopicId(document.querySelector('.lesson-nav a.active').getAttribute('href'));
+        if (completedLessons.has(currentLesson)) completedLessons.delete(currentLesson);
+        else completedLessons.add(currentLesson);
+        saveCompletedLessons();
+        renderLessonProgress();
+      });
+
+      window.addEventListener('storage', (event) => {
+        if (event.key === completedLessonsStorageKey || event.key === null) {
+          completedLessons = loadCompletedLessons();
+          renderLessonProgress();
+        }
+      });
+      renderLessonProgress();
+        render();
+      })();
+    </script>
+  </body>
+</html>

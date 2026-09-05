@@ -1,0 +1,44 @@
+@import url("../shared/lesson-shell.css");
+
+.rsa-controls { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.rsa-chip-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; }
+.rsa-chip-label { margin: 0 4px; color: var(--color-text-muted); font: 13px var(--font-mono); }
+.rsa-chip { min-width: 40px; min-height: 36px; padding: 4px 10px; border-radius: 999px; background: var(--color-border); color: var(--color-text-muted); font: 600 13px var(--font-mono); transition: background-color .2s, color .2s, opacity .2s; }
+.rsa-chip:hover:not(:disabled), .rsa-chip.selected { background: var(--color-accent); color: var(--color-accent-contrast); }
+.rsa-chip:disabled { cursor: not-allowed; opacity: .35; }
+.rsa-message-input { width: 72px; min-height: 38px; padding: 4px 8px; border: 0; border-radius: var(--radius-md); background: var(--color-bg); box-shadow: 0 2px 12px #0000000f; color: var(--color-text); font: 700 15px var(--font-mono); text-align: center; }
+.rsa-message-input:focus-visible { outline: 2px solid var(--color-accent); }
+.rsa-canvas { display: flex; flex-direction: column; gap: 16px; padding: 8px 0; }
+.rsa-pipeline { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.rsa-station { display: flex; flex-direction: column; gap: 4px; padding: 16px; border-radius: var(--radius-lg); background: var(--color-bg); box-shadow: 0 2px 12px #0000000f; opacity: .4; transition: opacity .3s, box-shadow .3s; }
+.rsa-station.on { opacity: 1; box-shadow: 0 6px 24px #00000014; }
+.rsa-station-tag { color: var(--color-accent); font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.rsa-station-body { font: 13px var(--font-mono); }
+.rsa-station-body strong { font-size: 15px; }
+.rsa-station-secret { color: var(--color-text-muted); font-size: 11px; }
+.rsa-key-public, .rsa-key-private { align-self: flex-start; padding: 2px 8px; border-radius: 999px; font: 700 11px var(--font-mono); animation: rsa-key-in .3s ease-out; }
+.rsa-key-public { background: color-mix(in srgb, var(--color-success) 16%, transparent); color: var(--color-success); }
+.rsa-key-private { background: #a78bfa33; color: #7c5ce0; }
+.rsa-tubes { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.rsa-tube { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: var(--radius-lg); background: var(--color-bg); box-shadow: 0 2px 12px #0000000f; opacity: .4; transition: opacity .3s; }
+.rsa-tube.on { opacity: 1; }
+.rsa-tube-label { color: var(--color-text-muted); font-size: 12px; }
+.rsa-tube-flow { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.rsa-token, .rsa-token-hidden { display: inline-flex; min-width: 56px; min-height: 44px; align-items: center; justify-content: center; border-radius: var(--radius-md); font: 700 18px var(--font-mono); box-shadow: 0 2px 12px #0000000f; }
+.rsa-token { background: #38bdf838; transition: background-color .3s; }
+.rsa-token-hidden { background: var(--color-border); color: var(--color-text-muted); opacity: .6; }
+.rsa-token.cipher { background: color-mix(in srgb, var(--color-secondary) 35%, transparent); animation: rsa-scramble .3s ease-out; }
+.rsa-token.done { background: color-mix(in srgb, var(--color-success) 28%, transparent); box-shadow: 0 0 14px color-mix(in srgb, var(--color-success) 45%, transparent); }
+.rsa-tube-arrow { color: var(--color-text-muted); font: 13px var(--font-mono); }
+.rsa-attacker { display: flex; flex-direction: column; gap: 4px; padding: 16px; border: 1.5px dashed var(--color-danger, #b34b4b); border-radius: var(--radius-lg); background: color-mix(in srgb, var(--color-danger, #b34b4b) 6%, transparent); animation: rsa-key-in .3s ease-out; }
+.rsa-attacker[hidden] { display: none; }
+.rsa-attacker-title { margin: 0; color: var(--color-danger, #b34b4b); font-size: 13px; font-weight: 700; }
+.rsa-attacker-body { margin: 0; font-size: 13px; line-height: 1.6; }
+.rsa-attacker-shake { display: inline-block; font-weight: 700; animation: rsa-shake .9s ease-in-out infinite; }
+
+@keyframes rsa-key-in { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: scale(1); } }
+@keyframes rsa-scramble { 0% { opacity: 0; transform: rotate(0) scale(.7); } 50% { transform: rotate(6deg) scale(1.1); } 100% { opacity: 1; transform: rotate(0) scale(1); } }
+@keyframes rsa-shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-2px); } 40% { transform: translateX(2px); } 60% { transform: translateX(-1px); } 80% { transform: translateX(1px); } }
+
+@media (min-width: 641px) { .rsa-tubes { grid-template-columns: 1fr 1fr; } }
+@media (prefers-reduced-motion: reduce) { .rsa-key-public, .rsa-key-private, .rsa-token.cipher, .rsa-attacker { animation: none; } .rsa-attacker-shake { animation: none; } }

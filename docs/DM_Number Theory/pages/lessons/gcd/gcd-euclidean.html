@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="เรียนรู้ตัวหารร่วมมากและขั้นตอนวิธียูคลิดแบบโต้ตอบ">
+    <title>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด | Number Theory</title>
+    <link rel="stylesheet" href="../../../css/modular-lessons/gcd-euclidean.css">
+    <script src="../../../js/index-modular-shell.js"></script>
+  </head>
+  <body>
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู">☰</button>
+      </div>
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a href="../foundations/divisibility.html"><span class="done">✓</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a href="../foundations/integer-representations.html"><span class="done">✓</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a href="../foundations/primes.html"><span class="done">✓</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a href="../factorization/sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a class="active" href="gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a href="gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a href="../factorization/prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a href="../modular/modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a href="../modular/congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a href="../modular/pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a href="../modular/check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a href="../modular/fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a href="../theorems/euler-totient.html"><span>13</span><span>ฟังก์ชันทอเทียนต์ของออยเลอร์ (Euler's Totient)</span></a></li>
+          <li><a href="../theorems/fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มาต์ (Fermat's Little Theorem)</span></a></li>
+          <li><a href="extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a href="../cryptography/classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบคลาสสิก (Classical Ciphers)</span></a></li>
+          <li><a href="../theorems/chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a href="../cryptography/rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography)</span></a></li>
+        </ol>
+      </nav>
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>3/18 หัวข้อ · 17%</span><div><i></i></div></div>
+        <button class="learned-button" type="button">ทำเครื่องหมายว่าเรียนแล้ว</button>
+        <div class="utility-links"><a href="../../tools/playground.html">Playground</a><a href="../../tools/glossary.html">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article>
+        <header class="page-header">
+          <h1>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด</h1>
+          <p>เข้าใจว่า gcd(a,b) = gcd(b, a mod b) และทำไมมันลู่เข้าเร็ว</p>
+        </header>
+
+        <div class="lesson-stack">
+          <section class="definition-card" aria-labelledby="definition-title">
+            <h2 id="definition-title"><i></i>นิยาม</h2>
+            <p class="definition-text">จำนวนเต็มบวกที่มากที่สุดซึ่งสามารถหารจำนวนเต็มตั้งแต่สองจำนวนขึ้นไปลงตัวทั้งหมด โดยจำนวนเหล่านั้นไม่เป็นศูนย์พร้อมกัน</p>
+            <p class="sub-label">สูตร</p>
+            <div class="formula">gcd(<b>a</b>, <b>b</b>) = gcd(<b>b</b>, <b>a</b> mod <b>b</b>)</div>
+            <div class="definition-note">
+              <p>ให้ <code>a</code>, <code>b</code> ∈ ℤ โดยที่ a และ b ไม่เป็นศูนย์พร้อมกัน</p>
+              <p><code>d</code> เป็น<strong>ตัวหารร่วมมาก</strong>ของ a และ b เมื่อ d เป็นจำนวนเต็มบวกที่มากที่สุดซึ่ง <code>d | a</code> และ <code>d | b</code> โดยมีจุดหยุดคือ <code>gcd(a, 0) = |a|</code></p>
+              <p>การแทนคู่ (a, b) ด้วย (b, a mod b) ซ้ำ ๆ จะลดขนาดปัญหาจนเศษเป็นศูนย์ และตัวตั้งที่เหลือคือ gcd(a, b)</p>
+            </div>
+          </section>
+
+          <section class="execution" aria-labelledby="visualizer-title">
+            <h2 class="execution-title" id="visualizer-title">Interactive GCD Visualizer</h2>
+            <div class="execution-header">
+              <div class="method-toggle" role="tablist">
+                <button class="active" type="button" role="tab" aria-selected="true" data-method="intersection">Intersection Method</button>
+                <button type="button" role="tab" aria-selected="false" data-method="euclidean">Euclidean Algorithm</button>
+              </div>
+              <div class="inputs-row">
+                <label for="number-a">Number A<input id="number-a" type="number" min="1" max="200" value="48"></label>
+                <label for="number-b">Number B<input id="number-b" type="number" min="1" max="200" value="36"></label>
+              </div>
+            </div>
+
+            <div class="execution-layout" id="execution-layout">
+              <div class="canvas-area">
+                <div class="intersection-canvas" id="intersection-canvas">
+                  <div class="scan-wrapper">
+                    <p id="scan-label"></p>
+                    <div class="scan-grid" id="scan-grid"></div>
+                    <span class="scan-tooltip" id="scan-tooltip" hidden></span>
+                  </div>
+                  <div class="pools-row">
+                    <section class="pool pool-a"><h3 id="pool-a-title"></h3><div id="pool-a"></div></section>
+                    <section class="pool pool-b"><h3 id="pool-b-title"></h3><div id="pool-b"></div></section>
+                  </div>
+                  <section class="common-panel" id="common-panel"><h3 id="common-title"></h3><div id="common-values"></div><span id="winner-badge" hidden></span></section>
+                </div>
+
+                <div class="euclidean-canvas" id="euclidean-canvas" hidden>
+                  <ul class="euclidean-rules">
+                    <li>ในแต่ละรอบ ตัดจัตุรัสให้ได้มากที่สุด แล้วดูว่ายังมีเศษหรือไม่
+                      <ul>
+                        <li>ถ้า<strong>ยังมีเศษเหลือ</strong> ให้นำเศษไปตัดต่อในรอบถัดไป</li>
+                        <li>ถ้า<strong>ลงตัวพอดี</strong> ความยาวด้านของจัตุรัสรอบสุดท้ายคือ GCD</li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <svg class="tile-stage" id="tile-stage" viewBox="0 0 100 64" role="img" aria-label="ภาพเรขาคณิตแสดงขั้นตอนยูคลิด"></svg>
+                </div>
+              </div>
+
+              <aside class="monitor-panel" id="monitor-panel" hidden>
+                <p class="monitor-title">Execution Monitor</p>
+                <p class="monitor-hint" id="monitor-hint"></p>
+                <div class="monitor-log" id="monitor-log"></div>
+                <span class="monitor-badge" id="monitor-badge" hidden></span>
+              </aside>
+            </div>
+
+            <div class="player">
+              <button id="previous" type="button" aria-label="ขั้นก่อนหน้า">‹</button>
+              <button id="play" type="button" aria-label="เล่นขั้นตอน">▶</button>
+              <button id="next" type="button" aria-label="ขั้นถัดไป">›</button>
+              <div class="player-progress"><span><i id="progress-fill"></i></span><output id="step-label"></output></div>
+            </div>
+            <div class="gcd-final-answer" id="gcd-final-answer" aria-live="polite" hidden>
+              <span>คำตอบ</span>
+              <strong id="gcd-final-value"></strong>
+              <span class="gcd-final-reason" id="gcd-final-reason"></span>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+
+    <script>
+      (() => {
+        const SVG_NS = 'http://www.w3.org/2000/svg';
+        const tileColors = ['#38bdf8', 'var(--color-success)', '#a78bfa', '#f472b6'];
+        const numberA = document.querySelector('#number-a');
+        const numberB = document.querySelector('#number-b');
+        const playButton = document.querySelector('#play');
+        let method = 'intersection';
+        let intersectionStep = 0;
+        let euclideanStep = 0;
+        let playTimer = null;
+
+        function clamp(value) {
+          const number = Math.trunc(Number(value));
+          return Number.isNaN(number) ? 1 : Math.min(Math.max(number, 1), 200);
+        }
+
+        function divisors(value) {
+          const result = [];
+          for (let number = 1; number <= value; number += 1) if (value % number === 0) result.push(number);
+          return result;
+        }
+
+        function gcd(first, second) {
+          let a = Math.abs(first);
+          let b = Math.abs(second);
+          while (b !== 0) [a, b] = [b, a % b];
+          return a;
+        }
+
+        function euclideanSteps(first, second) {
+          let a = Math.max(first, second);
+          let b = Math.min(first, second);
+          const steps = [];
+          while (b !== 0) {
+            const quotient = Math.floor(a / b);
+            const remainder = a % b;
+            steps.push({ a, b, quotient, remainder });
+            [a, b] = [b, remainder];
+          }
+          return steps;
+        }
+
+        function stopPlaying() {
+          clearInterval(playTimer);
+          playTimer = null;
+          playButton.textContent = '▶';
+        }
+
+        function makeChip(value, className = '') {
+          const chip = document.createElement('span');
+          chip.className = `value-chip ${className}`;
+          chip.textContent = value;
+          return chip;
+        }
+
+        function renderIntersection(a, b) {
+          const totalSteps = a + b + 2;
+          const lastStep = totalSteps - 1;
+          intersectionStep = Math.min(intersectionStep, lastStep);
+          const scanningA = intersectionStep < a;
+          const scanningB = intersectionStep >= a && intersectionStep < a + b;
+          const showCommon = intersectionStep >= a + b;
+          const showWinner = intersectionStep >= a + b + 1;
+          const scanValue = scanningA ? a : b;
+          const current = scanningA ? intersectionStep + 1 : scanningB ? intersectionStep - a + 1 : null;
+          const checkedThroughA = scanningA ? intersectionStep : a;
+          const checkedThroughB = scanningB ? intersectionStep - a : showCommon ? b : 0;
+          const divisorsA = divisors(a);
+          const divisorsB = divisors(b);
+          const setB = new Set(divisorsB);
+          const common = divisorsA.filter((value) => setB.has(value));
+
+          document.querySelector('#scan-label').textContent = `Scanning divisors of ${scanValue}`;
+          const cells = Array.from({ length: scanValue }, (_, index) => {
+            const value = index + 1;
+            const checkedThrough = scanningA ? checkedThroughA : checkedThroughB;
+            const cell = document.createElement('span');
+            cell.className = 'scan-cell';
+            if (value <= checkedThrough) cell.classList.add(scanValue % value === 0 ? 'divisor' : 'muted');
+            if (value === current) cell.classList.add('current');
+            cell.textContent = value;
+            return cell;
+          });
+          document.querySelector('#scan-grid').replaceChildren(...cells);
+
+          const tooltip = document.querySelector('#scan-tooltip');
+          tooltip.hidden = !current;
+          if (current) tooltip.textContent = `${scanValue} ÷ ${current} = ${Math.floor(scanValue / current)} R ${scanValue % current}`;
+
+          document.querySelector('#pool-a-title').textContent = `Divisors of A: ${a}`;
+          document.querySelector('#pool-b-title').textContent = `Divisors of B: ${b}`;
+          document.querySelector('#pool-a').replaceChildren(...divisorsA.filter((value) => value <= checkedThroughA).map((value) => makeChip(value, 'blue')));
+          document.querySelector('#pool-b').replaceChildren(...divisorsB.filter((value) => value <= checkedThroughB).map((value) => makeChip(value, 'orange')));
+          document.querySelector('#common-title').textContent = `Common Divisors: ${a} & ${b}`;
+          document.querySelector('#common-panel').className = `common-panel${showCommon ? ' ready' : ''}${showWinner ? ' done' : ''}`;
+          document.querySelector('#common-values').replaceChildren(...(showCommon ? common.map((value) => makeChip(value, showWinner && value === gcd(a, b) ? 'winner' : 'green')) : []));
+          document.querySelector('#winner-badge').hidden = !showWinner;
+          document.querySelector('#winner-badge').textContent = `GCD found: ${gcd(a, b)}!`;
+          return { totalSteps, currentStep: intersectionStep, lastStep };
+        }
+
+        function buildTileRounds(steps) {
+          let area = { x: 0, y: 0, width: steps[0]?.a ?? 1, height: steps[0]?.b ?? 1 };
+          return steps.map((step) => {
+            const horizontal = area.width >= area.height;
+            const size = step.b;
+            const squares = Array.from({ length: step.quotient }, (_, index) => horizontal
+              ? { x: area.x + index * size, y: area.y, size }
+              : { x: area.x, y: area.y + index * size, size });
+            const leftover = step.remainder > 0
+              ? horizontal
+                ? { x: area.x + step.quotient * size, y: area.y, width: step.remainder, height: area.height }
+                : { x: area.x, y: area.y + step.quotient * size, width: area.width, height: step.remainder }
+              : null;
+            if (leftover) area = leftover;
+            return { step, squares, leftover };
+          });
+        }
+
+        function svgElement(name, attributes = {}) {
+          const element = document.createElementNS(SVG_NS, name);
+          Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+          return element;
+        }
+
+        function renderTiles(a, b, steps) {
+          const stage = document.querySelector('#tile-stage');
+          const rounds = buildTileRounds(steps);
+          const activeRound = euclideanStep - 1;
+          const completed = activeRound === rounds.length - 1;
+          const width = Math.max(a, b);
+          const height = Math.min(a, b);
+          const scale = Math.min(85 / width, 50 / height);
+          const originX = 7 + (85 - width * scale) / 2;
+          const originY = 9 + (50 - height * scale) / 2;
+          const elements = [];
+          const floor = svgElement('rect', { x: originX, y: originY, width: width * scale, height: height * scale, rx: 1, class: `tile-floor${completed ? ' done' : ''}` });
+          elements.push(floor);
+
+          const topLabel = svgElement('text', { x: originX + width * scale / 2, y: originY - 3, 'text-anchor': 'middle', class: 'axis-label' });
+          topLabel.textContent = `กว้าง ${width}`;
+          elements.push(topLabel);
+          const sideLabel = svgElement('text', { x: originX + width * scale + 3.2, y: originY + height * scale / 2, 'text-anchor': 'middle', 'dominant-baseline': 'middle', transform: `rotate(90 ${originX + width * scale + 3.2} ${originY + height * scale / 2})`, class: 'axis-label' });
+          sideLabel.textContent = `สูง ${height}`;
+          elements.push(sideLabel);
+
+          rounds.slice(0, activeRound + 1).forEach((round, roundIndex) => {
+            round.squares.forEach((square) => elements.push(svgElement('rect', {
+              x: originX + square.x * scale + .25,
+              y: originY + square.y * scale + .25,
+              width: Math.max(square.size * scale - .5, .4),
+              height: Math.max(square.size * scale - .5, .4),
+              rx: .8,
+              fill: tileColors[roundIndex % tileColors.length],
+              class: 'tile',
+            })));
+          });
+
+          const leftover = rounds[activeRound]?.leftover;
+          if (leftover) {
+            elements.push(svgElement('rect', { x: originX + leftover.x * scale, y: originY + leftover.y * scale, width: leftover.width * scale, height: leftover.height * scale, rx: .8, class: 'tile-leftover' }));
+            const label = svgElement('text', { x: originX + (leftover.x + leftover.width / 2) * scale, y: originY + (leftover.y + leftover.height / 2) * scale, 'text-anchor': 'middle', 'dominant-baseline': 'middle', class: 'leftover-label' });
+            label.textContent = rounds[activeRound].step.remainder;
+            elements.push(label);
+          }
+          stage.replaceChildren(...elements);
+        }
+
+        function renderEuclidean(a, b) {
+          const steps = euclideanSteps(a, b);
+          const totalSteps = steps.length + 1;
+          const lastStep = totalSteps - 1;
+          euclideanStep = Math.min(euclideanStep, lastStep);
+          const visibleSteps = steps.slice(0, euclideanStep);
+          const complete = euclideanStep >= steps.length;
+          renderTiles(a, b, steps);
+          document.querySelector('#monitor-hint').hidden = visibleSteps.length > 0;
+          document.querySelector('#monitor-hint').textContent = `พื้นที่ ${Math.max(a, b)} × ${Math.min(a, b)} — กด ▶ เพื่อเริ่มปูตาราง`;
+          document.querySelector('#monitor-log').replaceChildren(...visibleSteps.map((step, index) => {
+            const line = document.createElement('div');
+            line.className = 'monitor-line';
+            line.innerHTML = `<i style="background:${tileColors[index % tileColors.length]}"></i><span>GCD(${step.a}, ${step.b}) → ${step.a} mod ${step.b} = ${step.remainder}</span>`;
+            return line;
+          }));
+          document.querySelector('#monitor-badge').hidden = !complete;
+          document.querySelector('#monitor-badge').textContent = `GCD found: ${gcd(a, b)}!`;
+          return { totalSteps, currentStep: euclideanStep, lastStep };
+        }
+
+        function render() {
+          const a = clamp(numberA.value);
+          const b = clamp(numberB.value);
+          numberA.value = a;
+          numberB.value = b;
+          const euclidean = method === 'euclidean';
+          document.querySelector('#intersection-canvas').hidden = euclidean;
+          document.querySelector('#euclidean-canvas').hidden = !euclidean;
+          document.querySelector('#monitor-panel').hidden = !euclidean;
+          document.querySelector('#execution-layout').classList.toggle('with-monitor', euclidean);
+          const player = euclidean ? renderEuclidean(a, b) : renderIntersection(a, b);
+          document.querySelector('#step-label').textContent = `${player.currentStep + 1}/${player.totalSteps}`;
+          document.querySelector('#progress-fill').style.width = `${(player.currentStep / (player.lastStep || 1)) * 100}%`;
+          const finalAnswer = document.querySelector('#gcd-final-answer');
+          const isComplete = player.currentStep >= player.lastStep;
+          finalAnswer.hidden = euclidean || !isComplete;
+          const answer = gcd(a, b);
+          document.querySelector('#gcd-final-value').textContent = `gcd(${a}, ${b}) = ${answer}`;
+          document.querySelector('#gcd-final-reason').textContent = `เพราะ ${answer} เป็นจำนวนเต็มบวกที่มากที่สุดที่หารทั้ง ${a} และ ${b} ลงตัว`;
+        }
+
+        document.querySelectorAll('[data-method]').forEach((button) => button.addEventListener('click', () => {
+          method = button.dataset.method;
+          stopPlaying();
+          document.querySelectorAll('[data-method]').forEach((item) => {
+            const active = item === button;
+            item.classList.toggle('active', active);
+            item.setAttribute('aria-selected', active);
+          });
+          render();
+        }));
+        [numberA, numberB].forEach((input) => input.addEventListener('change', () => {
+          intersectionStep = 0;
+          euclideanStep = 0;
+          stopPlaying();
+          render();
+        }));
+        document.querySelector('#previous').addEventListener('click', () => {
+          stopPlaying();
+          if (method === 'euclidean') euclideanStep = Math.max(0, euclideanStep - 1);
+          else intersectionStep = Math.max(0, intersectionStep - 1);
+          render();
+        });
+        document.querySelector('#next').addEventListener('click', () => {
+          stopPlaying();
+          if (method === 'euclidean') euclideanStep += 1;
+          else intersectionStep += 1;
+          render();
+        });
+        playButton.addEventListener('click', () => {
+          if (playTimer) { stopPlaying(); return; }
+          playButton.textContent = '❚❚';
+          playTimer = setInterval(() => {
+            const a = clamp(numberA.value);
+            const b = clamp(numberB.value);
+            const lastStep = method === 'euclidean' ? euclideanSteps(a, b).length : a + b + 1;
+            const step = method === 'euclidean' ? euclideanStep : intersectionStep;
+            if (step >= lastStep) { stopPlaying(); return; }
+            if (method === 'euclidean') euclideanStep += 1;
+            else intersectionStep += 1;
+            render();
+            if ((method === 'euclidean' ? euclideanStep : intersectionStep) >= lastStep) stopPlaying();
+          }, method === 'euclidean' ? 750 : 55);
+        });
+        document.querySelector('#sidebar-toggle').addEventListener('click', () => document.querySelector('#sidebar').classList.toggle('open'));
+        DMModularShell.initTheme(document.querySelector('#theme-toggle'));
+const completedLessonsStorageKey = 'dm2026:progress';
+const legacyCompletedLessonsStorageKey = 'dm-completed-lessons-v1';
+      const progressMigrationStorageKey = 'dm2026:progress-migrated-v1';
+      const defaultCompletedLessons = ['divisibility', 'integer-representations', 'primes'];
+
+      function normalizeTopicId(value) {
+        return String(value).split('/').pop().replace(/\.html$/, '');
+      }
+
+      function loadCompletedLessons() {
+        try {
+          const saved = localStorage.getItem(completedLessonsStorageKey);
+          const completed = new Set(saved === null ? [] : JSON.parse(saved).map(normalizeTopicId));
+          let hasStoredProgress = saved !== null;
+
+          if (localStorage.getItem(progressMigrationStorageKey) !== '1') {
+            const legacySaved = localStorage.getItem(legacyCompletedLessonsStorageKey);
+            if (legacySaved !== null) {
+              JSON.parse(legacySaved).map(normalizeTopicId).forEach((id) => completed.add(id));
+              hasStoredProgress = true;
+            }
+            localStorage.setItem(progressMigrationStorageKey, '1');
+          }
+
+          return hasStoredProgress ? completed : new Set(defaultCompletedLessons);
+        } catch {
+          return new Set(defaultCompletedLessons);
+        }
+      }
+
+      let completedLessons = loadCompletedLessons();
+
+      function saveCompletedLessons() {
+        try {
+          localStorage.setItem(completedLessonsStorageKey, JSON.stringify([...completedLessons]));
+        } catch {
+          // The button still works for this page if storage is unavailable.
+        }
+      }
+      saveCompletedLessons();
+
+      function renderLessonProgress() {
+        const links = [...document.querySelectorAll('.lesson-nav a')];
+        const lessonIds = links.map((link) => normalizeTopicId(link.getAttribute('href')));
+        links.forEach((link, index) => {
+          const marker = link.querySelector('span:first-child');
+          const isCompleted = completedLessons.has(lessonIds[index]);
+          marker.classList.toggle('done', isCompleted);
+          marker.textContent = isCompleted ? '✓' : String(index + 1).padStart(2, '0');
+        });
+
+        const completedCount = lessonIds.filter((id) => completedLessons.has(id)).length;
+        const percentage = Math.round(completedCount / lessonIds.length * 100);
+        const progress = document.querySelector('.lesson-progress');
+        progress.querySelector('span').textContent = `${completedCount}/${lessonIds.length} หัวข้อ · ${percentage}%`;
+        progress.querySelector('i').style.width = `${percentage}%`;
+
+        const currentLink = document.querySelector('.lesson-nav a.active');
+        const currentLesson = normalizeTopicId(currentLink.getAttribute('href'));
+        const learnedButton = document.querySelector('.learned-button');
+        const isCurrentCompleted = completedLessons.has(currentLesson);
+        learnedButton.classList.toggle('selected', isCurrentCompleted);
+        learnedButton.setAttribute('aria-pressed', String(isCurrentCompleted));
+        learnedButton.textContent = isCurrentCompleted ? '✓ เรียนหัวข้อนี้แล้ว' : 'ทำเครื่องหมายว่าเรียนแล้ว';
+      }
+
+      const learnedButton = document.querySelector('.learned-button');
+      learnedButton.addEventListener('click', () => {
+        const currentLesson = normalizeTopicId(document.querySelector('.lesson-nav a.active').getAttribute('href'));
+        if (completedLessons.has(currentLesson)) completedLessons.delete(currentLesson);
+        else completedLessons.add(currentLesson);
+        saveCompletedLessons();
+        renderLessonProgress();
+      });
+
+      window.addEventListener('storage', (event) => {
+        if (event.key === completedLessonsStorageKey || event.key === null) {
+          completedLessons = loadCompletedLessons();
+          renderLessonProgress();
+        }
+      });
+      renderLessonProgress();
+        render();
+      })();
+    </script>
+  </body>
+</html>

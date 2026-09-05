@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="เรียนรู้ฟังก์ชันทอเทียนต์ของออยเลอร์ด้วยการนับจำนวนที่ coprime">
+    <title>ฟังก์ชันออยเลอร์ (Euler's Totient) | Number Theory</title>
+    <link rel="stylesheet" href="../../../css/root-lessons/euler-totient.css">
+    <script src="../../../js/lesson-shell.js" defer></script>
+  </head>
+  <body data-lesson-id="euler-totient">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู" aria-expanded="false">☰</button>
+      </div>
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a data-lesson-id="divisibility" href="../foundations/divisibility.html"><span>01</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a data-lesson-id="integer-representations" href="../foundations/integer-representations.html"><span>02</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a data-lesson-id="primes" href="../foundations/primes.html"><span>03</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a data-lesson-id="sieve-of-eratosthenes" href="../factorization/sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a data-lesson-id="gcd-euclidean" href="../gcd/gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="gcd-prime-factorization" href="../gcd/gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a data-lesson-id="prime-factorization" href="../factorization/prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a data-lesson-id="modular-arithmetic" href="../modular/modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a data-lesson-id="congruence" href="../modular/congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a data-lesson-id="pseudorandom-numbers" href="../modular/pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a data-lesson-id="check-digits" href="../modular/check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a data-lesson-id="fast-modular-exponentiation" href="../modular/fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a data-lesson-id="euler-totient" href="euler-totient.html"><span>13</span><span>ฟังก์ชันออยเลอร์ (Euler's Totient Function φ(n))</span></a></li>
+          <li><a data-lesson-id="fermats-little-theorem" href="fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มา (Fermat's Little Theorem)</span></a></li>
+          <li><a data-lesson-id="extended-euclidean" href="../gcd/extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="classical-ciphers" href="../cryptography/classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบดั้งเดิม (Classical Ciphers)</span></a></li>
+          <li><a data-lesson-id="chinese-remainder-theorem" href="chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a data-lesson-id="rsa-cryptography" href="../cryptography/rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography) — Capstone</span></a></li>
+        </ol>
+      </nav>
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>0/18 หัวข้อ · 0%</span><div><i></i></div></div>
+        <button class="learned-button" type="button" aria-pressed="false">ทำเครื่องหมายว่าเรียนแล้ว</button>
+        <div class="utility-links"><a href="../../tools/playground.html">Playground</a><a href="../../tools/glossary.html">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article>
+        <header class="page-header">
+          <h1>ฟังก์ชันออยเลอร์ (Euler's Totient Function φ(n))</h1>
+          <p>เข้าใจ φ(n) เป็น "จำนวนตัวเลขที่ coprime กับ n" ผ่านการนับจริงบนภาพ ก่อนเจอสูตร</p>
+        </header>
+
+        <div class="lesson-stack">
+          <section class="definition-card" aria-labelledby="definition-title">
+            <h2 id="definition-title"><i></i>นิยาม</h2>
+            <p class="definition-text">ฟังก์ชันในทางทฤษฎีจำนวนที่ใช้นับจำนวนเต็มบวก <b>m</b> ทั้งหมดที่น้อยกว่าหรือเท่ากับ <b>n</b> ซึ่งเป็นจำนวนเฉพาะสัมพัทธ์ (coprime หรือ relatively prime) กับ <b>n</b> (กล่าวคือ ห.ร.ม. ของ <b>m</b> และ <b>n</b> มีค่าเท่ากับ 1 หรือ gcd(<b>m</b>, <b>n</b>) = 1)</p>
+            <p class="sub-label">สูตร</p>
+            <div class="formula set-formula"><b>φ(n)</b> = จำนวนสมาชิกของ { <b>k</b> ∈ ℤ : 1 ≤ <b>k</b> ≤ <b>n</b> และ gcd(<b>k</b>, <b>n</b>) = 1 }</div>
+            <p>ให้ <code>n</code> เป็นจำนวนเต็มบวก</p>
+            <p>ฟังก์ชันออยเลอร์ <code>φ(n)</code> นิยามให้เป็นขนาดของเซตด้านบน คือนับดูว่าในช่วง 1 ถึง <code>n</code> มีจำนวนเต็มกี่ตัวที่ <code>gcd(k, n) = 1</code></p>
+            <p>หรือกล่าวได้ว่า φ(n) คือจำนวนของจำนวนเต็มตั้งแต่ 1 ถึง n ที่เป็นจำนวนเฉพาะสัมพัทธ์กับ n</p>
+          </section>
+
+          <section class="lesson-card" aria-labelledby="visualizer-title">
+            <div class="lesson-card-header">
+              <div>
+                <h2 id="visualizer-title">EULER'S TOTIENT — นับจำนวนที่ COPRIME กับ N</h2>
+              </div>
+            </div>
+
+            <div class="totient-controls">
+              <label class="totient-slider-label" for="totient-range">n</label>
+              <div class="totient-range-row">
+                <input id="totient-range" type="range" min="2" max="36" value="12">
+                <input class="totient-number-input" id="totient-n" type="number" min="2" max="36" value="12" aria-label="ค่า n">
+              </div>
+            </div>
+
+            <div class="visualizer-layout totient-visualizer-layout">
+              <div class="visualizer-canvas totient-canvas">
+                <div class="totient-readout"><span>เจอแล้ว <strong id="phi-found">0</strong> ตัว</span><span class="totient-readout-note">(เลื่อนไปข้างหน้าเพื่อดูเส้นทาง gcd)</span></div>
+                <div class="candidate-grid" id="candidate-grid" role="grid" aria-label="ตัวเลขที่ทดสอบว่า coprime กับ n"></div>
+                <div class="factorization-box" id="factorization-box" hidden></div>
+              </div>
+              <aside class="monitor-panel" aria-label="ตัวติดตามขั้นตอน">
+                <p class="monitor-title">Execution Monitor</p>
+                <p class="monitor-hint" id="monitor-hint">จะสแกน k = 1..12 แล้วเก็บเฉพาะตัวที่ gcd(k, 12) = 1 — กด ▶</p>
+                <div class="monitor-log" id="monitor-log"></div>
+              </aside>
+            </div>
+
+            <div class="step-controls" aria-label="ควบคุมขั้นตอน">
+              <button id="previous-step" type="button" aria-label="ขั้นก่อนหน้า">‹</button>
+              <button id="play-step" type="button" aria-label="เล่นขั้นตอน">▶</button>
+              <button id="next-step" type="button" aria-label="ขั้นถัดไป">›</button>
+              <button id="reset-step" type="button" aria-label="รีเซ็ตขั้นตอน">↺</button>
+              <div class="step-progress"><span><i id="step-progress-fill"></i></span><output id="step-label">1/7</output></div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+
+    <script>
+      (() => {
+        const input = document.querySelector('#totient-n');
+        const rangeInput = document.querySelector('#totient-range');
+        const phiFound = document.querySelector('#phi-found');
+        const candidateGrid = document.querySelector('#candidate-grid');
+        const factorizationBox = document.querySelector('#factorization-box');
+        const monitorHint = document.querySelector('#monitor-hint');
+        const monitorLog = document.querySelector('#monitor-log');
+        const progressFill = document.querySelector('#step-progress-fill');
+        const stepLabel = document.querySelector('#step-label');
+        const playButton = document.querySelector('#play-step');
+        const totalSteps = 7;
+        let n = 12;
+        let candidates = [];
+        let factors = [];
+        let phi = 0;
+        let step = 1;
+        let timer = null;
+
+        function gcd(a, b) {
+          let x = Math.abs(a);
+          let y = Math.abs(b);
+          while (y !== 0) [x, y] = [y, x % y];
+          return x;
+        }
+
+        function factorize(value) {
+          const result = [];
+          let remainder = value;
+          for (let factor = 2; factor * factor <= remainder; factor += 1) {
+            if (remainder % factor !== 0) continue;
+            let exponent = 0;
+            while (remainder % factor === 0) {
+              remainder /= factor;
+              exponent += 1;
+            }
+            result.push({ factor, exponent });
+          }
+          if (remainder > 1) result.push({ factor: remainder, exponent: 1 });
+          return result;
+        }
+
+        function formatFactorization() {
+          return factors.map(({ factor, exponent }) => exponent === 1 ? String(factor) : `${factor}<sup>${exponent}</sup>`).join(' × ');
+        }
+
+        function stopPlaying() {
+          if (timer !== null) window.clearInterval(timer);
+          timer = null;
+          playButton.textContent = '▶';
+          playButton.setAttribute('aria-label', 'เล่นขั้นตอน');
+        }
+
+        function compute() {
+          candidates = Array.from({ length: n }, (_, index) => {
+            const value = index + 1;
+            const divisor = gcd(value, n);
+            return { value, gcd: divisor, coprime: divisor === 1 };
+          });
+          phi = candidates.filter((item) => item.coprime).length;
+          factors = factorize(n);
+        }
+
+        function resetStep() {
+          stopPlaying();
+          compute();
+          step = 1;
+          render();
+        }
+
+        function readInput(value = Number(input.value)) {
+          n = Number.isFinite(value) ? Math.min(Math.max(Math.trunc(value), 2), 36) : 2;
+          input.value = String(n);
+          rangeInput.value = String(n);
+          resetStep();
+        }
+
+        function setStep(nextStep) {
+          step = Math.min(Math.max(nextStep, 1), totalSteps);
+          render();
+          if (step >= totalSteps) stopPlaying();
+        }
+
+        function addMonitorLine(text, tone = '') {
+          const line = document.createElement('div');
+          line.className = `monitor-line ${tone}`;
+          const dot = document.createElement('i');
+          const copy = document.createElement('span');
+          copy.textContent = text;
+          line.append(dot, copy);
+          monitorLog.append(line);
+        }
+
+        function checkedLimit() {
+          if (step === 1) return 0;
+          if (step === 2) return Math.ceil(n / 2);
+          return n;
+        }
+
+        function renderCandidates() {
+          candidateGrid.replaceChildren();
+          const limit = checkedLimit();
+          candidates.forEach((item, index) => {
+            const cell = document.createElement('div');
+            const isChecked = index < limit;
+            const isCurrent = (step === 2 && index === limit - 1) || (step === 3 && index === n - 1);
+            cell.className = `candidate-cell${isChecked ? ' checked' : ''}${isChecked && item.coprime ? ' coprime' : ''}${isChecked && !item.coprime ? ' not-coprime' : ''}${isCurrent ? ' current' : ''}`;
+            cell.setAttribute('role', 'gridcell');
+            cell.setAttribute('aria-label', `${item.value}${isChecked ? `, gcd = ${item.gcd}${item.coprime ? ', coprime' : ', ไม่ coprime'}` : ', ยังไม่ตรวจ'}`);
+            cell.textContent = String(item.value);
+            candidateGrid.append(cell);
+          });
+        }
+
+        function renderFormula() {
+          factorizationBox.hidden = step < 6;
+          if (factorizationBox.hidden) return;
+          factorizationBox.innerHTML = `<div class="factorization-label">ตัวประกอบเฉพาะ: <strong>${formatFactorization()}</strong></div><div class="totient-formula-line"><span>φ(${n}) = ${n} × ${factors.map(({ factor }) => `(1 − 1/${factor})`).join(' × ')}</span> = <strong>${phi}</strong></div>`;
+        }
+
+        function renderMonitor() {
+          monitorLog.replaceChildren();
+          const middle = Math.ceil(n / 2);
+          const firstHalf = candidates.slice(0, middle).filter((item) => item.coprime).length;
+          const secondHalf = candidates.slice(middle).filter((item) => item.coprime).length;
+          if (step === 1) {
+            monitorHint.textContent = `จะสแกน k = 1..${n} แล้วเก็บเฉพาะตัวที่ gcd(k, ${n}) = 1 — กด ▶`;
+            return;
+          }
+          monitorHint.textContent = step === 2
+            ? `สแกน k = 1..${middle} แล้วเก็บเฉพาะตัวที่ gcd(k, ${n}) = 1`
+            : step === 3
+              ? `สแกน k = ${middle + 1}..${n} ต่อ แล้วนับตัวที่ผ่าน`
+              : step === 4
+                ? `นับจำนวนที่ gcd(k, ${n}) = 1 จากภาพ`
+                : step < totalSteps
+                  ? 'ตรวจคำตอบจากการนับจริงด้วยสูตรของออยเลอร์'
+                  : `ตรวจครบแล้ว: φ(${n}) = ${phi}`;
+          addMonitorLine(`สแกน 1–${middle}: เจอ coprime ${firstHalf} ตัว`, firstHalf ? 'good' : '');
+          if (step >= 3) addMonitorLine(`สแกน ${middle + 1}–${n}: เจอ coprime ${secondHalf} ตัว`, secondHalf ? 'good' : '');
+          if (step >= 4) addMonitorLine(`นับได้ φ(${n}) = ${phi}`, 'good');
+          if (step >= 5) {
+            factors.slice(0, Math.min(factors.length, step - 4)).forEach(({ factor }) => addMonitorLine(`ตัวประกอบเฉพาะ ${factor} → คูณ (1 − 1/${factor})`, 'warn'));
+          }
+          if (step >= 6) addMonitorLine(`สูตรให้ ${phi} ตรงกับที่นับได้ ✓`, 'good');
+          if (step >= totalSteps) addMonitorLine(`φ(${n}) = ${phi}`, 'result');
+        }
+
+        function render() {
+          const limit = checkedLimit();
+          const found = candidates.slice(0, limit).filter((item) => item.coprime).length;
+          phiFound.textContent = String(found);
+          renderCandidates();
+          renderFormula();
+          renderMonitor();
+          progressFill.style.width = `${(step - 1) / (totalSteps - 1) * 100}%`;
+          stepLabel.textContent = `${step}/${totalSteps}`;
+        }
+
+        rangeInput.addEventListener('input', () => readInput(Number(rangeInput.value)));
+        input.addEventListener('change', () => readInput());
+        document.querySelector('#previous-step').addEventListener('click', () => { stopPlaying(); setStep(step - 1); });
+        document.querySelector('#next-step').addEventListener('click', () => { stopPlaying(); setStep(step + 1); });
+        document.querySelector('#reset-step').addEventListener('click', resetStep);
+        playButton.addEventListener('click', () => {
+          if (timer !== null) {
+            stopPlaying();
+            return;
+          }
+          if (step >= totalSteps) resetStep();
+          playButton.textContent = 'Ⅱ';
+          playButton.setAttribute('aria-label', 'หยุดขั้นตอน');
+          timer = window.setInterval(() => setStep(step + 1), 650);
+        });
+
+        resetStep();
+      })();
+    </script>
+  </body>
+</html>

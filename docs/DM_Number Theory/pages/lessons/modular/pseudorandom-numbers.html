@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="เรียนรู้ Linear Congruential Generator และคาบของลำดับสุ่มเทียม">
+    <title>จำนวนสุ่มเทียม (Pseudorandom Numbers) | Number Theory</title>
+    <link rel="stylesheet" href="../../../css/root-lessons/pseudorandom-numbers.css">
+    <script src="../../../js/lesson-shell.js" defer></script>
+  </head>
+  <body data-lesson-id="pseudorandom-numbers">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู" aria-expanded="false">☰</button>
+      </div>
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a data-lesson-id="divisibility" href="../foundations/divisibility.html"><span>01</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a data-lesson-id="integer-representations" href="../foundations/integer-representations.html"><span>02</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a data-lesson-id="primes" href="../foundations/primes.html"><span>03</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a data-lesson-id="sieve-of-eratosthenes" href="../factorization/sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a data-lesson-id="gcd-euclidean" href="../gcd/gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="gcd-prime-factorization" href="../gcd/gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a data-lesson-id="prime-factorization" href="../factorization/prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a data-lesson-id="modular-arithmetic" href="modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a data-lesson-id="congruence" href="congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a data-lesson-id="pseudorandom-numbers" href="pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a data-lesson-id="check-digits" href="check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a data-lesson-id="fast-modular-exponentiation" href="fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a data-lesson-id="euler-totient" href="../theorems/euler-totient.html"><span>13</span><span>ฟังก์ชันออยเลอร์ (Euler's Totient Function φ(n))</span></a></li>
+          <li><a data-lesson-id="fermats-little-theorem" href="../theorems/fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มา (Fermat's Little Theorem)</span></a></li>
+          <li><a data-lesson-id="extended-euclidean" href="../gcd/extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="classical-ciphers" href="../cryptography/classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบดั้งเดิม (Classical Ciphers)</span></a></li>
+          <li><a data-lesson-id="chinese-remainder-theorem" href="../theorems/chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a data-lesson-id="rsa-cryptography" href="../cryptography/rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography) — Capstone</span></a></li>
+        </ol>
+      </nav>
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>0/18 หัวข้อ · 0%</span><div><i></i></div></div>
+        <button class="learned-button" type="button" aria-pressed="false">ทำเครื่องหมายว่าเรียนแล้ว</button>
+        <div class="utility-links"><a href="../../tools/playground.html">Playground</a><a href="../../tools/glossary.html">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article>
+        <header class="page-header">
+          <h1>จำนวนสุ่มเทียม (Pseudorandom Numbers)</h1>
+          <p>เข้าใจ Linear Congruential Generator (LCG) และเห็นว่าลำดับที่ดู “สุ่ม” จริง ๆ คำนวณได้แน่นอนด้วยสูตรมอดูลาร์</p>
+        </header>
+
+        <div class="lesson-stack">
+          <section class="definition-card" aria-labelledby="definition-title">
+            <h2 id="definition-title"><i></i>นิยาม</h2>
+            <p class="definition-text">ชุดข้อมูลตัวเลขที่ดูเหมือนว่าถูกสุ่มขึ้นมาอย่างไม่มีระเบียบ แต่ความจริงแล้วถูกสร้างขึ้นจากขั้นตอนวิธีทางคณิตศาสตร์แบบกำหนดผลลัพธ์ล่วงหน้า (Deterministic Algorithm)</p>
+            <p class="sub-label">สูตร</p>
+            <div class="formula"><b>x</b><sub>n+1</sub> = (<b>a</b>·x<sub>n</sub> + <b>c</b>) mod <b>m</b></div>
+            <div class="definition-note">
+              <p>ให้ <code>m</code> ∈ ℤ และ <code>m</code> ≥ 2 (เรียกว่ามอดูลัส) และให้ <code>a</code>, <code>c</code>, <code>x₀</code> ∈ ℤ โดยที่ 0 ≤ a, c, x₀ &lt; m</p>
+              <p><strong>ตัวสร้างเชิงเส้นสมภาค (LCG)</strong> นิยามลำดับ x<sub>0</sub>, x<sub>1</sub>, x<sub>2</sub>, ... ด้วยความสัมพันธ์เวียนเกิดด้านบน คือนำพจน์ก่อนหน้ามาคูณ a บวก c แล้วหารเอาเศษด้วย m</p>
+              <p>เนื่องจากค่าที่เป็นไปได้มีจำกัดเพียง m ค่า ลำดับนี้จึงต้อง <strong>วนกลับมาซ้ำ</strong> เสมอ ความยาวของช่วงก่อนเริ่มวนซ้ำเรียกว่าคาบ (period) — จึงเป็นการสุ่มเทียม ไม่ใช่การสุ่มจริง</p>
+            </div>
+          </section>
+
+          <section class="lesson-card" aria-labelledby="visualizer-title">
+            <div class="lesson-card-header">
+              <div>
+                <h2 id="visualizer-title">LCG — ลำดับที่คำนวณได้แน่นอน</h2>
+                <p>ปรับค่า a, c, m และ seed แล้วกด ▶ เพื่อดูทีละพจน์</p>
+              </div>
+              <div class="button-row"><button class="primary" id="reset-lesson" type="button">รีเซ็ต</button></div>
+            </div>
+
+            <div class="control-row lcg-controls" aria-label="พารามิเตอร์ LCG">
+              <label class="control-group" for="multiplier"><span>a</span><input id="multiplier" type="number" min="1" max="30" value="5"></label>
+              <label class="control-group" for="increment"><span>c</span><input id="increment" type="number" min="0" max="30" value="3"></label>
+              <label class="control-group" for="modulus"><span>m</span><input id="modulus" type="number" min="2" max="30" value="16"></label>
+              <label class="control-group" for="seed"><span>seed x₀</span><input id="seed" type="number" min="0" max="30" value="1"></label>
+            </div>
+
+            <div class="visualizer-layout">
+              <div class="visualizer-canvas">
+                <div class="lcg-clock" aria-label="นาฬิกามอดูลัสแสดงค่าปัจจุบัน">
+                  <svg class="clock-face" viewBox="0 0 190 190" aria-hidden="true">
+                    <circle class="clock-dial" cx="95" cy="95" r="91"></circle>
+                    <g class="clock-markers" id="clock-markers"></g>
+                    <line class="clock-hand" id="clock-hand" x1="95" y1="95" x2="95" y2="22"></line>
+                    <circle class="clock-center" cx="95" cy="95" r="4.5"></circle>
+                  </svg>
+                  <strong id="current-value" hidden>1</strong>
+                  <span id="current-label">1 mod 16 = 1</span>
+                </div>
+                <div class="sequence-row" id="sequence-row" aria-live="polite"></div>
+                <p class="status-banner" id="sequence-status" aria-live="polite">เริ่มจาก seed แล้วกด ▶ เพื่อคำนวณ x₁</p>
+                <p class="period-note" id="period-note" hidden></p>
+              </div>
+              <aside class="monitor-panel" aria-label="ตัวติดตามขั้นตอน">
+                <p class="monitor-title">Execution Monitor</p>
+                <p class="monitor-hint" id="monitor-hint">เดิน x บนนาฬิกา mod 16 ด้วยสูตร (5x + 3) mod 16</p>
+                <div class="monitor-log" id="monitor-log"></div>
+              </aside>
+            </div>
+
+            <div class="step-controls" aria-label="ควบคุมขั้นตอน">
+              <button id="previous-step" type="button" aria-label="ขั้นก่อนหน้า">‹</button>
+              <button id="play-step" type="button" aria-label="เล่นขั้นตอน">▶</button>
+              <button id="next-step" type="button" aria-label="ขั้นถัดไป">›</button>
+              <button id="reset-step" type="button" aria-label="รีเซ็ตขั้นตอน">↺</button>
+              <div class="step-progress"><span><i id="step-progress-fill"></i></span><output id="step-label">0/0</output></div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+
+    <script>
+      (() => {
+        const inputs = {
+          multiplier: document.querySelector('#multiplier'),
+          increment: document.querySelector('#increment'),
+          modulus: document.querySelector('#modulus'),
+          seed: document.querySelector('#seed')
+        };
+        const currentValue = document.querySelector('#current-value');
+        const currentLabel = document.querySelector('#current-label');
+        const clockMarkers = document.querySelector('#clock-markers');
+        const clockHand = document.querySelector('#clock-hand');
+        const sequenceRow = document.querySelector('#sequence-row');
+        const sequenceStatus = document.querySelector('#sequence-status');
+        const periodNote = document.querySelector('#period-note');
+        const monitorHint = document.querySelector('#monitor-hint');
+        const monitorLog = document.querySelector('#monitor-log');
+        const progressFill = document.querySelector('#step-progress-fill');
+        const stepLabel = document.querySelector('#step-label');
+        const playButton = document.querySelector('#play-step');
+        let params = { multiplier: 5, increment: 3, modulus: 16, seed: 1 };
+        let sequence = [];
+        let step = 0;
+        let timer = null;
+
+        function clampInteger(value, min, max) {
+          const parsed = Number(value);
+          return Number.isFinite(parsed) ? Math.min(Math.max(Math.trunc(parsed), min), max) : min;
+        }
+
+        function buildSequence() {
+          const values = [];
+          const seen = new Map();
+          const modulus = Math.max(params.modulus, 2);
+          let value = ((params.seed % modulus) + modulus) % modulus;
+          for (let index = 0; index < 40; index += 1) {
+            const isRepeat = seen.has(value);
+            values.push({ index, value, isRepeat, firstIndex: isRepeat ? seen.get(value) : null });
+            if (isRepeat) break;
+            seen.set(value, index);
+            value = ((params.multiplier * value + params.increment) % modulus + modulus) % modulus;
+          }
+          return values;
+        }
+
+        function stopPlaying() {
+          if (timer !== null) window.clearInterval(timer);
+          timer = null;
+          playButton.textContent = '▶';
+          playButton.setAttribute('aria-label', 'เล่นขั้นตอน');
+        }
+
+        function resetStep() {
+          stopPlaying();
+          sequence = buildSequence();
+          step = 0;
+          render();
+        }
+
+        function readInputs() {
+          params = {
+            multiplier: clampInteger(inputs.multiplier.value, 1, 30),
+            increment: clampInteger(inputs.increment.value, 0, 30),
+            modulus: clampInteger(inputs.modulus.value, 2, 30),
+            seed: clampInteger(inputs.seed.value, 0, 30)
+          };
+          Object.entries(params).forEach(([key, value]) => { inputs[key].value = String(value); });
+          resetStep();
+        }
+
+        function setStep(nextStep) {
+          const maxStep = Math.max(sequence.length - 1, 0);
+          step = Math.min(Math.max(nextStep, 0), maxStep);
+          render();
+          if (step >= maxStep) stopPlaying();
+        }
+
+        function addMonitorLine(text, tone) {
+          const line = document.createElement('div');
+          line.className = `monitor-line ${tone || ''}`;
+          const dot = document.createElement('i');
+          const copy = document.createElement('span');
+          copy.textContent = text;
+          line.append(dot, copy);
+          monitorLog.append(line);
+        }
+
+        function renderClock(current) {
+          const modulus = Math.max(params.modulus, 2);
+          const markerFontSize = Math.max(8, Math.min(13, 176 / modulus));
+          const svgNamespace = 'http://www.w3.org/2000/svg';
+          clockMarkers.replaceChildren();
+          for (let index = 0; index < modulus; index += 1) {
+            const marker = document.createElementNS(svgNamespace, 'text');
+            const angle = index / modulus * 360;
+            const radians = (angle - 90) * Math.PI / 180;
+            marker.setAttribute('class', `clock-marker${index === current.value ? ' current' : ''}`);
+            marker.textContent = String(index);
+            marker.setAttribute('x', String(95 + 77 * Math.cos(radians)));
+            marker.setAttribute('y', String(95 + 77 * Math.sin(radians)));
+            marker.setAttribute('font-size', String(markerFontSize));
+            marker.setAttribute('text-anchor', 'middle');
+            marker.setAttribute('dominant-baseline', 'middle');
+            clockMarkers.append(marker);
+          }
+          clockHand.setAttribute('transform', `rotate(${current.value / modulus * 360} 95 95)`);
+        }
+
+        function render() {
+          const current = sequence[step] || { index: 0, value: params.seed % params.modulus, isRepeat: false };
+          const maxStep = Math.max(sequence.length - 1, 1);
+          const visible = sequence.slice(0, step + 1);
+          currentValue.textContent = String(current.value);
+          currentLabel.textContent = `${current.value} mod ${params.modulus} = ${current.value}`;
+          renderClock(current);
+          monitorHint.textContent = `เดิน x บนนาฬิกา mod ${params.modulus} ด้วยสูตร (${params.multiplier}x + ${params.increment}) mod ${params.modulus}`;
+          sequenceRow.replaceChildren();
+          visible.forEach((item) => {
+            const chip = document.createElement('span');
+            chip.className = `sequence-chip${item.index === 0 ? ' seed' : ''}${item.isRepeat ? ' repeat' : ''}${item.index === current.index ? ' current' : ''}`;
+            chip.textContent = String(item.value);
+            chip.title = `x${item.index} = ${item.value}`;
+            sequenceRow.append(chip);
+          });
+          if (current.isRepeat) {
+            sequenceStatus.className = 'status-banner good';
+            sequenceStatus.textContent = `พบค่าซ้ำ: x${current.index} = ${current.value} เคยพบแล้วที่ x${current.firstIndex}`;
+            periodNote.hidden = false;
+            periodNote.textContent = `ลำดับวนกลับมาที่ ${current.value} — period ยาว ${current.index - current.firstIndex}`;
+          } else {
+            sequenceStatus.className = 'status-banner';
+            sequenceStatus.textContent = step === 0 ? 'เริ่มจาก seed แล้วกด ▶ เพื่อคำนวณ x₁' : `x${current.index} = (${params.multiplier} × ${sequence[step - 1].value} + ${params.increment}) mod ${params.modulus} = ${current.value}`;
+            periodNote.hidden = true;
+          }
+          monitorLog.replaceChildren();
+          visible.forEach((item, index) => {
+            if (index === 0) addMonitorLine(`x₀ = seed = ${item.value}`, '');
+            else addMonitorLine(`x${item.index} = (${params.multiplier}×${sequence[item.index - 1].value} + ${params.increment}) mod ${params.modulus} = ${item.value}`, item.isRepeat ? 'good' : '');
+          });
+          progressFill.style.width = `${step / maxStep * 100}%`;
+          stepLabel.textContent = `${step}/${Math.max(sequence.length - 1, 0)}`;
+        }
+
+        Object.values(inputs).forEach((input) => input.addEventListener('change', readInputs));
+        document.querySelector('#previous-step').addEventListener('click', () => { stopPlaying(); setStep(step - 1); });
+        document.querySelector('#next-step').addEventListener('click', () => { stopPlaying(); setStep(step + 1); });
+        document.querySelector('#reset-step').addEventListener('click', resetStep);
+        document.querySelector('#reset-lesson').addEventListener('click', () => {
+          params = { multiplier: 5, increment: 3, modulus: 16, seed: 1 };
+          Object.entries(params).forEach(([key, value]) => { inputs[key].value = String(value); });
+          resetStep();
+        });
+        playButton.addEventListener('click', () => {
+          if (timer !== null) {
+            stopPlaying();
+            return;
+          }
+          if (step >= sequence.length - 1) resetStep();
+          playButton.textContent = 'Ⅱ';
+          playButton.setAttribute('aria-label', 'หยุดขั้นตอน');
+          timer = window.setInterval(() => setStep(step + 1), 700);
+        });
+
+        resetStep();
+      })();
+    </script>
+  </body>
+</html>

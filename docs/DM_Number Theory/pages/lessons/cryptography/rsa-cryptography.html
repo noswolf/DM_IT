@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="เรียนรู้ RSA ตั้งแต่เลือกจำนวนเฉพาะ สร้างกุญแจ เข้ารหัส และถอดรหัส">
+    <title>การเข้ารหัส RSA (RSA Cryptography) — Capstone | Number Theory</title>
+    <link rel="stylesheet" href="../../../css/root-lessons/rsa-cryptography.css">
+    <script src="../../../js/lesson-shell.js" defer></script>
+  </head>
+  <body data-lesson-id="rsa-cryptography">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู" aria-expanded="false">☰</button>
+      </div>
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a data-lesson-id="divisibility" href="../foundations/divisibility.html"><span>01</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a data-lesson-id="integer-representations" href="../foundations/integer-representations.html"><span>02</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a data-lesson-id="primes" href="../foundations/primes.html"><span>03</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a data-lesson-id="sieve-of-eratosthenes" href="../factorization/sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a data-lesson-id="gcd-euclidean" href="../gcd/gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="gcd-prime-factorization" href="../gcd/gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a data-lesson-id="prime-factorization" href="../factorization/prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a data-lesson-id="modular-arithmetic" href="../modular/modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a data-lesson-id="congruence" href="../modular/congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a data-lesson-id="pseudorandom-numbers" href="../modular/pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a data-lesson-id="check-digits" href="../modular/check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a data-lesson-id="fast-modular-exponentiation" href="../modular/fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a data-lesson-id="euler-totient" href="../theorems/euler-totient.html"><span>13</span><span>ฟังก์ชันออยเลอร์ (Euler's Totient Function φ(n))</span></a></li>
+          <li><a data-lesson-id="fermats-little-theorem" href="../theorems/fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มา (Fermat's Little Theorem)</span></a></li>
+          <li><a data-lesson-id="extended-euclidean" href="../gcd/extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="classical-ciphers" href="classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบดั้งเดิม (Classical Ciphers)</span></a></li>
+          <li><a data-lesson-id="chinese-remainder-theorem" href="../theorems/chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a data-lesson-id="rsa-cryptography" href="rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography) — Capstone</span></a></li>
+        </ol>
+      </nav>
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>0/18 หัวข้อ · 0%</span><div><i></i></div></div>
+        <button class="learned-button" type="button" aria-pressed="false">ทำเครื่องหมายว่าเรียนแล้ว</button>
+        <div class="utility-links"><a href="../../tools/playground.html">Playground</a><a href="../../tools/glossary.html">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article>
+        <header class="page-header">
+          <h1>การเข้ารหัส RSA (RSA Cryptography) — Capstone</h1>
+          <p>เห็นภาพรวมว่า Number Theory ที่เรียนมาทั้งหมดประกอบกันเป็นระบบเข้ารหัส RSA ได้จริง</p>
+        </header>
+
+        <div class="lesson-stack">
+          <section class="definition-card" aria-labelledby="definition-title">
+            <h2 id="definition-title"><i></i>นิยาม</h2>
+            <p class="definition-text">ระบบการเข้ารหัสข้อมูลแบบอสมมาตร (Asymmetric Encryption) ที่ใช้กุญแจสองดอกคู่กัน คือกุญแจสาธารณะสำหรับเข้ารหัสและกุญแจส่วนตัวสำหรับถอดรหัส</p>
+            <p class="sub-label">สูตร</p>
+            <div class="formula"><b>c</b> = <b>m</b><sup>e</sup> mod <b>n</b> &nbsp;·&nbsp; <b>m</b> = <b>c</b><sup>d</sup> mod <b>n</b></div>
+            <div class="definition-note">
+              <p>ให้ <code>p</code>, <code>q</code> เป็นจำนวนเฉพาะที่ต่างกัน กำหนด <code>n = pq</code> และ <code>φ(n) = (p<sup>−1</sup>)(q<sup>−1</sup>)</code> จากนั้นเลือก <code>e</code> ที่ <code>gcd(e, φ(n)) = 1</code> แล้วหา <code>d</code> ที่เป็นตัวผกผันมอดุลาร์ของ <code>e</code> คือ <code>ed ≡ 1 (mod φ(n))</code></p>
+              <p>เราเข้ารหัสข้อความ <code>m</code> ให้เป็นข้อความลับ <code>c</code> และถอดรหัสกลับ ด้วยการยกกำลังมอดุลาร์ ตามสูตรด้านบน</p>
+              <p>โดย <code>(n, e)</code> คือ<strong>กุญแจสาธารณะ</strong>ที่เผยแพร่ให้ใครก็ได้ ส่วน <code>(n, d)</code> คือ<strong>กุญแจส่วนตัว</strong>ที่ต้องเก็บเป็นความลับ — ความปลอดภัยของระบบมาจากการที่แยกตัวประกอบของ <code>n</code> เพื่อหา <code>φ(n)</code> นั้นทำได้ยากมากเมื่อ <code>n</code> มีขนาดใหญ่</p>
+            </div>
+          </section>
+
+          <section class="lesson-card" aria-labelledby="visualizer-title">
+            <div class="lesson-card-header">
+              <div>
+                <h2 id="visualizer-title">RSA — Capstone: ประกอบทุกบทเป็นระบบเข้ารหัส</h2>
+                <p>กด ▶ เพื่อเดินข้อมูลจากความลับของ p,q ไปถึงการถอดรหัสกลับเป็นข้อความเดิม</p>
+              </div>
+              <div class="rsa-controls" aria-label="ตัวเลือก RSA">
+                <div class="rsa-chip-row" id="rsa-p-chips"><span class="rsa-chip-label">p =</span></div>
+                <div class="rsa-chip-row" id="rsa-q-chips"><span class="rsa-chip-label">q =</span></div>
+                <div class="rsa-chip-row" id="rsa-e-chips"><span class="rsa-chip-label">e =</span><span class="rsa-chip-label">ข้อความ m =</span><input class="rsa-message-input" id="rsa-message" type="number" min="2" max="142" value="42" aria-label="ข้อความตัวเลข m"></div>
+              </div>
+            </div>
+
+            <div class="visualizer-layout">
+              <div class="visualizer-canvas rsa-canvas">
+                <div class="rsa-pipeline" id="rsa-pipeline"></div>
+                <div class="rsa-tubes" id="rsa-tubes"></div>
+                <div class="rsa-attacker" id="rsa-attacker" hidden></div>
+              </div>
+              <aside class="monitor-panel" aria-label="ตัวติดตามขั้นตอน">
+                <p class="monitor-title">Execution Monitor</p>
+                <p class="monitor-hint" id="rsa-monitor-hint">สร้างกุญแจจาก p, q แล้วส่งข้อความ m=42 ให้ปลอดภัย — กด ▶</p>
+                <div class="monitor-log" id="rsa-monitor"></div>
+              </aside>
+            </div>
+
+            <div class="step-controls" aria-label="ควบคุมขั้นตอน">
+              <button id="rsa-prev" type="button" aria-label="ขั้นก่อนหน้า">‹</button>
+              <button id="rsa-play" type="button" aria-label="เล่นขั้นตอน">▶</button>
+              <button id="rsa-next" type="button" aria-label="ขั้นถัดไป">›</button>
+              <button id="rsa-reset-step" type="button" aria-label="รีเซ็ตขั้นตอน">↺</button>
+              <div class="step-progress"><span><i id="rsa-step-fill"></i></span><output id="rsa-step-label">0/9</output></div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+
+    <script>
+      (() => {
+        const primes = [5, 7, 11, 13, 17, 19];
+        const pChips = document.querySelector('#rsa-p-chips');
+        const qChips = document.querySelector('#rsa-q-chips');
+        const eChips = document.querySelector('#rsa-e-chips');
+        const messageInput = document.querySelector('#rsa-message');
+        const pipeline = document.querySelector('#rsa-pipeline');
+        const tubes = document.querySelector('#rsa-tubes');
+        const attacker = document.querySelector('#rsa-attacker');
+        const monitorHint = document.querySelector('#rsa-monitor-hint');
+        const monitor = document.querySelector('#rsa-monitor');
+        const fill = document.querySelector('#rsa-step-fill');
+        const label = document.querySelector('#rsa-step-label');
+        const playButton = document.querySelector('#rsa-play');
+        let p = 11;
+        let q = 13;
+        let eIndex = 0;
+        let message = 42;
+        let step = 0;
+        let timer = null;
+
+        const gcd = (left, right) => { let x = Math.abs(left); let y = Math.abs(right); while (y) [x, y] = [y, x % y]; return x; };
+        const mod = (value, divisor) => (value % divisor + divisor) % divisor;
+        function modPow(base, exponent, modulus) { let result = 1 % modulus; let current = mod(base, modulus); let remaining = exponent; while (remaining > 0) { if (remaining % 2 === 1) result = result * current % modulus; current = current * current % modulus; remaining = Math.floor(remaining / 2); } return result; }
+        function extendedGcd(aValue, bValue) { let oldR = aValue; let r = bValue; let oldS = 1; let s = 0; while (r !== 0) { const quotient = Math.floor(oldR / r); [oldR, r] = [r, oldR - quotient * r]; [oldS, s] = [s, oldS - quotient * s]; } return { gcd: oldR, coefficient: oldS }; }
+        function values() { const n = p * q; const phi = (p - 1) * (q - 1); const candidates = [3, 5, 7, 11, 13, 17].filter((value) => value < phi && gcd(value, phi) === 1); const e = candidates[Math.min(eIndex, Math.max(candidates.length - 1, 0))] ?? 3; const inverse = extendedGcd(e, phi); const d = mod(inverse.coefficient, phi); const m = Math.min(Math.max(Math.trunc(message), 2), n - 1); return { n, phi, candidates, e, d, m, cipher: modPow(m, e, n), decoded: modPow(modPow(m, e, n), d, n) }; }
+        function addMonitorLine(text, tone = '') { const line = document.createElement('div'); line.className = `monitor-line ${tone}`; const dot = document.createElement('i'); const copy = document.createElement('span'); copy.textContent = text; line.append(dot, copy); monitor.append(line); }
+        function renderChipGroup(container, labelText, valuesList, selected, disabledValue, onSelect) { const labelNode = document.createElement('span'); labelNode.className = 'rsa-chip-label'; labelNode.textContent = labelText; container.replaceChildren(labelNode); valuesList.forEach((value) => { const button = document.createElement('button'); button.className = `rsa-chip ${value === selected ? 'selected' : ''}`; button.type = 'button'; button.textContent = String(value); button.disabled = value === disabledValue; button.addEventListener('click', () => onSelect(value)); container.append(button); }); }
+        function renderControls(data) {
+          renderChipGroup(pChips, 'p =', primes, p, q, (value) => { p = value; eIndex = 0; message = Math.min(message, p * q - 1); step = 0; stopPlaying(); render(); });
+          renderChipGroup(qChips, 'q =', primes, q, p, (value) => { q = value; eIndex = 0; message = Math.min(message, p * q - 1); step = 0; stopPlaying(); render(); });
+          const eLabel = document.createElement('span'); eLabel.className = 'rsa-chip-label'; eLabel.textContent = 'e ='; eChips.replaceChildren(eLabel);
+          data.candidates.forEach((value, index) => { const button = document.createElement('button'); button.className = `rsa-chip ${index === eIndex ? 'selected' : ''}`; button.type = 'button'; button.textContent = String(value); button.addEventListener('click', () => { eIndex = index; step = 0; stopPlaying(); render(); }); eChips.append(button); });
+          const messageLabel = document.createElement('span'); messageLabel.className = 'rsa-chip-label'; messageLabel.textContent = 'ข้อความ m ='; eChips.append(messageLabel); messageInput.max = String(data.n - 1); messageInput.value = String(data.m); eChips.append(messageInput);
+        }
+        function renderPipeline(data) {
+          const active = [step >= 1, step >= 2, step >= 3, step >= 4];
+          const stations = [
+            { tag: '1 · Primes', body: `p = ${active[0] ? p : '?'}, q = ${active[0] ? q : '?'}`, secret: '🤫 ความลับ' },
+            { tag: '2 · φ(n)', body: `n = ${active[1] ? data.n : '?'}, φ = ${active[1] ? data.phi : '?'}` },
+            { tag: '3 · gcd', body: `e = ${active[2] ? data.e : '?'} (gcd(e, φ)=1)`, key: active[2] ? '🔓 public (n, e)' : '' },
+            { tag: '4 · Ext-Euclid', body: `d = e⁻¹ mod φ = ${active[3] ? data.d : '?'}`, key: active[3] ? '🔑 private (d)' : '' }
+          ];
+          pipeline.replaceChildren(); stations.forEach((station, index) => { const card = document.createElement('div'); card.className = `rsa-station ${active[index] ? 'on' : ''}`; const tag = document.createElement('span'); tag.className = 'rsa-station-tag'; tag.textContent = station.tag; const body = document.createElement('span'); body.className = 'rsa-station-body'; body.textContent = station.body; card.append(tag, body); if (station.secret) { const secret = document.createElement('span'); secret.className = 'rsa-station-secret'; secret.textContent = station.secret; card.append(secret); } if (station.key) { const key = document.createElement('span'); key.className = index === 2 ? 'rsa-key-public' : 'rsa-key-private'; key.textContent = station.key; card.append(key); } pipeline.append(card); });
+        }
+        function renderTubes(data) {
+          const encrypted = step >= 5; const decrypted = step >= 6; const complete = step >= 7;
+          tubes.replaceChildren();
+          const encryption = document.createElement('div'); encryption.className = `rsa-tube ${encrypted ? 'on' : ''}`; encryption.innerHTML = `<span class="rsa-tube-label">เข้ารหัส (fast mod-exp): m^e mod n</span>`;
+          const encFlow = document.createElement('div'); encFlow.className = 'rsa-tube-flow'; const plain = document.createElement('span'); plain.className = 'rsa-token'; plain.textContent = String(data.m); const encArrow = document.createElement('span'); encArrow.className = 'rsa-tube-arrow'; encArrow.textContent = encrypted ? '⟶ 🔓 ⟶' : '⟶ ? ⟶'; const cipher = document.createElement('span'); cipher.className = encrypted ? 'rsa-token cipher' : 'rsa-token-hidden'; cipher.textContent = encrypted ? String(data.cipher) : '?'; encFlow.append(plain, encArrow, cipher); encryption.append(encFlow);
+          const decryption = document.createElement('div'); decryption.className = `rsa-tube ${decrypted ? 'on' : ''}`; decryption.innerHTML = '<span class="rsa-tube-label">ถอดรหัส: c^d mod n</span>'; const decFlow = document.createElement('div'); decFlow.className = 'rsa-tube-flow'; const cipherInput = document.createElement('span'); cipherInput.className = decrypted ? 'rsa-token cipher' : 'rsa-token-hidden'; cipherInput.textContent = decrypted ? String(data.cipher) : '?'; const decArrow = document.createElement('span'); decArrow.className = 'rsa-tube-arrow'; decArrow.textContent = decrypted ? '⟶ 🔑 ⟶' : '⟶ ? ⟶'; const plainOutput = document.createElement('span'); plainOutput.className = decrypted ? `rsa-token ${complete ? 'done' : ''}` : 'rsa-token-hidden'; plainOutput.textContent = decrypted ? String(data.decoded) : '?'; decFlow.append(cipherInput, decArrow, plainOutput); decryption.append(decFlow);
+          tubes.append(encryption, decryption);
+        }
+        function renderAttacker(data) { attacker.hidden = step < 9; attacker.replaceChildren(); if (step < 9) return; const title = document.createElement('p'); title.className = 'rsa-attacker-title'; title.textContent = `😈 ลองแอบอ่าน: มีแค่ (n=${data.n}, e=${data.e}, c=${data.cipher})`; const body = document.createElement('p'); body.className = 'rsa-attacker-body'; body.innerHTML = `ถ้าอยากถอดรหัสต้องรู้ค่า d ซึ่งต้องรู้ φ(n) ก่อน และการจะรู้ φ(n) ก็ต้องแยกตัวประกอบ <span class="rsa-attacker-shake">n = ${data.n} = ? × ?</span> ให้ได้ก่อน`; attacker.append(title, body); }
+        function render() {
+          const data = values();
+          renderControls(data); renderPipeline(data); renderTubes(data); renderAttacker(data);
+          monitorHint.textContent = step >= 7 ? `ถอดรหัสสำเร็จ! ${data.m} → ${data.cipher} → ${data.decoded} ✓` : `สร้างกุญแจจาก p, q แล้วส่งข้อความ m=${data.m} ให้ปลอดภัย — กด ▶ ดูทุกบทที่เรียนมาประกอบกัน`;
+          fill.style.width = `${step / 9 * 100}%`; label.textContent = `${step}/9`; monitor.replaceChildren();
+          if (step >= 1) addMonitorLine(`เลือก prime ลับ: p=${p}, q=${q} (บทที่ 2)`);
+          if (step >= 2) addMonitorLine(`n = p×q = ${data.n}, φ(n) = (p−1)(q−1) = ${data.phi}`);
+          if (step >= 3) addMonitorLine(`เลือก e = ${data.e} โดย gcd(e, φ) = 1 → public key (n=${data.n}, e=${data.e})`, 'good');
+          if (step >= 4) addMonitorLine(`d = e⁻¹ mod φ = ${data.d} จาก Extended Euclid → private key`, 'good');
+          if (step >= 5) addMonitorLine(`เข้ารหัส: c = m^e mod n = ${data.m}^${data.e} mod ${data.n} = ${data.cipher}`);
+          if (step >= 6) addMonitorLine(`ถอดรหัส: c^d mod n = ${data.cipher}^${data.d} mod ${data.n} = ${data.decoded}`);
+          if (step >= 7) addMonitorLine(`${data.m} → ${data.cipher} → ${data.decoded} — กลับมาครบ!`, 'good');
+          if (step >= 9) addMonitorLine(`ผู้แอบอ่านมี n, e, c แต่ยังขาด d ซึ่งต้องหา φ(n) จากการแยกตัวประกอบ n`, 'warn');
+        }
+        function stopPlaying() { if (timer !== null) window.clearInterval(timer); timer = null; playButton.textContent = '▶'; playButton.setAttribute('aria-label', 'เล่นขั้นตอน'); }
+        function setStep(nextStep) { step = Math.min(Math.max(nextStep, 0), 9); render(); if (step >= 9) stopPlaying(); }
+        messageInput.addEventListener('change', () => { const data = values(); message = Math.min(Math.max(Math.trunc(Number(messageInput.value) || 2), 2), data.n - 1); messageInput.value = String(message); step = 0; stopPlaying(); render(); });
+        document.querySelector('#rsa-prev').addEventListener('click', () => { stopPlaying(); setStep(step - 1); });
+        document.querySelector('#rsa-next').addEventListener('click', () => { stopPlaying(); setStep(step + 1); });
+        document.querySelector('#rsa-reset-step').addEventListener('click', () => { stopPlaying(); setStep(0); });
+        playButton.addEventListener('click', () => { if (timer !== null) { stopPlaying(); return; } if (step >= 9) setStep(0); playButton.textContent = 'Ⅱ'; playButton.setAttribute('aria-label', 'หยุดขั้นตอน'); timer = window.setInterval(() => setStep(step + 1), 480); });
+        render();
+      })();
+    </script>
+  </body>
+</html>

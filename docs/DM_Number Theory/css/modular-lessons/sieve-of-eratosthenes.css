@@ -1,0 +1,95 @@
+/* Shared converted layout, sidebar, definition card, player, and monitor. */
+@import url("./integer-representations.css");
+
+.execution-title {
+  margin: 0;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.input-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.input-group input { width: 76px; }
+
+.random-button {
+  min-height: 44px;
+  padding: 4px 16px;
+  border-radius: 999px;
+  background: var(--color-bg-elevated);
+  box-shadow: 0 2px 12px #0000000f;
+  font-size: 14px;
+  font-weight: 600;
+  transition: transform .2s;
+}
+
+.random-button:hover { transform: translateY(-1px); }
+.sqrt-hint { margin: 0; color: var(--color-secondary); text-align: center; font: 14px var(--font-mono); }
+.sieve-canvas { display: flex; flex-direction: column; gap: 16px; padding: 8px 0; }
+
+.sieve-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(32px, 1fr));
+  gap: 3px;
+}
+
+.sieve-cell {
+  position: relative;
+  display: flex;
+  min-width: 32px;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--color-border);
+  color: var(--color-text);
+  font: 12px var(--font-mono);
+  transition: background-color .2s, opacity .2s, transform .2s;
+}
+
+.sieve-cell.crossed {
+  opacity: .45;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.sieve-cell.crossed::after {
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  width: 55%;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--round-color);
+  content: "";
+  transform: translateX(-50%);
+}
+
+.sieve-cell.current {
+  z-index: 2;
+  outline: 3px solid var(--color-secondary);
+  outline-offset: 1px;
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  font-weight: 700;
+  transform: scale(1.15);
+}
+
+.sieve-cell.prime {
+  background: color-mix(in srgb, var(--color-secondary) 30%, transparent);
+  color: var(--color-text);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--color-secondary) 45%, transparent);
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sieve-cell { transition: none; }
+}

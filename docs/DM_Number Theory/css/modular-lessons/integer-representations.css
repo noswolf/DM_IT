@@ -1,0 +1,237 @@
+/* Reuse the readable base layout and sidebar from the converted divisibility page. */
+@import url("./divisibility.css");
+
+.execution {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.execution-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.input-group input {
+  width: 90px;
+  min-height: 44px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 12px;
+  outline: 0;
+  background: var(--color-bg-elevated);
+  box-shadow: 0 2px 12px #0000000f;
+  color: var(--color-text);
+  text-align: center;
+  font: 16px var(--font-mono);
+}
+
+.base-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.base-options > span {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.base-options button {
+  min-height: 44px;
+  padding: 4px 16px;
+  border-radius: 999px;
+  background: var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color .2s, color .2s;
+}
+
+.base-options button.active {
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
+
+.execution-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  align-items: start;
+  gap: 24px;
+}
+
+.canvas-area {
+  width: 100%;
+  min-width: 0;
+}
+
+.division-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.division-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--color-border);
+  animation: row-in .3s ease-out both;
+}
+
+.division-equation {
+  color: var(--color-text-muted);
+  font: 14px var(--font-mono);
+}
+
+.division-equation strong:last-child {
+  color: var(--color-secondary);
+}
+
+.digit-tag {
+  color: var(--color-accent);
+  white-space: nowrap;
+  font: 12px var(--font-mono);
+}
+
+.answer-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  border: 2px solid var(--color-success);
+  border-radius: 16px;
+  box-shadow: 0 0 28px color-mix(in srgb, var(--color-success) 40%, transparent);
+  animation: answer-in .3s ease-out;
+}
+
+.answer-panel[hidden] { display: none; }
+.answer-panel > p:first-child { margin: 0; color: var(--color-text-muted); font-size: 14px; }
+.answer-digits { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.answer-digits span {
+  display: inline-flex;
+  min-width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-success) 20%, transparent);
+  color: var(--color-success);
+  font: 700 20px var(--font-mono);
+  animation: digit-pop .3s ease-out both;
+}
+.answer-equation { margin: 0; color: var(--color-text); font: 700 28px var(--font-mono); }
+.answer-equation sub { font-size: .55em; }
+
+.monitor-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-left: 24px;
+  border-left: 1px solid var(--color-border);
+}
+
+.monitor-title {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.monitor-hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.monitor-log { display: flex; flex-direction: column; gap: 8px; }
+.monitor-line { display: flex; align-items: center; gap: 8px; animation: row-in .2s ease-out both; }
+.monitor-line i { width: 10px; height: 10px; flex-shrink: 0; border-radius: 3px; background: var(--color-accent); }
+.monitor-line span { color: var(--color-text); font: 12px/1.4 var(--font-mono); }
+.monitor-line.emphasis span { font-weight: 700; }
+.monitor-badge {
+  align-self: flex-start;
+  padding: 4px 16px;
+  border: 1px solid color-mix(in srgb, var(--color-success) 45%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-success) 16%, transparent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--color-success) 40%, transparent);
+  color: var(--color-success);
+  font: 700 14px var(--font-mono);
+}
+.monitor-badge[hidden] { display: none; }
+
+.execution > .player {
+  margin-top: 0;
+  padding-top: 16px;
+}
+
+.player-progress {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+}
+
+.player-progress > span {
+  height: 3px;
+  max-width: 220px;
+  flex: 1;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--color-border);
+}
+
+.player-progress i { display: block; height: 100%; background: var(--color-accent); transition: width .3s; }
+.player-progress output { color: var(--color-text-muted); font: 12px var(--font-mono); }
+
+@keyframes row-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes answer-in {
+  from { opacity: 0; transform: scale(.9); }
+  60% { transform: scale(1.03); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes digit-pop {
+  from { transform: scale(1); }
+  40% { transform: scale(1.25); }
+  to { transform: scale(1); }
+}
+
+@media (max-width: 640px) {
+  .execution-layout { grid-template-columns: 1fr; }
+  .monitor-panel { padding: 16px 0 0; border-top: 1px solid var(--color-border); border-left: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .division-row, .answer-panel, .answer-digits span, .monitor-line { animation: none; }
+}

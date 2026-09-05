@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ทดลอง widget และแนวคิดจากบทเรียนทฤษฎีจำนวนในหน้าเดียว">
+    <title>Playground | Number Theory</title>
+    <link rel="stylesheet" href="../../css/shared/utility.css">
+    <script src="../../js/lesson-shell.js" defer></script>
+  </head>
+  <body data-lesson-id="playground">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู" aria-expanded="false">☰</button>
+      </div>
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a data-lesson-id="divisibility" href="../lessons/foundations/divisibility.html"><span>01</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a data-lesson-id="integer-representations" href="../lessons/foundations/integer-representations.html"><span>02</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a data-lesson-id="primes" href="../lessons/foundations/primes.html"><span>03</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a data-lesson-id="sieve-of-eratosthenes" href="../lessons/factorization/sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a data-lesson-id="gcd-euclidean" href="../lessons/gcd/gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="gcd-prime-factorization" href="../lessons/gcd/gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a data-lesson-id="prime-factorization" href="../lessons/factorization/prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a data-lesson-id="modular-arithmetic" href="../lessons/modular/modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a data-lesson-id="congruence" href="../lessons/modular/congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a data-lesson-id="pseudorandom-numbers" href="../lessons/modular/pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a data-lesson-id="check-digits" href="../lessons/modular/check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a data-lesson-id="fast-modular-exponentiation" href="../lessons/modular/fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a data-lesson-id="euler-totient" href="../lessons/theorems/euler-totient.html"><span>13</span><span>ฟังก์ชันออยเลอร์ (Euler's Totient Function φ(n))</span></a></li>
+          <li><a data-lesson-id="fermats-little-theorem" href="../lessons/theorems/fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มา (Fermat's Little Theorem)</span></a></li>
+          <li><a data-lesson-id="extended-euclidean" href="../lessons/gcd/extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="classical-ciphers" href="../lessons/cryptography/classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบดั้งเดิม (Classical Ciphers)</span></a></li>
+          <li><a data-lesson-id="chinese-remainder-theorem" href="../lessons/theorems/chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a data-lesson-id="rsa-cryptography" href="../lessons/cryptography/rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography) — Capstone</span></a></li>
+        </ol>
+      </nav>
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>0/18 หัวข้อ · 0%</span><div><i></i></div></div>
+        <div class="utility-links"><a href="playground.html" aria-current="page">Playground</a><a href="glossary.html">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article class="utility-page">
+        <header class="utility-page-header">
+          <h1>Playground</h1>
+          <p>ทดลองเล่นกับ widget จากบทเรียนหลายบทในที่เดียว ตั้งแต่ step controller ไปจนถึง factor tree และ quiz สั้น ๆ</p>
+        </header>
+
+        <div class="playground-stack">
+          <section class="playground-block">
+            <span class="playground-block-title">&lt;StepController&gt;</span>
+            <div class="playground-card">
+              <h2>ควบคุมจังหวะการทดลอง</h2>
+              <div class="playground-step-row">
+                <div class="step-controls" id="playground-step-controls" aria-label="ควบคุมขั้นตอน">
+                  <button id="playground-prev" type="button" aria-label="ขั้นก่อนหน้า">‹</button>
+                  <button id="playground-play" type="button" aria-label="เล่นขั้นตอน">▶</button>
+                  <button id="playground-next" type="button" aria-label="ขั้นถัดไป">›</button>
+                  <button id="playground-reset" type="button" aria-label="รีเซ็ตขั้นตอน">↺</button>
+                  <div class="step-progress"><span><i id="playground-step-fill"></i></span><output id="playground-step-label">0/5</output></div>
+                </div>
+                <button class="playground-mode active" id="playground-mode" type="button">manual · กดเอง</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="playground-block">
+            <span class="playground-block-title">&lt;SliderInput&gt; + &lt;NumberGrid&gt;</span>
+            <div class="playground-card">
+              <h2>เลือกขนาด n แล้วสำรวจจำนวนรอบตัว</h2>
+              <div class="playground-range"><label for="playground-range">n</label><input id="playground-range" type="range" min="1" max="60" value="12"><input id="playground-number" type="number" min="1" max="60" value="12" aria-label="ค่า n"></div>
+              <div class="playground-number-grid" id="playground-number-grid" aria-label="ตารางตัวเลข"></div>
+              <p class="playground-note" id="playground-grid-note">คลิกตัวเลขเพื่อเลือก แล้วดูความสัมพันธ์กับ n</p>
+            </div>
+          </section>
+
+          <section class="playground-block">
+            <span class="playground-block-title">&lt;ClockModulo&gt;</span>
+            <div class="playground-card playground-clock">
+              <h2>นาฬิกา mod 12</h2>
+              <svg id="playground-clock" viewBox="0 0 160 160" role="img" aria-label="นาฬิกา modulo 12"><circle class="playground-clock-face" cx="80" cy="80" r="68"></circle><g id="playground-clock-ticks"></g><line id="playground-clock-hand" class="playground-clock-hand" x1="80" y1="80" x2="80" y2="28"></line><circle cx="80" cy="80" r="4" fill="var(--color-secondary)"></circle></svg>
+              <span class="playground-clock-value" id="playground-clock-value">12 mod 12 = 0</span>
+            </div>
+          </section>
+
+          <section class="playground-block">
+            <span class="playground-block-title">&lt;BarCompare&gt;</span>
+            <div class="playground-card">
+              <h2>เปรียบเทียบจำนวนขั้นตอน</h2>
+              <div class="playground-bars" id="playground-bars"></div>
+              <p class="playground-note">Fast ใช้ประมาณ log₂(n) ขั้นตอน ในขณะที่วิธีตรงไปตรงมาโตตาม n</p>
+            </div>
+          </section>
+
+          <section class="playground-block">
+            <span class="playground-block-title">&lt;FactorTree&gt;</span>
+            <div class="playground-card">
+              <h2>แยกตัวประกอบของ n</h2>
+              <div class="playground-factor-tree" id="playground-factor-tree"></div>
+              <p class="playground-note" id="playground-factor-note"></p>
+            </div>
+          </section>
+
+          <section class="playground-block">
+            <span class="playground-block-title">&lt;EquationHighlighter&gt;</span>
+            <div class="playground-card">
+              <h2>แตะส่วนของสมการเพื่อเน้นแนวคิด</h2>
+              <div class="playground-expression" id="playground-expression"><button data-expression-part="left" type="button">gcd(a, b)</button> = <button data-expression-part="right" type="button">gcd(b, a mod b)</button></div>
+              <p class="playground-note" id="playground-expression-note">สมการนี้คือหัวใจของ Euclidean algorithm</p>
+            </div>
+          </section>
+
+          <section class="playground-block">
+            <span class="playground-block-title">&lt;CodeSyncPanel&gt;</span>
+            <div class="playground-card">
+              <h2>โค้ด Euclidean algorithm</h2>
+              <div class="playground-code" id="playground-code"></div>
+              <p class="playground-note">คลิกบรรทัดใดก็ได้เพื่อเลื่อน highlight</p>
+            </div>
+          </section>
+
+          <section class="playground-block">
+            <span class="playground-block-title">&lt;MisconceptionCard&gt;</span>
+            <div class="playground-card">
+              <button class="playground-misconception" id="playground-misconception" type="button"><span class="playground-misconception-label">ผิดบ่อย — คลิกเพื่อดูคำตอบที่ถูก</span><span class="playground-misconception-copy" id="playground-misconception-copy">ต้องหา factor ทั้งหมดก่อนถึงจะหา gcd ได้</span></button>
+            </div>
+          </section>
+
+          <section class="playground-block">
+            <span class="playground-block-title">&lt;QuizCard&gt;</span>
+            <div class="playground-card playground-quiz">
+              <h2>ลองตอบด้วยตัวเอง</h2>
+              <p class="playground-quiz-prompt">gcd(24, 36) มีค่าเท่าไร?</p>
+              <div class="playground-quiz-choices" id="playground-quiz-choices"><button class="playground-quiz-choice" data-answer="6" type="button">6</button><button class="playground-quiz-choice" data-answer="12" type="button">12</button><button class="playground-quiz-choice" data-answer="18" type="button">18</button><button class="playground-quiz-choice" data-answer="24" type="button">24</button></div>
+              <p class="playground-quiz-explanation" id="playground-quiz-explanation" hidden></p>
+            </div>
+          </section>
+        </div>
+      </article>
+    </main>
+
+    <script>
+      (() => {
+        const range = document.querySelector('#playground-range');
+        const numberInput = document.querySelector('#playground-number');
+        const grid = document.querySelector('#playground-number-grid');
+        const gridNote = document.querySelector('#playground-grid-note');
+        const clockTicks = document.querySelector('#playground-clock-ticks');
+        const clockHand = document.querySelector('#playground-clock-hand');
+        const clockValue = document.querySelector('#playground-clock-value');
+        const bars = document.querySelector('#playground-bars');
+        const factorTree = document.querySelector('#playground-factor-tree');
+        const factorNote = document.querySelector('#playground-factor-note');
+        const expressionNote = document.querySelector('#playground-expression-note');
+        const codePanel = document.querySelector('#playground-code');
+        const misconception = document.querySelector('#playground-misconception');
+        const misconceptionLabel = document.querySelector('.playground-misconception-label');
+        const misconceptionCopy = document.querySelector('#playground-misconception-copy');
+        const quizChoices = [...document.querySelectorAll('[data-answer]')];
+        const quizExplanation = document.querySelector('#playground-quiz-explanation');
+        const playButton = document.querySelector('#playground-play');
+        let value = 12;
+        let selectedNumber = null;
+        let step = 0;
+        let mode = 'manual';
+        let codeLine = 2;
+        let misconceptionOpen = false;
+        let quizAnswer = null;
+        let timer = null;
+        const codeLines = ['function gcd(a, b) {', '  if (b === 0) return a;', '  return gcd(b, a % b);', '}'];
+        function clamp(raw) { return Math.min(Math.max(Math.trunc(Number(raw) || 1), 1), 60); }
+        function factors(number) { const result = []; let remaining = number; for (let divisor = 2; divisor * divisor <= remaining; divisor += 1) while (remaining % divisor === 0) { result.push(divisor); remaining /= divisor; } if (remaining > 1) result.push(remaining); return result.length ? result : [number]; }
+        function stopPlaying() { if (timer !== null) window.clearInterval(timer); timer = null; playButton.textContent = '▶'; playButton.setAttribute('aria-label', 'เล่นขั้นตอน'); }
+        function setValue(nextValue) { value = clamp(nextValue); range.value = String(value); numberInput.value = String(value); selectedNumber = selectedNumber === null ? null : Math.min(selectedNumber, value); render(); }
+        function renderGrid() { grid.replaceChildren(); for (let number = 0; number <= value; number += 1) { const button = document.createElement('button'); button.className = `playground-number ${number === selectedNumber ? 'selected' : ''} ${number !== 0 && value % number === 0 ? 'multiple' : ''}`; button.type = 'button'; button.textContent = String(number); button.dataset.note = number !== 0 && value % number === 0 ? `| ${value}` : ''; button.addEventListener('click', () => { selectedNumber = number; render(); }); grid.append(button); } gridNote.textContent = selectedNumber === null ? `ตาราง 0–${value} · คลิกตัวเลขเพื่อเลือก` : `${selectedNumber} mod ${value} = ${selectedNumber % value} · ${selectedNumber === 0 || value % selectedNumber !== 0 ? 'เป็นตัวอย่างให้ลองคิดต่อ' : `${selectedNumber} เป็นตัวหารของ ${value}`}`; }
+        function renderClock() { const center = 80; const radius = 52; clockTicks.replaceChildren(); for (let number = 0; number < 12; number += 1) { const angle = number / 12 * Math.PI * 2 - Math.PI / 2; const text = document.createElementNS('http://www.w3.org/2000/svg', 'text'); text.setAttribute('class', 'playground-clock-tick'); text.setAttribute('x', String(center + radius * Math.cos(angle))); text.setAttribute('y', String(center + radius * Math.sin(angle))); text.setAttribute('text-anchor', 'middle'); text.setAttribute('dominant-baseline', 'middle'); text.textContent = String(number); clockTicks.append(text); } const remainder = value % 12; clockHand.style.transformOrigin = '80px 80px'; clockHand.style.transform = `rotate(${remainder / 12 * 360}deg)`; clockValue.textContent = `${value} mod 12 = ${remainder}`; }
+        function renderBars() { bars.replaceChildren(); const fast = Math.max(1, Math.ceil(Math.log2(value + 1))); [{ label: 'Naive', amount: value, type: 'naive' }, { label: 'Fast', amount: fast, type: 'fast' }].forEach((item) => { const row = document.createElement('div'); row.className = 'playground-bar-row'; const labelNode = document.createElement('span'); labelNode.className = 'playground-bar-label'; labelNode.textContent = item.label; const track = document.createElement('div'); track.className = 'playground-bar-track'; const fill = document.createElement('div'); fill.className = `playground-bar-fill ${item.type}`; fill.style.width = `${item.amount / Math.max(value, 1) * 100}%`; track.append(fill); const amount = document.createElement('span'); amount.className = 'playground-bar-value'; amount.textContent = String(item.amount); row.append(labelNode, track, amount); bars.append(row); }); }
+        function renderFactors() { const list = factors(value); factorTree.replaceChildren(); const root = document.createElement('span'); root.className = 'playground-factor-node'; root.textContent = String(value); factorTree.append(root); if (list.length > 1) { const arrow = document.createElement('span'); arrow.className = 'playground-factor-arrow'; arrow.textContent = '→'; factorTree.append(arrow); list.forEach((factor, index) => { const node = document.createElement('span'); node.className = 'playground-factor-node'; node.textContent = String(factor); factorTree.append(node); if (index < list.length - 1) { const plus = document.createElement('span'); plus.className = 'playground-factor-arrow'; plus.textContent = '×'; factorTree.append(plus); } }); factorNote.textContent = `${value} = ${list.join(' × ')}`; } else factorNote.textContent = value === 1 ? '1 ไม่ใช่จำนวนเฉพาะและไม่ใช่จำนวนประกอบ' : `${value} เป็นจำนวนเฉพาะ`; }
+        function renderCode() { codePanel.replaceChildren(); codeLines.forEach((text, index) => { const line = document.createElement('button'); line.className = `playground-code-line ${index === codeLine ? 'active' : ''}`; line.type = 'button'; line.textContent = text; line.addEventListener('click', () => { codeLine = index; renderCode(); }); codePanel.append(line); }); }
+        function renderStep() { document.querySelector('#playground-step-fill').style.width = `${step / 5 * 100}%`; document.querySelector('#playground-step-label').textContent = `${step}/5`; document.querySelector('#playground-mode').textContent = mode === 'manual' ? 'manual · กดเอง' : 'auto · เล่นอัตโนมัติ'; document.querySelector('#playground-mode').classList.toggle('active', mode === 'manual'); }
+        function render() { renderStep(); renderGrid(); renderClock(); renderBars(); renderFactors(); renderCode(); }
+        function setStep(nextStep) { step = Math.min(Math.max(nextStep, 0), 5); renderStep(); if (step >= 5) stopPlaying(); }
+        range.addEventListener('input', () => { value = clamp(range.value); numberInput.value = String(value); render(); });
+        numberInput.addEventListener('change', () => { value = clamp(numberInput.value); range.value = String(value); numberInput.value = String(value); render(); });
+        document.querySelector('#playground-prev').addEventListener('click', () => { stopPlaying(); setStep(step - 1); });
+        document.querySelector('#playground-next').addEventListener('click', () => { stopPlaying(); setStep(step + 1); });
+        document.querySelector('#playground-reset').addEventListener('click', () => { stopPlaying(); setStep(0); });
+        document.querySelector('#playground-mode').addEventListener('click', () => { mode = mode === 'manual' ? 'auto' : 'manual'; renderStep(); });
+        playButton.addEventListener('click', () => { if (timer !== null) { stopPlaying(); return; } if (step >= 5) setStep(0); playButton.textContent = 'Ⅱ'; playButton.setAttribute('aria-label', 'หยุดขั้นตอน'); timer = window.setInterval(() => setStep(step + 1), 420); });
+        document.querySelectorAll('[data-expression-part]').forEach((button) => button.addEventListener('click', () => { document.querySelectorAll('[data-expression-part]').forEach((item) => item.classList.toggle('active', item === button)); expressionNote.textContent = button.dataset.expressionPart === 'left' ? 'ด้านซ้ายคือค่า gcd เดิมที่เราต้องการหา' : 'ด้านขวาคือการลดปัญหาให้เล็กลงด้วยเศษจากการหาร'; }));
+        misconception.addEventListener('click', () => { misconceptionOpen = !misconceptionOpen; misconceptionLabel.textContent = misconceptionOpen ? 'คำตอบที่ถูก — คลิกเพื่อดูความเข้าใจผิด' : 'ผิดบ่อย — คลิกเพื่อดูคำตอบที่ถูก'; misconceptionCopy.classList.toggle('correct', misconceptionOpen); misconceptionCopy.textContent = misconceptionOpen ? 'ใช้ Euclidean algorithm หารเศษซ้ำ ๆ ได้เลย ไม่ต้องหา factor ทั้งหมดก่อน' : 'ต้องหา factor ทั้งหมดก่อนถึงจะหา gcd ได้'; });
+        quizChoices.forEach((button) => button.addEventListener('click', () => { quizAnswer = button.dataset.answer; quizChoices.forEach((item) => { item.classList.remove('selected', 'correct', 'incorrect'); if (item.dataset.answer === quizAnswer) item.classList.add('selected'); if (item.dataset.answer === '12') item.classList.add('correct'); else if (item.dataset.answer === quizAnswer) item.classList.add('incorrect'); }); quizExplanation.hidden = false; quizExplanation.textContent = quizAnswer === '12' ? 'ถูกต้อง — gcd(24,36) = 12' : 'ลองใหม่ — ตัวหารร่วมที่มากที่สุดของ 24 และ 36 คือ 12'; }));
+        render();
+      })();
+    </script>
+  </body>
+</html>

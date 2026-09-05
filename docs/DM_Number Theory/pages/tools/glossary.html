@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="อภิธานศัพท์คำสำคัญในทฤษฎีจำนวนและเลขคณิตมอดูลาร์">
+    <title>Glossary | Number Theory</title>
+    <link rel="stylesheet" href="../../css/shared/utility.css">
+    <script src="../../js/lesson-shell.js" defer></script>
+  </head>
+  <body data-lesson-id="glossary">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <a class="brand" href="../../index.html"><span class="brand-mark">DM</span><span>Number Theory</span></a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="เปิดหรือปิดเมนู" aria-expanded="false">☰</button>
+      </div>
+      <nav class="lesson-nav" aria-label="บทเรียนทั้งหมด">
+        <ol>
+          <li><a data-lesson-id="divisibility" href="../lessons/foundations/divisibility.html"><span>01</span><span>การหารลงตัว (Divisibility)</span></a></li>
+          <li><a data-lesson-id="integer-representations" href="../lessons/foundations/integer-representations.html"><span>02</span><span>การแทนจำนวนเต็ม (Integer Representations)</span></a></li>
+          <li><a data-lesson-id="primes" href="../lessons/foundations/primes.html"><span>03</span><span>จำนวนเฉพาะ (Prime Numbers)</span></a></li>
+          <li><a data-lesson-id="sieve-of-eratosthenes" href="../lessons/factorization/sieve-of-eratosthenes.html"><span>04</span><span>ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)</span></a></li>
+          <li><a data-lesson-id="gcd-euclidean" href="../lessons/gcd/gcd-euclidean.html"><span>05</span><span>ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="gcd-prime-factorization" href="../lessons/gcd/gcd-prime-factorization.html"><span>06</span><span>GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)</span></a></li>
+          <li><a data-lesson-id="prime-factorization" href="../lessons/factorization/prime-factorization.html"><span>07</span><span>การแยกตัวประกอบเฉพาะ (Prime Factorization)</span></a></li>
+          <li><a data-lesson-id="modular-arithmetic" href="../lessons/modular/modular-arithmetic.html"><span>08</span><span>เลขคณิตมอดูลาร์ (Modular Arithmetic)</span></a></li>
+          <li><a data-lesson-id="congruence" href="../lessons/modular/congruence.html"><span>09</span><span>สมภาค (Congruence)</span></a></li>
+          <li><a data-lesson-id="pseudorandom-numbers" href="../lessons/modular/pseudorandom-numbers.html"><span>10</span><span>จำนวนสุ่มเทียม (Pseudorandom Numbers)</span></a></li>
+          <li><a data-lesson-id="check-digits" href="../lessons/modular/check-digits.html"><span>11</span><span>เลขตรวจสอบ (Check Digits)</span></a></li>
+          <li><a data-lesson-id="fast-modular-exponentiation" href="../lessons/modular/fast-modular-exponentiation.html"><span>12</span><span>การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)</span></a></li>
+          <li><a data-lesson-id="euler-totient" href="../lessons/theorems/euler-totient.html"><span>13</span><span>ฟังก์ชันออยเลอร์ (Euler's Totient Function φ(n))</span></a></li>
+          <li><a data-lesson-id="fermats-little-theorem" href="../lessons/theorems/fermats-little-theorem.html"><span>14</span><span>ทฤษฎีบทเล็กของแฟร์มา (Fermat's Little Theorem)</span></a></li>
+          <li><a data-lesson-id="extended-euclidean" href="../lessons/gcd/extended-euclidean.html"><span>15</span><span>ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)</span></a></li>
+          <li><a data-lesson-id="classical-ciphers" href="../lessons/cryptography/classical-ciphers.html"><span>16</span><span>การเข้ารหัสแบบดั้งเดิม (Classical Ciphers)</span></a></li>
+          <li><a data-lesson-id="chinese-remainder-theorem" href="../lessons/theorems/chinese-remainder-theorem.html"><span>17</span><span>ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)</span></a></li>
+          <li><a data-lesson-id="rsa-cryptography" href="../lessons/cryptography/rsa-cryptography.html"><span>18</span><span>การเข้ารหัส RSA (RSA Cryptography) — Capstone</span></a></li>
+        </ol>
+      </nav>
+      <div class="sidebar-utility">
+        <div class="lesson-progress"><span>0/18 หัวข้อ · 0%</span><div><i></i></div></div>
+        <div class="utility-links"><a href="playground.html">Playground</a><a href="glossary.html" aria-current="page">Glossary</a><button id="theme-toggle" type="button" aria-label="เปลี่ยนธีม">🌙</button></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <article class="utility-page">
+        <header class="utility-page-header">
+          <h1>Glossary</h1>
+          <p>รวมคำสำคัญจากบทเรียนทฤษฎีจำนวน ค้นหาได้ทั้งภาษาไทยและภาษาอังกฤษ แล้วกดลิงก์เพื่อกลับไปยังบทเรียนที่เกี่ยวข้อง</p>
+        </header>
+
+        <section class="utility-card" aria-labelledby="glossary-title">
+          <h2 id="glossary-title" class="sr-only">รายการคำศัพท์</h2>
+          <div class="glossary-toolbar">
+            <label class="glossary-search-wrap" for="glossary-search"><span class="glossary-search-icon" aria-hidden="true">⌕</span><input class="glossary-search" id="glossary-search" type="search" placeholder="ค้นหา เช่น gcd, prime, มอดูลาร์" autocomplete="off"></label>
+            <div class="glossary-filter-row" role="group" aria-label="กรองหมวดคำศัพท์">
+              <button class="glossary-filter selected" data-glossary-filter="all" type="button">ทั้งหมด</button>
+              <button class="glossary-filter" data-glossary-filter="core" type="button">พื้นฐาน</button>
+              <button class="glossary-filter" data-glossary-filter="modular" type="button">มอดูลาร์</button>
+              <button class="glossary-filter" data-glossary-filter="algorithm" type="button">อัลกอริทึม</button>
+            </div>
+          </div>
+          <p class="glossary-count" id="glossary-count" aria-live="polite">แสดง 10 จาก 10 คำ</p>
+          <div class="glossary-list" id="glossary-list">
+            <article class="glossary-entry" data-category="core" data-search="divisor ตัวหาร การหารลงตัว divisor a divides b">
+              <div class="glossary-term-row"><h3 class="glossary-term">Divisor</h3><div class="glossary-tags"><span class="glossary-tag">พื้นฐาน</span></div></div>
+              <p class="glossary-definition">ตัวหาร — ถ้า <code>a</code> หาร <code>b</code> ลงตัว เขียนแทนด้วย <code>a | b</code></p>
+              <a class="glossary-related" href="../lessons/foundations/divisibility.html">ไปที่บท การหารลงตัว →</a>
+            </article>
+            <article class="glossary-entry" data-category="core" data-search="prime จำนวนเฉพาะ primes">
+              <div class="glossary-term-row"><h3 class="glossary-term">Prime</h3><div class="glossary-tags"><span class="glossary-tag">พื้นฐาน</span></div></div>
+              <p class="glossary-definition">จำนวนเต็มที่มากกว่า 1 และไม่มีตัวหารบวกอื่นนอกจาก 1 กับตัวมันเอง</p>
+              <a class="glossary-related" href="../lessons/foundations/primes.html">ไปที่บท จำนวนเฉพาะ →</a>
+            </article>
+            <article class="glossary-entry" data-category="core" data-search="composite จำนวนประกอบ factor">
+              <div class="glossary-term-row"><h3 class="glossary-term">Composite</h3><div class="glossary-tags"><span class="glossary-tag">พื้นฐาน</span></div></div>
+              <p class="glossary-definition">จำนวนเต็มที่มากกว่า 1 ซึ่งไม่ใช่จำนวนเฉพาะ จึงเขียนเป็นผลคูณของจำนวนที่เล็กกว่าได้</p>
+              <a class="glossary-related" href="../lessons/factorization/prime-factorization.html">ไปที่บท Prime Factorization →</a>
+            </article>
+            <article class="glossary-entry" data-category="algorithm" data-search="gcd greatest common divisor ตัวหารร่วมมาก euclidean">
+              <div class="glossary-term-row"><h3 class="glossary-term">GCD</h3><div class="glossary-tags"><span class="glossary-tag">อัลกอริทึม</span></div></div>
+              <p class="glossary-definition">ตัวหารร่วมมาก — จำนวนที่มากที่สุดที่หารตัวเลขทั้งสองจำนวนลงตัว</p>
+              <a class="glossary-related" href="../lessons/gcd/gcd-euclidean.html">ไปที่บท Euclidean Algorithm →</a>
+            </article>
+            <article class="glossary-entry" data-category="core" data-search="lcm least common multiple ตัวคูณร่วมน้อย multiple">
+              <div class="glossary-term-row"><h3 class="glossary-term">LCM</h3><div class="glossary-tags"><span class="glossary-tag">พื้นฐาน</span></div></div>
+              <p class="glossary-definition">ตัวคูณร่วมน้อย — จำนวนบวกที่น้อยที่สุดซึ่งเป็นพหุคูณร่วมของจำนวนที่กำหนด</p>
+              <a class="glossary-related" href="../lessons/gcd/gcd-euclidean.html">กลับไปดูพื้นฐาน GCD →</a>
+            </article>
+            <article class="glossary-entry" data-category="modular" data-search="modulus modular arithmetic มอดูลาร์ เศษ modulus n">
+              <div class="glossary-term-row"><h3 class="glossary-term">Modulus</h3><div class="glossary-tags"><span class="glossary-tag">มอดูลาร์</span></div></div>
+              <p class="glossary-definition">ตัวหารในเลขคณิตมอดูลาร์ — <code>a mod n</code> คือเศษจากการหาร <code>a</code> ด้วย <code>n</code></p>
+              <a class="glossary-related" href="../lessons/modular/modular-arithmetic.html">ไปที่บท Modular Arithmetic →</a>
+            </article>
+            <article class="glossary-entry" data-category="modular" data-search="congruence สมภาค a b mod n">
+              <div class="glossary-term-row"><h3 class="glossary-term">Congruence</h3><div class="glossary-tags"><span class="glossary-tag">มอดูลาร์</span></div></div>
+              <p class="glossary-definition"><code>a ≡ b (mod n)</code> หมายถึง <code>n</code> หารผลต่าง <code>a − b</code> ลงตัว หรือทั้งคู่เหลือเศษเท่ากัน</p>
+              <a class="glossary-related" href="../lessons/modular/congruence.html">ไปที่บท Congruence →</a>
+            </article>
+            <article class="glossary-entry" data-category="modular" data-search="euler totient phi ออยเลอร์ coprime">
+              <div class="glossary-term-row"><h3 class="glossary-term">Euler's Totient</h3><div class="glossary-tags"><span class="glossary-tag">มอดูลาร์</span></div></div>
+              <p class="glossary-definition"><code>φ(n)</code> คือจำนวน <code>k</code> ในช่วง <code>1…n</code> ที่มี <code>gcd(k,n)=1</code></p>
+              <a class="glossary-related" href="../lessons/theorems/euler-totient.html">ไปที่บท Euler's Totient →</a>
+            </article>
+            <article class="glossary-entry" data-category="algorithm" data-search="bezout identity extended euclidean เบซูต์">
+              <div class="glossary-term-row"><h3 class="glossary-term">Bézout's Identity</h3><div class="glossary-tags"><span class="glossary-tag">อัลกอริทึม</span></div></div>
+              <p class="glossary-definition"><code>ax + by = gcd(a,b)</code> มีคำตอบ <code>x,y</code> เป็นจำนวนเต็มเสมอ และเป็นพื้นฐานของ modular inverse</p>
+              <a class="glossary-related" href="../lessons/gcd/extended-euclidean.html">ไปที่บท Extended Euclidean →</a>
+            </article>
+            <article class="glossary-entry" data-category="modular" data-search="coprime relatively prime gcd 1 จำนวนเฉพาะสัมพัทธ์">
+              <div class="glossary-term-row"><h3 class="glossary-term">Coprime</h3><div class="glossary-tags"><span class="glossary-tag">มอดูลาร์</span></div></div>
+              <p class="glossary-definition">สองจำนวนที่มี <code>gcd</code> เท่ากับ 1 แม้ตัวเลขนั้นอาจไม่ใช่จำนวนเฉพาะทั้งคู่</p>
+              <a class="glossary-related" href="../lessons/theorems/chinese-remainder-theorem.html">ไปที่บท CRT →</a>
+            </article>
+          </div>
+          <p class="glossary-empty" id="glossary-empty" hidden>ไม่พบคำศัพท์ที่ตรงกับคำค้นนี้ ลองใช้คำว่า gcd, prime หรือ มอดูลาร์</p>
+        </section>
+      </article>
+    </main>
+
+    <script>
+      (() => {
+        const search = document.querySelector('#glossary-search');
+        const filters = [...document.querySelectorAll('[data-glossary-filter]')];
+        const entries = [...document.querySelectorAll('.glossary-entry')];
+        const count = document.querySelector('#glossary-count');
+        const empty = document.querySelector('#glossary-empty');
+        let category = 'all';
+        function render() {
+          const query = search.value.trim().toLocaleLowerCase('th');
+          let visible = 0;
+          entries.forEach((entry) => {
+            const matchesCategory = category === 'all' || entry.dataset.category === category;
+            const matchesQuery = !query || entry.dataset.search.toLocaleLowerCase('th').includes(query);
+            const show = matchesCategory && matchesQuery;
+            entry.hidden = !show;
+            if (show) visible += 1;
+          });
+          count.textContent = `แสดง ${visible} จาก ${entries.length} คำ`;
+          empty.hidden = visible !== 0;
+        }
+        search.addEventListener('input', render);
+        filters.forEach((button) => button.addEventListener('click', () => { category = button.dataset.glossaryFilter; filters.forEach((item) => item.classList.toggle('selected', item === button)); render(); }));
+        render();
+      })();
+    </script>
+  </body>
+</html>
