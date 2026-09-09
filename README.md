@@ -10,7 +10,7 @@ Email: sirasit.lo@kmitl.ac.th
 |Week| Date | Topic | Lecture Slides |
 |---|---|---|---|
 |Week 08| 26/08/2026 | Number Theory | [Slides](https://github.com/noswolf/DM_IT/blob/main/2026/slides/DM_Week8.pdf) |
-|Week 10| 09/09/2026 | Number Theory (Cont.) |-|
+|Week 10| 09/09/2026 | Number Theory (Cont.) |[Slides](https://github.com/noswolf/DM_IT/blob/main/2026/slides/DM_Week9.pdf)|
 |Week 11| 16/09/2026 | Number Theory and Cryptography | - |
 |Week 12| 23/09/2026 | Relations | - |
 |Week 13| 30/09/2026 | Graphs Part 1 | -|
