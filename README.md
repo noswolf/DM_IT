@@ -10,7 +10,7 @@ Email: sirasit.lo@kmitl.ac.th
 |Week| Date | Topic | Lecture Slides | Interactive Guides | Homework |
 |---|---|---|---|---|---|
 |Week 08| 26/08/2026 | Number Theory | [Slides](https://github.com/noswolf/DM_IT/blob/main/2026/slides/DM_Week8.pdf) | [Guide: Number Theory](https://noswolf.github.io/DM_IT/DM_Number%20Theory/index.html)| - |
-|Week 10| 09/09/2026 | Number Theory (Cont.) |[Slides](https://github.com/noswolf/DM_IT/blob/main/2026/slides/DM_Week9.pdf)| -| [HW#1: Number Theory](https://forms.cloud.microsoft/r/31KHJtMibE) <br> Deadline: 24/10/2026 11:00PM|
+|Week 10| 09/09/2026 | Number Theory (Cont.) |[Slides](https://github.com/noswolf/DM_IT/blob/main/2026/slides/DM_Week9.pdf)| -| [HW#1: Number Theory](https://forms.cloud.microsoft/r/31KHJtMibE) <br> Deadline: 24/09/2026 11:00PM|
 |Week 11| 16/09/2026 | Relations | - | -| -|
 |Week 12| 23/09/2026 | Graphs Part 1 | - | -| -|
 |Week 13| 30/09/2026 | Graphs Part 2 | -| -| -|
