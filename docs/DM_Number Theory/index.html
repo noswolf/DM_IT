@@ -155,8 +155,8 @@
       .legend-dot.locked { opacity: .55; }
 
       .roadmap-scroll { padding-bottom: 8px; overflow-x: auto; }
-      .roadmap-canvas { position: relative; width: 836px; height: 1420px; margin: 0 auto; }
-      .roadmap-lines { position: absolute; top: 0; left: 0; width: 836px; height: 1420px; overflow: visible; }
+      .roadmap-canvas { position: relative; width: 836px; height: 2400px; margin: 0 auto; }
+      .roadmap-lines { position: absolute; top: 0; left: 0; width: 836px; height: 2400px; overflow: visible; }
       .roadmap-line { fill: none; stroke: var(--color-border); stroke-width: 2.5px; transition: stroke var(--transition-base), opacity var(--transition-base); }
       .roadmap-line.active { stroke: var(--color-accent); opacity: .6; }
       .roadmap-node {
@@ -217,6 +217,8 @@
       .mobile-node.is-completed { border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg-elevated)); }
       .mobile-node.is-next { border-color: var(--color-secondary); }
       .mobile-node.is-locked { opacity: .55; }
+      .mobile-node.branch { margin-left: 24px; border-style: dashed; position: relative; }
+      .mobile-node.branch::before { content: ""; position: absolute; left: -18px; top: 50%; width: 16px; border-top: 2px solid var(--color-border); }
       .mobile-state { flex-shrink: 0; color: var(--color-accent); font-weight: 700; }
       .mobile-state.next { padding: 2px 8px; border-radius: 999px; background: var(--color-secondary); color: var(--color-secondary-contrast); font-size: 11px; }
 
@@ -263,7 +265,7 @@
 
       <section class="roadmap-section">
         <h2>Number Theory Roadmap</h2>
-        <p class="roadmap-hint">คลิกที่หัวข้อเพื่อเริ่มเรียน — เส้นเชื่อมแสดงว่าต้องเรียนหัวข้อไหนมาก่อน</p>
+        <p class="roadmap-hint">หัวข้อหลักเรียงจากบนลงล่าง ส่วนเส้นด้านข้างเชื่อมหัวข้อย่อยที่เกี่ยวข้องกัน</p>
 
         <div class="desktop-roadmap">
           <div class="legend" aria-label="คำอธิบายสถานะ">
@@ -273,7 +275,7 @@
             <span class="legend-item"><i class="legend-dot locked"></i>ยังไม่ปลดล็อก</span>
           </div>
           <div class="roadmap-scroll">
-            <div class="roadmap-canvas" id="roadmap-canvas"><svg class="roadmap-lines" id="roadmap-lines" viewBox="0 0 836 1420" aria-hidden="true"></svg></div>
+            <div class="roadmap-canvas" id="roadmap-canvas"><svg class="roadmap-lines" id="roadmap-lines" viewBox="0 0 836 2400" aria-hidden="true"></svg></div>
           </div>
         </div>
 
@@ -284,36 +286,143 @@
     <script>
       (() => {
         const topics = [
-          { id: "divisibility", title: "การหารลงตัว (Divisibility)", dependsOn: [] },
-          { id: "integer-representations", title: "การแทนจำนวนเต็ม (Integer Representations)", dependsOn: ["divisibility"] },
-          { id: "primes", title: "จำนวนเฉพาะ (Prime Numbers)", dependsOn: ["divisibility"] },
-          { id: "sieve-of-eratosthenes", title: "ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)", dependsOn: ["primes"] },
-          { id: "gcd-euclidean", title: "ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)", dependsOn: ["divisibility"] },
-          { id: "gcd-prime-factorization", title: "GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)", dependsOn: ["gcd-euclidean"] },
-          { id: "prime-factorization", title: "การแยกตัวประกอบเฉพาะ (Prime Factorization)", dependsOn: ["primes"] },
-          { id: "modular-arithmetic", title: "เลขคณิตมอดูลาร์ (Modular Arithmetic)", dependsOn: ["divisibility"] },
-          { id: "congruence", title: "สมภาค (Congruence)", dependsOn: ["modular-arithmetic"] },
-          { id: "pseudorandom-numbers", title: "จำนวนสุ่มเทียม (Pseudorandom Numbers)", dependsOn: ["congruence"] },
-          { id: "check-digits", title: "เลขตรวจสอบ (Check Digits)", dependsOn: ["congruence"] },
-          { id: "fast-modular-exponentiation", title: "การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)", dependsOn: ["modular-arithmetic"] },
-          { id: "euler-totient", title: "ฟังก์ชันออยเลอร์ (Euler's Totient Function φ(n))", dependsOn: ["gcd-euclidean", "prime-factorization"] },
-          { id: "fermats-little-theorem", title: "ทฤษฎีบทเล็กของแฟร์มา (Fermat's Little Theorem)", dependsOn: ["fast-modular-exponentiation", "euler-totient"] },
-          { id: "extended-euclidean", title: "ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)", dependsOn: ["gcd-euclidean"] },
-          { id: "classical-ciphers", title: "การเข้ารหัสแบบดั้งเดิม (Classical Ciphers)", dependsOn: ["modular-arithmetic", "extended-euclidean"] },
-          { id: "chinese-remainder-theorem", title: "ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)", dependsOn: ["congruence", "extended-euclidean"] },
-          { id: "rsa-cryptography", title: "การเข้ารหัส RSA (RSA Cryptography) — Capstone", dependsOn: ["fermats-little-theorem", "euler-totient", "extended-euclidean", "chinese-remainder-theorem"] }
-        ];
+  {
+    "id": "divisibility",
+    "title": "การหารลงตัว (Divisibility)",
+    "dependsOn": []
+  },
+  {
+    "id": "modular-arithmetic",
+    "title": "เลขคณิตมอดูลาร์ (Modular Arithmetic)",
+    "dependsOn": [
+      "divisibility"
+    ]
+  },
+  {
+    "id": "congruence",
+    "title": "สมภาค (Congruence)",
+    "dependsOn": [
+      "modular-arithmetic"
+    ]
+  },
+  {
+    "id": "integer-representations",
+    "title": "การแทนจำนวนเต็ม (Integer Representations)",
+    "dependsOn": [
+      "congruence"
+    ]
+  },
+  {
+    "id": "fast-modular-exponentiation",
+    "title": "การยกกำลังมอดูลาร์แบบเร็ว (Fast Modular Exponentiation)",
+    "dependsOn": [
+      "integer-representations"
+    ]
+  },
+  {
+    "id": "primes",
+    "title": "จำนวนเฉพาะ (Prime Numbers)",
+    "dependsOn": [
+      "fast-modular-exponentiation"
+    ]
+  },
+  {
+    "id": "prime-factorization",
+    "title": "การแยกตัวประกอบเฉพาะ (Prime Factorization)",
+    "dependsOn": [
+      "primes"
+    ]
+  },
+  {
+    "id": "sieve-of-eratosthenes",
+    "title": "ตะแกรงเอราทอสเทนีส (Sieve of Eratosthenes)",
+    "dependsOn": [
+      "prime-factorization"
+    ]
+  },
+  {
+    "id": "gcd-prime-factorization",
+    "title": "GCD ด้วยการแยกตัวประกอบเฉพาะ (GCD by Prime Factorisation)",
+    "dependsOn": [
+      "sieve-of-eratosthenes"
+    ]
+  },
+  {
+    "id": "gcd-euclidean",
+    "title": "ตัวหารร่วมมาก — ขั้นตอนวิธียูคลิด (GCD — Euclidean Algorithm)",
+    "dependsOn": [
+      "gcd-prime-factorization"
+    ]
+  },
+  {
+    "id": "pseudorandom-numbers",
+    "title": "จำนวนสุ่มเทียม (Pseudorandom Numbers)",
+    "dependsOn": [
+      "gcd-euclidean"
+    ]
+  },
+  {
+    "id": "check-digits",
+    "title": "เลขตรวจสอบ (Check Digits)",
+    "dependsOn": [
+      "pseudorandom-numbers"
+    ]
+  },
+  {
+    "id": "classical-ciphers",
+    "title": "การเข้ารหัสแบบดั้งเดิม (Classical Ciphers)",
+    "dependsOn": [
+      "check-digits"
+    ]
+  },
+  {
+    "id": "extended-euclidean",
+    "title": "ขั้นตอนวิธียูคลิดแบบขยาย (Extended Euclidean Algorithm)",
+    "dependsOn": [
+      "classical-ciphers"
+    ]
+  },
+  {
+    "id": "euler-totient",
+    "title": "ฟังก์ชันออยเลอร์ (Euler's Totient Function φ(n))",
+    "dependsOn": [
+      "extended-euclidean"
+    ]
+  },
+  {
+    "id": "fermats-little-theorem",
+    "title": "ทฤษฎีบทเล็กของแฟร์มา (Fermat's Little Theorem)",
+    "dependsOn": [
+      "euler-totient"
+    ]
+  },
+  {
+    "id": "chinese-remainder-theorem",
+    "title": "ทฤษฎีบทเศษเหลือจีน (Chinese Remainder Theorem)",
+    "dependsOn": [
+      "fermats-little-theorem"
+    ]
+  },
+  {
+    "id": "rsa-cryptography",
+    "title": "การเข้ารหัส RSA (RSA Cryptography) — Capstone",
+    "dependsOn": [
+      "chinese-remainder-theorem"
+    ]
+  }
+];
 
         const spine = [
-          { id: "divisibility", branches: [{ id: "integer-representations", side: "right" }] },
-          { id: "primes", branches: [{ id: "sieve-of-eratosthenes", side: "right" }, { id: "prime-factorization", side: "left" }] },
-          { id: "gcd-euclidean", branches: [{ id: "gcd-prime-factorization", side: "right" }, { id: "extended-euclidean", side: "left" }] },
+          { id: "divisibility", branches: [] },
           { id: "modular-arithmetic", branches: [] },
-          { id: "congruence", branches: [{ id: "pseudorandom-numbers", side: "right" }, { id: "check-digits", side: "left" }] },
+          { id: "congruence", branches: [{ id: "pseudorandom-numbers", side: "left" }, { id: "check-digits", side: "right" }] },
+          { id: "integer-representations", branches: [] },
           { id: "fast-modular-exponentiation", branches: [] },
+          { id: "primes", branches: [{ id: "prime-factorization", side: "left" }, { id: "sieve-of-eratosthenes", side: "right" }] },
+          { id: "gcd-euclidean", branches: [{ id: "gcd-prime-factorization", side: "left" }, { id: "extended-euclidean", side: "right" }] },
+          { id: "classical-ciphers", branches: [] },
           { id: "euler-totient", branches: [] },
           { id: "fermats-little-theorem", branches: [] },
-          { id: "classical-ciphers", branches: [] },
           { id: "chinese-remainder-theorem", branches: [] },
           { id: "rsa-cryptography", branches: [] }
         ];
@@ -416,6 +525,11 @@
           const centerX = 418;
           const top = 60;
           const rowGap = 130;
+          const height = top * 2 + (spine.length - 1) * rowGap;
+          document.querySelector("#roadmap-canvas").style.height = height + "px";
+          const lines = document.querySelector("#roadmap-lines");
+          lines.style.height = height + "px";
+          lines.setAttribute("viewBox", "0 0 836 " + height);
           spine.forEach((entry, index) => {
             const y = top + index * rowGap;
             createDesktopNode(entry.id, "spine", centerX, y);
@@ -427,10 +541,15 @@
             });
           });
 
-          topics.forEach((topic) => {
+          const mobileTopics = spine.flatMap((entry) => [
+            { id: entry.id, branch: false },
+            ...entry.branches.map(({ id }) => ({ id, branch: true }))
+          ]);
+          mobileTopics.forEach(({ id, branch }) => {
+            const topic = topicById(id);
             const link = document.createElement("a");
             link.href = topicHref(topic.id);
-            link.className = "mobile-node";
+            link.className = "mobile-node" + (branch ? " branch" : "");
             link.dataset.topicId = topic.id;
             document.querySelector("#mobile-roadmap").append(link);
           });
