@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Graph terminology: interactive explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3F6FA; --sheet:#FFFFFF; --grid:#E4EBF4;
+  --ink:#15213B; --ink-2:#47546E; --ink-3:#7784A0; --rule:#D3DCE9;
+  --pen:#2340B8; --pen-ink:#FFFFFF; --pen-soft:#E4E9FA;
+  --edge:#23304F; --vfill:#FFFFFF; --vstroke:#15213B;
+  --multi:#E46F0A; --loop:#CF2F79; --conflict:#D92D20; --cycle:#7A3CE0; --dim:#CCD4E2;
+  --pa:#0E9C88; --pa-text:#FFFFFF; --pb:#F2B51D; --pb-text:#2A1E00;
+  --mark:rgba(255,221,51,.55);
+  --ok:#11734A; --ok-soft:#DCF2E6; --bad:#B42318; --bad-soft:#FCE3DF;
+  --serif:"STIX Two Text","STIX Two","Cambria Math",Cambria,"Times New Roman",serif;
+  --sans:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1525; --sheet:#152038; --grid:#1E2B48;
+    --ink:#E6ECF7; --ink-2:#AAB6CD; --ink-3:#7C89A4; --rule:#2A3858;
+    --pen:#93A8FF; --pen-ink:#0C1330; --pen-soft:#1F2A52;
+    --edge:#D5DCEA; --vfill:#152038; --vstroke:#E6ECF7;
+    --multi:#FF9B3D; --loop:#FF6DB0; --conflict:#FF5A4E; --cycle:#B48CFF; --dim:#2F3C5C;
+    --pa:#2FC4AE; --pa-text:#04211C; --pb:#F5C04A; --pb-text:#2A1E00;
+    --mark:rgba(255,214,10,.2);
+    --ok:#56D08F; --ok-soft:#133526; --bad:#FF8076; --bad-soft:#3A1A1A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1525; --sheet:#152038; --grid:#1E2B48;
+  --ink:#E6ECF7; --ink-2:#AAB6CD; --ink-3:#7C89A4; --rule:#2A3858;
+  --pen:#93A8FF; --pen-ink:#0C1330; --pen-soft:#1F2A52;
+  --edge:#D5DCEA; --vfill:#152038; --vstroke:#E6ECF7;
+  --multi:#FF9B3D; --loop:#FF6DB0; --conflict:#FF5A4E; --cycle:#B48CFF; --dim:#2F3C5C;
+  --pa:#2FC4AE; --pa-text:#04211C; --pb:#F5C04A; --pb-text:#2A1E00;
+  --mark:rgba(255,214,10,.2);
+  --ok:#56D08F; --ok-soft:#133526; --bad:#FF8076; --bad-soft:#3A1A1A;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html{font-size:16px;scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%;height:100%}
+html[data-size="lg"]{font-size:19px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55;min-height:100%}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+i{font-family:var(--serif);font-size:1.07em}
+sub,sup{font-family:var(--serif);font-size:.7em;line-height:0}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:500;line-height:1.15;margin:0}
+:focus-visible{outline:3px solid var(--pen);outline-offset:2px;border-radius:4px}
+
+/* Header + tabs */
+.top{padding:30px 0 18px}
+.top-in{display:flex;gap:20px 28px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap}
+h1{font-size:clamp(2.3rem,5vw,3.6rem);letter-spacing:-.015em}
+.lede{margin:.45em 0 0;max-width:62ch;color:var(--ink-2);font-size:1.05rem}
+.view-tools{display:flex;gap:8px;flex-wrap:wrap}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--rule)}
+.tabs-in{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.tabs-in::-webkit-scrollbar{display:none}
+.tab{border:0;background:none;font:inherit;font-size:1rem;padding:.85em .85em .7em;color:var(--ink-2);border-bottom:3px solid transparent;white-space:nowrap;cursor:pointer;display:flex;gap:.5em;align-items:baseline}
+.tab .n{font-family:var(--serif);font-size:1.1em;color:var(--ink-3)}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--pen)}
+.tab[aria-selected="true"] .n{color:var(--pen)}
+
+/* Common controls */
+.btn{font:inherit;font-size:.93rem;padding:.5em .95em;border-radius:8px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);cursor:pointer;line-height:1.3}
+.btn:hover:not(:disabled){border-color:var(--ink-3)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.primary{background:var(--pen);color:var(--pen-ink);border-color:var(--pen)}
+.btn.ghost{background:transparent}
+.btn.small{font-size:.86rem;padding:.38em .8em}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--rule);border-radius:10px;padding:3px;background:var(--sheet);gap:2px}
+.seg button{border:0;background:transparent;padding:.45em .8em;border-radius:7px;font:inherit;font-size:.93rem;color:var(--ink-2);cursor:pointer;display:inline-flex;gap:.45em;align-items:center;line-height:1.3}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.seg svg{width:22px;height:14px;flex:none}
+.chk{display:inline-flex;gap:.45em;align-items:center;font-size:.93rem;color:var(--ink-2);cursor:pointer}
+.chk input{accent-color:var(--pen);width:1.05em;height:1.05em;margin:0}
+.selw{display:inline-flex;gap:.5em;align-items:center;font-size:.93rem;color:var(--ink-2)}
+select{font:inherit;font-size:.93rem;color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:.42em .6em}
+.rng{display:inline-flex;align-items:center;gap:.6em;font-size:1rem}
+.rng input{accent-color:var(--pen);width:150px}
+.rng output{font-weight:700;min-width:1.4em;display:inline-block}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-bottom:12px}
+.toolbar .push{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+.scroll-x{overflow-x:auto;max-width:100%}
+
+/* Panels */
+.panel{padding:28px 0 44px}
+.panel-head{max-width:74ch;margin-bottom:18px}
+.panel-head h2{font-size:1.95rem}
+.panel-head p{color:var(--ink-2);margin:.45em 0 0}
+
+/* Graph-paper boards */
+.board{position:relative;background-color:var(--sheet);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;background-position:-1px -1px;border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+.board svg{display:block;width:100%;height:auto;overflow:visible}
+.hint{position:absolute;left:10px;bottom:10px;max-width:calc(100% - 20px);font-size:.86rem;color:var(--ink-2);background:var(--sheet);border:1px solid var(--rule);padding:.3em .65em;border-radius:6px;pointer-events:none}
+.empty{position:absolute;inset:0;display:grid;place-items:center;color:var(--ink-3);font-size:1.05rem;pointer-events:none;text-align:center;padding:20px}
+
+svg .e{fill:none;stroke:var(--edge);stroke-width:2.2;stroke-linecap:round}
+svg .e.dir{stroke-linecap:butt}
+svg .e-multi{stroke:var(--multi);stroke-width:2.7}
+svg .e-loop{stroke:var(--loop);stroke-width:2.7}
+svg .e-conflict{stroke:var(--conflict);stroke-width:3.3;stroke-dasharray:8 5}
+svg .e-cycle{stroke:var(--cycle);stroke-width:4.4}
+svg .e-hl{stroke:var(--pen);stroke-width:3.4}
+svg .e-dim{stroke:var(--dim)}
+svg .ah-base{fill:var(--edge)} svg .ah-multi{fill:var(--multi)} svg .ah-loop{fill:var(--loop)}
+svg .ah-conflict{fill:var(--conflict)} svg .ah-cycle{fill:var(--cycle)} svg .ah-hl{fill:var(--pen)} svg .ah-dim{fill:var(--dim)}
+svg .v .vc{fill:var(--vfill);stroke:var(--vstroke);stroke-width:2}
+svg .v text{font-family:var(--serif);font-style:italic;text-anchor:middle;fill:var(--ink);pointer-events:none;user-select:none;-webkit-user-select:none}
+svg .v .sub{font-style:normal;font-size:.66em}
+svg .v .halo{fill:var(--mark)}
+svg .v.sel .vc{stroke:var(--pen);stroke-width:3}
+svg .v.pa .vc{fill:var(--pa)} svg .v.pa text{fill:var(--pa-text)}
+svg .v.pb .vc{fill:var(--pb)} svg .v.pb text{fill:var(--pb-text)}
+svg .v.faded{opacity:.3}
+svg .ehit{fill:none;stroke:transparent;stroke-width:16;pointer-events:none}
+.erase svg .ehit{pointer-events:stroke;cursor:pointer}
+.erase svg .ehit:hover{stroke:var(--conflict);stroke-opacity:.25}
+.erase svg .v:hover .vc{stroke:var(--conflict);stroke-width:3}
+#bBoard svg{cursor:crosshair;touch-action:none}
+#bBoard svg .v{cursor:grab}
+#bBoard.erase svg{cursor:default}
+#bBoard.erase svg .v{cursor:pointer}
+#ssvg .v,#csvg .v{cursor:pointer}
+
+/* Section 1 */
+.intro{display:grid;grid-template-columns:1.35fr 1fr;gap:28px 48px;margin-bottom:30px}
+.intro h2{font-size:1.5rem;margin-bottom:.45em}
+.def p{font-family:var(--serif);font-size:1.14rem;line-height:1.62;max-width:62ch;margin:0 0 .9em}
+.def dfn{font-style:italic;font-weight:600}
+.terms{margin:0;display:grid;gap:.45em}
+.terms div{display:grid;grid-template-columns:11.5em 1fr;gap:.8em}
+.terms dt{font-weight:700}
+.terms dd{margin:0;color:var(--ink-2)}
+.ask ol{margin:0;padding-left:1.4em;display:grid;gap:.4em;font-size:1.05rem}
+.ask li::marker{font-family:var(--serif);color:var(--pen);font-weight:600}
+.legend{margin:1.1em 0 0;color:var(--ink-2);font-size:.93rem;display:flex;gap:.4em 1.2em;flex-wrap:wrap}
+.sw{display:inline-block;width:24px;height:0;border-top:3px solid;vertical-align:middle;margin-right:.4em}
+.sw-multi{border-color:var(--multi)} .sw-loop{border-color:var(--loop)}
+h3.group{font-size:1.35rem;margin:28px 0 14px;padding-bottom:7px;border-bottom:1px solid var(--rule)}
+.figs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px}
+.fig{margin:0;display:flex;flex-direction:column;gap:10px}
+.fig.lit .board{border-color:var(--pen);box-shadow:0 0 0 2px var(--pen)}
+.fig h4{font-size:1.4rem}
+.flags{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.flag{font-size:.8rem;border:1px solid var(--rule);border-radius:999px;padding:.12em .6em;display:inline-flex;gap:.35em;background:var(--sheet)}
+.flag .fk{color:var(--ink-3)}
+.flag.f-yes .fv{color:var(--ok);font-weight:700}
+.flag.f-no .fv{color:var(--ink-2)}
+.fig .fd{margin:.55em 0 .35em;font-size:.96rem}
+.fig .fe{margin:0 0 .75em;font-size:.91rem;color:var(--ink-2)}
+.fig .fe b{color:var(--ink)}
+.sum{border-collapse:collapse;width:100%;min-width:580px;font-size:1.02rem}
+.sum th,.sum td{text-align:left;padding:.6em .85em;border-bottom:1px solid var(--rule)}
+.sum thead th{font-family:var(--serif);font-weight:600;font-size:1.06rem;border-bottom:2px solid var(--ink)}
+.sum tbody th{font-weight:700}
+.sum tr.lit{background:var(--mark)}
+.yn-yes{color:var(--ok);font-weight:700}
+.yn-no{color:var(--ink-3)}
+.notes{display:grid;grid-template-columns:1fr 1fr;gap:18px 34px;margin-top:24px}
+.notes p{margin:0;padding-left:14px;border-left:3px solid var(--pen);max-width:62ch}
+
+/* Work area */
+.work{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(280px,1fr);gap:22px;align-items:start}
+.side{display:flex;flex-direction:column;gap:18px;min-width:0}
+.blk{border-top:2px solid var(--ink);padding-top:10px}
+.blk h4{font-size:1.12rem;margin-bottom:.5em}
+.blk p{margin:.4em 0 0}
+.vsub{margin:0;color:var(--ink-2);font-size:.93rem}
+.vname{font-size:2.15rem;margin:.05em 0 .4em}
+.fam-t{font-size:1.65rem;margin-bottom:.3em}
+.def-t{font-family:var(--serif);font-size:1.06rem;line-height:1.58;margin:.2em 0 .8em !important}
+.props{margin:0;display:grid;gap:.38em}
+.props div{display:grid;grid-template-columns:8.3em 1fr;gap:.6em}
+.props dt{color:var(--ink-3)}
+.props dd{margin:0}
+.yes{color:var(--ok);font-weight:700}
+.no{color:var(--ink-2);font-weight:700}
+.note{background:var(--pen-soft);padding:.6em .8em;border-radius:8px;font-size:.93rem;margin:.9em 0 0 !important}
+.muted{color:var(--ink-2);font-size:.93rem}
+.warn{border-left:3px solid var(--multi);padding:.25em 0 .25em .75em;margin:.9em 0 0 !important;font-size:.94rem}
+.mini-t{border-collapse:collapse;width:100%;font-size:.86rem}
+.mini-t th,.mini-t td{padding:.32em .45em;border-bottom:1px solid var(--rule);text-align:left}
+.mini-t thead th{color:var(--ink-3);font-weight:400}
+.mini-t tbody th{font-weight:400}
+.mini-t tr.on{background:var(--mark)}
+.mini-t tr.on th{font-weight:700}
+.deg-t{border-collapse:collapse;font-size:.93rem}
+.deg-t th,.deg-t td{padding:.28em .6em;text-align:center;border-bottom:1px solid var(--rule)}
+.deg-t th[scope="row"]{text-align:left;white-space:nowrap;font-weight:400;color:var(--ink-2)}
+.formula{font-size:.92rem;color:var(--ink-2)}
+.badge{display:inline-block;font-size:.84rem;font-weight:700;padding:.05em .55em;border-radius:6px;margin-right:.3em}
+.badge.ok{background:var(--ok-soft);color:var(--ok)}
+.badge.bad{background:var(--bad-soft);color:var(--bad)}
+.dot{display:inline-block;width:.8em;height:.8em;border-radius:50%;vertical-align:-.06em;margin-right:.35em}
+.dot.pa{background:var(--pa)} .dot.pb{background:var(--pb)}
+.sliders{display:flex;flex-wrap:wrap;gap:10px 22px}
+
+/* Bipartite challenge */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.chip{font:inherit;font-size:.92rem;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);border-radius:999px;padding:.35em .9em;cursor:pointer}
+.chip:hover{border-color:var(--ink-3)}
+.chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.chip .tick{color:var(--ok);font-weight:700;margin-left:.35em}
+.chip.on .tick{color:inherit}
+.status{padding:.85em 1em;border-radius:10px;background:var(--sheet);border:1px solid var(--rule);font-size:.98rem;min-height:4.6em}
+.status.good{background:var(--ok-soft);border-color:transparent}
+.status.bad{background:var(--bad-soft);border-color:transparent}
+.status p{margin:0 0 .5em}
+.status p:last-child{margin:0}
+.btn-col{display:flex;flex-direction:column;gap:8px;align-items:stretch}
+.theory{font-family:var(--serif);font-size:1.02rem;line-height:1.58}
+.theory p{margin:0 0 .6em}
+
+/* Quiz */
+.quiz{max-width:820px}
+.q-top{display:flex;justify-content:space-between;color:var(--ink-2);font-size:.93rem}
+.q-bar{height:4px;background:var(--rule);border-radius:4px;margin:.5em 0 1.3em;overflow:hidden}
+.q-bar span{display:block;height:100%;background:var(--pen)}
+.q-prompt{font-size:1.6rem;margin:0 0 14px}
+.q-board{margin-bottom:14px;max-width:600px}
+.q-opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.q-opts.six{grid-template-columns:repeat(3,minmax(0,1fr))}
+.q-opt{font:inherit;font-size:1.03rem;text-align:left;padding:.75em 1em;border:1.5px solid var(--rule);border-radius:10px;background:var(--sheet);color:var(--ink);cursor:pointer}
+.q-opt:hover:not(:disabled){border-color:var(--pen)}
+.q-opt:disabled{cursor:default}
+.q-opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.q-opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.q-opt i,.q-opt sub{font-size:1.18em}
+.q-fb{margin-top:16px}
+.q-fb p{margin:0 0 12px;padding:.85em 1em;border-radius:10px;line-height:1.6}
+.q-fb .good{background:var(--ok-soft)}
+.q-fb .bad{background:var(--bad-soft)}
+.q-end .score{font-family:var(--serif);font-size:4.4rem;line-height:1;margin:.1em 0 .2em}
+.q-end p{max-width:60ch}
+
+.foot{color:var(--ink-3);font-size:.9rem;padding-top:14px;padding-bottom:40px;border-top:1px solid var(--rule)}
+.foot p{margin:0}
+
+@media (max-width:980px){.figs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:880px){.work{grid-template-columns:1fr}.intro{grid-template-columns:1fr}.notes{grid-template-columns:1fr}.toolbar .push{margin-left:0}}
+@media (max-width:620px){
+  .figs{grid-template-columns:1fr}
+  .terms div{grid-template-columns:1fr;gap:0}
+  .q-opts,.q-opts.six{grid-template-columns:1fr 1fr}
+  .props div{grid-template-columns:7em 1fr}
+  .panel-head h2{font-size:1.65rem}
+  .rng input{width:120px}
+  .hint{position:static;display:block;margin:0;max-width:none;border:0;border-top:1px solid var(--rule);border-radius:0}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-in">
+    <div>
+      <h1>Graph terminology</h1>
+      <p class="lede">Undirected and directed graphs, and the special simple graphs <i>K</i><sub><i>n</i></sub>, <i>C</i><sub><i>n</i></sub>, <i>W</i><sub><i>n</i></sub> and <i>K</i><sub><i>m</i>,<i>n</i></sub>. Draw them, test them, then quiz yourself.</p>
+    </div>
+    <div class="view-tools">
+      <button class="btn ghost" id="sizeBtn" aria-pressed="false">Larger text</button>
+      <button class="btn ghost" id="themeBtn">Dark mode</button>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Lesson sections">
+  <div class="wrap tabs-in" role="tablist">
+    <button class="tab" role="tab" id="t-types" data-tab="types" aria-controls="p-types" aria-selected="true"><span class="n">1</span>Graph types</button>
+    <button class="tab" role="tab" id="t-build" data-tab="build" aria-controls="p-build" aria-selected="false" tabindex="-1"><span class="n">2</span>Build and classify</button>
+    <button class="tab" role="tab" id="t-special" data-tab="special" aria-controls="p-special" aria-selected="false" tabindex="-1"><span class="n">3</span>Special simple graphs</button>
+    <button class="tab" role="tab" id="t-bip" data-tab="bip" aria-controls="p-bip" aria-selected="false" tabindex="-1"><span class="n">4</span>Bipartite challenge</button>
+    <button class="tab" role="tab" id="t-quiz" data-tab="quiz" aria-controls="p-quiz" aria-selected="false" tabindex="-1"><span class="n">5</span>Quick quiz</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- 1. Graph types -->
+<section class="panel" id="p-types" role="tabpanel" aria-labelledby="t-types">
+  <div class="intro">
+    <div class="def">
+      <h2>What is a graph?</h2>
+      <p>A <dfn>graph</dfn> <i>G</i> = (<i>V</i>, <i>E</i>) consists of a nonempty set <i>V</i> of <dfn>vertices</dfn> (or nodes) and a set <i>E</i> of <dfn>edges</dfn>. Each edge has one or two vertices attached to it, called its <dfn>endpoints</dfn>, and we say the edge <dfn>connects</dfn> its endpoints.</p>
+      <dl class="terms">
+        <div><dt>Loop</dt><dd>an edge that connects a vertex to itself.</dd></div>
+        <div><dt>Multiple edges</dt><dd>two or more edges that connect the same pair of vertices (also called parallel edges).</dd></div>
+        <div><dt>Directed edge (<i>u</i>, <i>v</i>)</dt><dd>an edge that starts at <i>u</i> and ends at <i>v</i>. It is drawn as an arrow.</dd></div>
+      </dl>
+    </div>
+    <div class="ask">
+      <h2>Three questions name the type</h2>
+      <ol>
+        <li>Are the edges <b>undirected</b>, <b>directed</b>, or <b>both</b>?</li>
+        <li>Are <b>multiple edges</b> allowed?</li>
+        <li>Are <b>loops</b> allowed?</li>
+      </ol>
+      <p class="legend"><span><span class="sw sw-multi"></span>multiple edges</span><span><span class="sw sw-loop"></span>loops</span></p>
+    </div>
+  </div>
+
+  <h3 class="group">Undirected graphs</h3>
+  <div class="figs" id="figsU"></div>
+  <h3 class="group">Directed and mixed graphs</h3>
+  <div class="figs" id="figsD"></div>
+  <h3 class="group">Summary</h3>
+  <div class="scroll-x"><table class="sum" id="sumTable"></table></div>
+  <div class="notes">
+    <p><b>Names nest.</b> Every simple graph is also a multigraph (a multigraph <em>may</em> have multiple edges but doesn't have to), and every multigraph is also a pseudograph. When you classify a graph, give the most specific name.</p>
+    <p><b>Direction matters.</b> In a directed graph, (<i>u</i>, <i>v</i>) and (<i>v</i>, <i>u</i>) are different edges. Having both of them does <em>not</em> count as multiple edges.</p>
+  </div>
+</section>
+
+<!-- 2. Build and classify -->
+<section class="panel" id="p-build" role="tabpanel" aria-labelledby="t-build" hidden>
+  <div class="panel-head">
+    <h2>Build a graph and classify it</h2>
+    <p>Click empty grid space to add a vertex. Click two vertices to join them, or click the same vertex twice for a loop. Drag a vertex to move it. The name updates as you draw.</p>
+  </div>
+  <div class="toolbar">
+    <div class="seg" id="bModes" role="group" aria-label="Drawing tool">
+      <button data-mode="und" aria-pressed="true"><svg viewBox="0 0 22 14" aria-hidden="true"><circle cx="3" cy="7" r="2.5" fill="currentColor"/><circle cx="19" cy="7" r="2.5" fill="currentColor"/><path d="M3 7H19" stroke="currentColor" stroke-width="2"/></svg>Undirected edge</button>
+      <button data-mode="dir" aria-pressed="false"><svg viewBox="0 0 22 14" aria-hidden="true"><circle cx="3" cy="7" r="2.5" fill="currentColor"/><path d="M3 7H15" stroke="currentColor" stroke-width="2"/><path d="M14 2.5L21 7L14 11.5Z" fill="currentColor"/></svg>Directed edge</button>
+      <button data-mode="erase" aria-pressed="false"><svg viewBox="0 0 22 14" aria-hidden="true"><path d="M6 3L16 11M16 3L6 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Erase</button>
+    </div>
+    <div class="push">
+      <button class="btn" id="bUndo">Undo</button>
+      <button class="btn" id="bClear">Clear</button>
+      <label class="selw">Load example
+        <select id="bPreset"><option value="">Choose a type</option></select>
+      </label>
+      <label class="chk"><input type="checkbox" id="bHl" checked> Color loops and multiple edges</label>
+    </div>
+  </div>
+  <div class="work">
+    <div class="board" id="bBoard">
+      <svg id="bsvg" viewBox="0 0 640 420" role="img" aria-label="Drawing area for your graph"></svg>
+      <div class="empty" id="bEmpty" hidden>Click anywhere on the grid to add your first vertex.</div>
+      <div class="hint" id="bStatus"></div>
+    </div>
+    <aside class="side" id="bPanel" aria-live="polite"></aside>
+  </div>
+</section>
+
+<!-- 3. Special simple graphs -->
+<section class="panel" id="p-special" role="tabpanel" aria-labelledby="t-special" hidden>
+  <div class="panel-head">
+    <h2>Special simple graphs</h2>
+    <p>Pick a family and change the size. Tap a vertex to see its degree and neighbors. Ask the class whether the graph is bipartite before you turn on the 2-coloring test.</p>
+  </div>
+  <div class="toolbar">
+    <div class="seg" id="sFam" role="group" aria-label="Graph family">
+      <button data-fam="K" aria-pressed="true">Complete <span><i>K</i><sub><i>n</i></sub></span></button>
+      <button data-fam="C" aria-pressed="false">Cycle <span><i>C</i><sub><i>n</i></sub></span></button>
+      <button data-fam="W" aria-pressed="false">Wheel <span><i>W</i><sub><i>n</i></sub></span></button>
+      <button data-fam="B" aria-pressed="false">Complete bipartite <span><i>K</i><sub><i>m</i>,<i>n</i></sub></span></button>
+    </div>
+    <div class="sliders">
+      <label class="rng" id="sMwrap" hidden><span><i>m</i> = <output id="sMout">3</output></span><input type="range" id="sM" min="1" max="6" value="3" aria-label="m"></label>
+      <label class="rng"><span><i>n</i> = <output id="sNout">5</output></span><input type="range" id="sN" min="1" max="10" value="5" aria-label="n"></label>
+    </div>
+  </div>
+  <div class="toolbar">
+    <label class="chk"><input type="checkbox" id="sLabels" checked> Vertex labels</label>
+    <label class="chk"><input type="checkbox" id="sColor"> Try a 2-coloring</label>
+    <label class="chk"><input type="checkbox" id="sBip"> Arrange as two sides</label>
+    <button class="btn small" id="sReplay">Replay construction</button>
+  </div>
+  <div class="work">
+    <div class="board"><svg id="ssvg" viewBox="0 0 640 440" role="img" aria-label="Special simple graph"></svg></div>
+    <aside class="side" id="sPanel" aria-live="polite"></aside>
+  </div>
+</section>
+
+<!-- 4. Bipartite challenge -->
+<section class="panel" id="p-bip" role="tabpanel" aria-labelledby="t-bip" hidden>
+  <div class="panel-head">
+    <h2>Bipartite challenge</h2>
+    <p>A simple graph is <b>bipartite</b> when its vertices can be split into two disjoint sets <i>V</i><sub>1</sub> and <i>V</i><sub>2</sub> so that every edge joins a vertex of <i>V</i><sub>1</sub> to a vertex of <i>V</i><sub>2</sub>. Tap a vertex to color it, tap again to switch color, and a third time to clear it. Can you 2-color each graph?</p>
+  </div>
+  <div class="chips" id="cList" role="group" aria-label="Choose a graph"></div>
+  <div class="work">
+    <div class="board"><svg id="csvg" viewBox="0 0 640 420" role="img" aria-label="Graph to color"></svg></div>
+    <aside class="side">
+      <div class="status" id="cStatus" aria-live="polite"></div>
+      <div class="btn-col">
+        <button class="btn" id="cClaim">It can't be 2-colored</button>
+        <button class="btn ghost" id="cShow">Show answer</button>
+        <button class="btn ghost" id="cReset">Reset colors</button>
+      </div>
+      <div class="blk theory">
+        <p><b>Theorem.</b> A simple graph is bipartite if and only if its vertices can be colored with two colors so that no two adjacent vertices have the same color.</p>
+        <p>Equivalently, a graph is bipartite if and only if it has no cycle of odd length.</p>
+        <p class="muted"><span class="dot pa"></span><i>V</i><sub>1</sub> &nbsp; <span class="dot pb"></span><i>V</i><sub>2</sub></p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- 5. Quiz -->
+<section class="panel" id="p-quiz" role="tabpanel" aria-labelledby="t-quiz" hidden>
+  <div class="panel-head">
+    <h2>Quick quiz</h2>
+    <p>Ten questions, generated fresh every time you start a new set.</p>
+  </div>
+  <div class="quiz" id="quiz"></div>
+</section>
+
+</main>
+<footer class="wrap foot">
+  <p>Terminology follows Rosen, <cite>Discrete Mathematics and Its Applications</cite>, Sections 10.1 and 10.2.</p>
+</footer>
+
+<script>
+(() => {
+'use strict';
+
+/* ================= helpers ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const LET = 'abcdefghijklmnopqrstuvwxyz';
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const range = n => Array.from({ length: n }, (_, i) => i);
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const f1 = n => Math.round(n * 10) / 10;
+const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } return null; };
+const vl = v => v ? `<i>${esc(v.label)}</i>${v.sub != null ? `<sub>${v.sub}</sub>` : ''}` : '?';
+const ring = (k, cx, cy, R, start = -Math.PI / 2) => range(k).map(i => [cx + R * Math.cos(start + 2 * Math.PI * i / k), cy + R * Math.sin(start + 2 * Math.PI * i / k)]);
+
+/* ================= graph model ================= */
+function mkGraph(pts, E) {
+  return {
+    V: pts.map((p, i) => ({ id: i, x: p[0], y: p[1], label: LET[i] })),
+    E: E.map((e, i) => ({ id: i, u: e[0], v: e[1], d: !!e[2] }))
+  };
+}
+
+const TYPE_ORDER = ['simple', 'multi', 'pseudo', 'sdg', 'dmulti', 'mixed'];
+const TYPES = {
+  simple: { name: 'Simple graph', edges: 'Undirected', multi: false, loops: false,
+    def: 'Each edge connects two <em>different</em> vertices, and no two edges connect the same pair of vertices.',
+    eg: 'a friendship network. Two people are either friends or not.' },
+  multi: { name: 'Multigraph', edges: 'Undirected', multi: true, loops: false,
+    def: 'Several edges may connect the same pair of vertices. If <i>m</i> edges connect <i>u</i> and <i>v</i>, we say {<i>u</i>, <i>v</i>} has <em>multiplicity</em> <i>m</i>. No loops.',
+    eg: 'flights. There can be several different flights between the same two cities.' },
+  pseudo: { name: 'Pseudograph', edges: 'Undirected', multi: true, loops: true,
+    def: 'The most general undirected graph. Both loops and multiple edges are allowed.',
+    eg: 'walking trails. Several paths join two landmarks, and a circular trail returns to where it started.' },
+  sdg: { name: 'Simple directed graph', edges: 'Directed', multi: false, loops: false,
+    def: 'Every edge (<i>u</i>, <i>v</i>) points from <i>u</i> to <i>v</i>. No loops and no multiple directed edges. Since (<i>u</i>, <i>v</i>) and (<i>v</i>, <i>u</i>) are different edges, both may appear.',
+    eg: 'followers on social media. If <i>a</i> follows <i>b</i>, that does not mean <i>b</i> follows <i>a</i>.' },
+  dmulti: { name: 'Directed multigraph', edges: 'Directed', multi: true, loops: true,
+    def: 'A directed graph that may have multiple directed edges from one vertex to another, or from a vertex to itself.',
+    eg: 'bus routes. Several routes run from stop <i>a</i> to stop <i>b</i>, and a circular route ends where it began.' },
+  mixed: { name: 'Mixed graph', edges: 'Directed and undirected', multi: true, loops: true,
+    def: 'Some edges are directed and some are undirected. Loops and multiple edges are allowed.',
+    eg: 'a city map with two-way roads (undirected) and one-way streets (directed).' },
+};
+const typeName = k => k === 'digraph' ? 'Directed graph with loops' : TYPES[k].name;
+
+const SQ = [[80, 62], [220, 62], [220, 162], [80, 162]];
+const PRESETS = {
+  simple: { pts: SQ, E: [[0, 1], [1, 2], [2, 3], [3, 0], [0, 2]] },
+  multi:  { pts: SQ, E: [[0, 1], [0, 1], [1, 2], [2, 3], [2, 3], [2, 3], [3, 0], [0, 2]] },
+  pseudo: { pts: SQ, E: [[0, 1], [0, 1], [1, 2], [2, 3], [3, 0], [0, 0], [2, 2]] },
+  sdg:    { pts: SQ, E: [[0, 1, 1], [1, 2, 1], [2, 3, 1], [3, 0, 1], [1, 3, 1], [3, 1, 1]] },
+  dmulti: { pts: SQ, E: [[0, 1, 1], [0, 1, 1], [1, 2, 1], [2, 3, 1], [3, 0, 1], [2, 0, 1], [2, 2, 1]] },
+  mixed:  { pts: SQ, E: [[0, 1, 0], [1, 2, 1], [2, 3, 0], [3, 0, 1], [0, 2, 1]] },
+};
+function presetGraph(key, s = 1, ox = 0, oy = 0) {
+  const P = PRESETS[key];
+  return mkGraph(P.pts.map(([x, y]) => [ox + x * s, oy + y * s]), P.E);
+}
+
+/* ================= analysis ================= */
+function analyze(G) {
+  const vmap = new Map(G.V.map(v => [v.id, v]));
+  let hasDir = false, hasUnd = false;
+  const loops = [], groups = new Map();
+  for (const e of G.E) {
+    if (e.d) hasDir = true; else hasUnd = true;
+    if (e.u === e.v) loops.push(e);
+    const key = e.d ? `D${e.u}>${e.v}` : `U${Math.min(e.u, e.v)}-${Math.max(e.u, e.v)}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(e);
+  }
+  const parallelGroups = [...groups.values()].filter(g => g.length > 1);
+  const anti = [];
+  for (const [key, g] of groups) {
+    if (key[0] !== 'D') continue;
+    const e = g[0];
+    if (e.u < e.v && groups.has(`D${e.v}>${e.u}`)) anti.push([e.u, e.v]);
+  }
+  return {
+    vmap, nV: G.V.length, nE: G.E.length, hasDir, hasUnd, loops, parallelGroups, anti,
+    loopIds: new Set(loops.map(e => e.id)),
+    parallelIds: new Set(parallelGroups.flat().map(e => e.id))
+  };
+}
+function classify(A) {
+  const loop = A.loops.length > 0, par = A.parallelGroups.length > 0;
+  if (A.nE === 0) return { key: 'simple', note: A.nV ? 'No edges yet. A graph with no edges counts as a simple graph.' : '' };
+  if (A.hasDir && A.hasUnd) return { key: 'mixed' };
+  if (A.hasUnd) return { key: loop ? 'pseudo' : par ? 'multi' : 'simple' };
+  if (par) return { key: 'dmulti' };
+  if (loop) return { key: 'digraph', note: 'A simple directed graph cannot have loops. Of the six types in the table, the most specific one that fits is the <b>directed multigraph</b>, because it allows loops. Many books simply call a digraph with loops but no multiple edges a <em>directed graph</em>.' };
+  return { key: 'sdg' };
+}
+function describe(A) {
+  const L = id => vl(A.vmap.get(id));
+  const edgesTxt = A.nE === 0 ? 'none yet' : (A.hasDir && A.hasUnd) ? 'directed and undirected' : A.hasDir ? 'all directed' : 'all undirected';
+  const multiTxt = A.parallelGroups.map(g => {
+    const e = g[0];
+    const nm = e.u === e.v ? `loop at ${L(e.u)}` : e.d ? `(${L(e.u)}, ${L(e.v)})` : `{${L(e.u)}, ${L(e.v)}}`;
+    return `${nm} ×${g.length}`;
+  }).join(', ');
+  const cnt = new Map();
+  A.loops.forEach(e => cnt.set(e.u, (cnt.get(e.u) || 0) + 1));
+  const lt = [...cnt].map(([u, k]) => k > 1 ? `${L(u)} (×${k})` : L(u)).join(', ');
+  const antiTxt = A.anti.map(([u, v]) => `(${L(u)}, ${L(v)}) and (${L(v)}, ${L(u)})`).join('; ');
+  return { edgesTxt, multiTxt, loopTxt: lt ? 'at ' + lt : '', antiTxt };
+}
+const HIER = {
+  simple: 'Every simple graph is also a multigraph and a pseudograph. Those types <em>allow</em> multiple edges and loops but do not require them.',
+  multi: 'Every multigraph is also a pseudograph. It is not a simple graph because of its multiple edges.',
+  pseudo: 'Pseudographs are the most general undirected graphs.',
+  sdg: 'Every simple directed graph is also a directed multigraph.',
+  dmulti: 'Remove the loops and multiple edges and you would have a simple directed graph.',
+  mixed: 'If every edge were the same kind, all directed or all undirected, it would no longer be mixed.',
+  digraph: ''
+};
+
+/* ================= bipartite (BFS 2-coloring) ================= */
+function adjOf(G) {
+  const adj = new Map(G.V.map(v => [v.id, []]));
+  for (const e of G.E) { adj.get(e.u).push(e.v); if (e.u !== e.v) adj.get(e.v).push(e.u); }
+  return adj;
+}
+function bfs(G, start) {
+  const adj = adjOf(G), col = new Map(), par = new Map(), order = [];
+  const starts = (start != null ? [start] : []).concat(G.V.map(v => v.id));
+  for (const s of starts) {
+    if (col.has(s)) continue;
+    col.set(s, 0); par.set(s, null);
+    const q = [s];
+    while (q.length) {
+      const x = q.shift(); order.push(x);
+      for (const y of adj.get(x)) if (!col.has(y)) { col.set(y, 1 - col.get(x)); par.set(y, x); q.push(y); }
+    }
+  }
+  return { col, par, order };
+}
+function oddCycle(par, e) {
+  if (e.u === e.v) return [e.u];
+  const anc = new Set();
+  for (let x = e.u; x != null; x = par.get(x)) anc.add(x);
+  const bPath = []; let y = e.v;
+  while (!anc.has(y)) { bPath.push(y); y = par.get(y); }
+  const aPath = [];
+  for (let x = e.u; x !== y; x = par.get(x)) aPath.push(x);
+  return aPath.concat([y], bPath.reverse());
+}
+function bipInfo(G, start) {
+  const base = bfs(G, start);
+  const conflicts = G.E.filter(e => base.col.get(e.u) === base.col.get(e.v));
+  let cycle = null;
+  if (conflicts.length) {
+    for (const v of G.V) {
+      const t = bfs(G, v.id);
+      for (const e of G.E) {
+        if (t.col.get(e.u) !== t.col.get(e.v)) continue;
+        const c = oddCycle(t.par, e);
+        if (!cycle || c.length < cycle.length) cycle = c;
+      }
+      if (cycle && cycle.length <= 3) break;
+    }
+  }
+  return { col: base.col, order: base.order, conflicts, cycle, bipartite: conflicts.length === 0 };
+}
+function cycleEdgeIds(G, cyc) {
+  const ids = new Set();
+  if (!cyc) return ids;
+  for (let i = 0; i < cyc.length; i++) {
+    const a = cyc[i], b = cyc[(i + 1) % cyc.length];
+    const e = G.E.find(e => (e.u === a && e.v === b) || (e.u === b && e.v === a));
+    if (e) ids.add(e.id);
+  }
+  return ids;
+}
+function cycleText(G, cyc) {
+  const vm = new Map(G.V.map(v => [v.id, v]));
+  return cyc.concat([cyc[0]]).map(id => vl(vm.get(id))).join(' – ');
+}
+function maxDegVertex(G) {
+  const d = new Map(G.V.map(v => [v.id, 0]));
+  G.E.forEach(e => { d.set(e.u, d.get(e.u) + 1); d.set(e.v, d.get(e.v) + 1); });
+  let best = G.V.length ? G.V[0].id : null, bd = -1;
+  for (const v of G.V) if (d.get(v.id) > bd) { bd = d.get(v.id); best = v.id; }
+  return best;
+}
+
+/* ================= rendering ================= */
+let pidCounter = 0;
+const KINDS = ['base', 'multi', 'loop', 'conflict', 'cycle', 'hl', 'dim'];
+function setupSvg(svg, arrow) {
+  const pid = 'g' + (++pidCounter);
+  svg.dataset.pid = pid;
+  svg.innerHTML = '<defs>' + KINDS.map(k =>
+    `<marker id="${pid}-${k}" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="${arrow}" markerHeight="${arrow}" markerUnits="userSpaceOnUse" orient="auto"><path class="ah-${k}" d="M0,0.6 L10,5 L0,9.4 L2.8,5 Z"/></marker>`
+  ).join('') + '</defs><g class="scene"></g>';
+}
+function toward(P, cx, cy, r) {
+  const dx = cx - P.x, dy = cy - P.y, l = Math.hypot(dx, dy) || 1;
+  return { x: P.x + dx / l * r, y: P.y + dy / l * r };
+}
+function angDist(a, b) { let d = Math.abs(a - b) % (2 * Math.PI); return d > Math.PI ? 2 * Math.PI - d : d; }
+function loopAngle(G, v, vm) {
+  const angs = [];
+  for (const e of G.E) {
+    if (e.u === e.v) continue;
+    const o = e.u === v.id ? e.v : e.v === v.id ? e.u : null;
+    if (o == null) continue;
+    const w = vm.get(o);
+    if (w && (w.x !== v.x || w.y !== v.y)) angs.push(Math.atan2(w.y - v.y, w.x - v.x));
+  }
+  let cx = 0, cy = 0;
+  G.V.forEach(w => { cx += w.x; cy += w.y; });
+  cx /= G.V.length; cy /= G.V.length;
+  const away = Math.hypot(v.x - cx, v.y - cy) > 2 ? Math.atan2(v.y - cy, v.x - cx) : -Math.PI / 2;
+  if (!angs.length) return away;
+  let best = away, bestScore = -Infinity;
+  for (let i = 0; i < 48; i++) {
+    const a = -Math.PI + i * Math.PI / 24;
+    let gap = Math.PI;
+    for (const b of angs) gap = Math.min(gap, angDist(a, b));
+    const score = gap + 0.35 * Math.cos(angDist(a, away));
+    if (score > bestScore) { bestScore = score; best = a; }
+  }
+  return best;
+}
+function drawGraph(svg, G, o = {}) {
+  const pid = svg.dataset.pid, r = o.r || 18, sp = o.spacing || 22;
+  const vm = new Map(G.V.map(v => [v.id, v]));
+  const eKind = o.eKind || (() => 'base'), vCls = o.vCls || (() => '');
+  const Es = o.visibleEdges == null ? G.E : G.E.slice(0, o.visibleEdges);
+  const groups = new Map(), loops = new Map();
+  for (const e of Es) {
+    if (!vm.has(e.u) || !vm.has(e.v)) continue;
+    if (e.u === e.v) { if (!loops.has(e.u)) loops.set(e.u, []); loops.get(e.u).push(e); continue; }
+    const a = Math.min(e.u, e.v), b = Math.max(e.u, e.v), k = a + '-' + b;
+    if (!groups.has(k)) groups.set(k, { a, b, list: [] });
+    groups.get(k).list.push(e);
+  }
+  let es = '', hs = '';
+  const emit = (e, d) => {
+    const k = eKind(e);
+    es += `<path class="e e-${k}${e.d ? ' dir' : ''}" d="${d}"${e.d ? ` marker-end="url(#${pid}-${k})"` : ''}/>`;
+    if (o.hit) hs += `<path class="ehit" data-eid="${e.id}" d="${d}"/>`;
+  };
+  groups.forEach(({ a, b, list }) => {
+    const A = vm.get(a), Bv = vm.get(b);
+    const dx = Bv.x - A.x, dy = Bv.y - A.y, len = Math.hypot(dx, dy) || 1;
+    const nx = -dy / len, ny = dx / len, mx = (A.x + Bv.x) / 2, my = (A.y + Bv.y) / 2, k = list.length;
+    list.forEach((e, i) => {
+      let off = (i - (k - 1) / 2) * sp;
+      if (o.bend) { const bd = o.bend(e, A, Bv); if (bd) off += bd.m * (Math.sign(nx * bd.x + ny * bd.y) || 1); }
+      const P = vm.get(e.u), Q = vm.get(e.v), cx = mx + nx * off * 2, cy = my + ny * off * 2;
+      const s = toward(P, cx, cy, r), t = toward(Q, cx, cy, e.d ? r + 1.5 : r);
+      emit(e, Math.abs(off) < 0.01
+        ? `M${f1(s.x)} ${f1(s.y)}L${f1(t.x)} ${f1(t.y)}`
+        : `M${f1(s.x)} ${f1(s.y)}Q${f1(cx)} ${f1(cy)} ${f1(t.x)} ${f1(t.y)}`);
+    });
+  });
+  loops.forEach((list, vid) => {
+    const v = vm.get(vid), th = loopAngle(G, v, vm);
+    const pt = (rad, ang) => `${f1(v.x + rad * Math.cos(ang))} ${f1(v.y + rad * Math.sin(ang))}`;
+    list.forEach((e, j) => {
+      const L = r * (o.loopScale || 5) * (1 + 0.5 * j), al = 0.5, be = 0.6;
+      emit(e, `M${pt(r, th - al)}C${pt(L, th - be)} ${pt(L, th + be)} ${pt(e.d ? r + 1.5 : r, th + al)}`);
+    });
+  });
+  let vs = '';
+  G.V.forEach(v => {
+    const cls = vCls(v) || '';
+    const halo = /(^|\s)sel(\s|$)/.test(cls) ? `<circle class="halo" r="${r + 8}"/>` : '';
+    const lab = o.labels === false ? '' : `<text dy="0.35em" style="font-size:${o.font || r}px">${esc(v.label)}${v.sub != null ? `<tspan class="sub" dy="0.32em">${v.sub}</tspan>` : ''}</text>`;
+    vs += `<g class="v ${cls}" data-vid="${v.id}" transform="translate(${f1(v.x)} ${f1(v.y)})">${halo}<circle class="vc" r="${r}"/>${lab}</g>`;
+  });
+  svg.querySelector('.scene').innerHTML = `<g>${es}</g><g>${hs}</g><g>${vs}</g>`;
+}
+const featureKind = A => e => A.loopIds.has(e.id) ? 'loop' : A.parallelIds.has(e.id) ? 'multi' : 'base';
+
+let animId = null;
+function animateTo(G, targets, render) {
+  if (animId) cancelAnimationFrame(animId);
+  animId = null;
+  if (reduceMotion) { G.V.forEach((v, i) => { v.x = targets[i][0]; v.y = targets[i][1]; }); render(); return; }
+  const from = G.V.map(v => [v.x, v.y]), t0 = performance.now(), dur = 650;
+  const step = now => {
+    const t = Math.min(1, (now - t0) / dur), k = t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    G.V.forEach((v, i) => { v.x = from[i][0] + (targets[i][0] - from[i][0]) * k; v.y = from[i][1] + (targets[i][1] - from[i][1]) * k; });
+    render();
+    animId = t < 1 ? requestAnimationFrame(step) : null;
+  };
+  animId = requestAnimationFrame(step);
+}
+
+/* ================= 1. Graph types ================= */
+function renderGallery() {
+  const flag = (k, v, cls) => `<span class="flag ${cls}"><span class="fk">${k}</span><span class="fv">${v}</span></span>`;
+  const mk = key => {
+    const T = TYPES[key];
+    return `<figure class="fig" data-type="${key}">
+      <div class="board"><svg viewBox="0 0 300 220" role="img" aria-label="Example of a ${T.name.toLowerCase()}"></svg></div>
+      <figcaption>
+        <h4>${T.name}</h4>
+        <div class="flags">${flag('Edges', T.edges.toLowerCase(), '')}${flag('Multiple edges', T.multi ? 'allowed' : 'not allowed', T.multi ? 'f-yes' : 'f-no')}${flag('Loops', T.loops ? 'allowed' : 'not allowed', T.loops ? 'f-yes' : 'f-no')}</div>
+        <p class="fd">${T.def}</p>
+        <p class="fe"><b>Example:</b> ${T.eg}</p>
+        <button class="btn small" data-open="${key}">Open in builder</button>
+      </figcaption>
+    </figure>`;
+  };
+  $('#figsU').innerHTML = ['simple', 'multi', 'pseudo'].map(mk).join('');
+  $('#figsD').innerHTML = ['sdg', 'dmulti', 'mixed'].map(mk).join('');
+  $$('.fig').forEach(fig => {
+    const svg = fig.querySelector('svg');
+    setupSvg(svg, 11);
+    const G = presetGraph(fig.dataset.type), A = analyze(G);
+    drawGraph(svg, G, { r: 14, spacing: 15, font: 15, eKind: featureKind(A) });
+  });
+  const yn = b => `<td class="${b ? 'yn-yes' : 'yn-no'}">${b ? 'Yes' : 'No'}</td>`;
+  $('#sumTable').innerHTML = `<thead><tr><th scope="col">Type</th><th scope="col">Edges</th><th scope="col">Multiple edges allowed?</th><th scope="col">Loops allowed?</th></tr></thead><tbody>` +
+    TYPE_ORDER.map(k => { const T = TYPES[k]; return `<tr data-type="${k}"><th scope="row">${T.name}</th><td>${T.edges}</td>${yn(T.multi)}${yn(T.loops)}</tr>`; }).join('') + '</tbody>';
+  const lit = (key, on) => $$(`#p-types [data-type="${key}"]`).forEach(el => el.classList.toggle('lit', on));
+  $('#p-types').addEventListener('mouseover', e => { const el = e.target.closest('[data-type]'); if (el) lit(el.dataset.type, true); });
+  $('#p-types').addEventListener('mouseout', e => { const el = e.target.closest('[data-type]'); if (el && !el.contains(e.relatedTarget)) lit(el.dataset.type, false); });
+}
+
+/* ================= 2. Builder ================= */
+const BW = 640, BH = 420;
+const Bsvg = $('#bsvg');
+const B = { G: { V: [], E: [] }, nv: 0, ne: 0, mode: 'und', sel: null, hist: [], hl: true };
+function pushHist() {
+  B.hist.push(JSON.stringify({ G: B.G, nv: B.nv, ne: B.ne }));
+  if (B.hist.length > 80) B.hist.shift();
+}
+function bUndo() {
+  if (!B.hist.length) return;
+  const s = JSON.parse(B.hist.pop());
+  B.G = s.G; B.nv = s.nv; B.ne = s.ne; B.sel = null;
+  bRender();
+}
+function bLoad(key, record = true) {
+  if (record) pushHist();
+  const G = presetGraph(key, 1.9, 35, 1);
+  B.G = G; B.nv = G.V.length; B.ne = G.E.length; B.sel = null;
+  bRender();
+}
+function bRender() {
+  const A = analyze(B.G);
+  drawGraph(Bsvg, B.G, { r: 20, spacing: 26, font: 19, hit: true,
+    eKind: B.hl ? featureKind(A) : () => 'base',
+    vCls: v => v.id === B.sel ? 'sel' : '' });
+  bPanel(A);
+  bStatus();
+  $('#bUndo').disabled = !B.hist.length;
+  $('#bClear').disabled = !B.G.V.length;
+}
+function bStatus() {
+  const el = $('#bStatus');
+  let t = '';
+  if (B.mode === 'erase') t = B.G.V.length ? 'Click a vertex or an edge to delete it.' : '';
+  else if (B.sel != null) {
+    const v = B.G.V.find(v => v.id === B.sel);
+    t = `${vl(v)} selected. Click another vertex to add ${B.mode === 'dir' ? `a directed edge from ${vl(v)}` : 'an edge'}, or ${vl(v)} again for a loop.`;
+  } else if (B.G.V.length) t = B.mode === 'dir' ? 'Click the start vertex, then the end vertex.' : 'Click two vertices to join them.';
+  el.innerHTML = t;
+  el.hidden = !t;
+  $('#bEmpty').hidden = B.G.V.length > 0;
+}
+function miniTable(key) {
+  const k = key === 'digraph' ? 'dmulti' : key;
+  return `<table class="mini-t"><thead><tr><th>Type</th><th>Edges</th><th>Multiple</th><th>Loops</th></tr></thead><tbody>` +
+    TYPE_ORDER.map(t => { const T = TYPES[t]; return `<tr class="${t === k ? 'on' : ''}"><th scope="row">${T.name}</th><td>${T.edges === 'Directed and undirected' ? 'Both' : T.edges}</td><td>${T.multi ? 'Yes' : 'No'}</td><td>${T.loops ? 'Yes' : 'No'}</td></tr>`; }).join('') +
+    '</tbody></table>';
+}
+function degHtml(G, A) {
+  if (!G.V.length) return '';
+  if (A.hasDir && A.hasUnd) return `<div class="blk"><h4>Degrees</h4><p class="muted">We only count degrees here when every edge is the same kind. Make all edges directed, or all undirected, to see them.</p></div>`;
+  const d = new Map(G.V.map(v => [v.id, [0, 0, 0]]));
+  for (const e of G.E) {
+    if (e.d) { d.get(e.u)[2]++; d.get(e.v)[1]++; }
+    else { d.get(e.u)[0]++; d.get(e.v)[0]++; }
+  }
+  const head = `<tr><th scope="row"><i>v</i></th>${G.V.map(v => `<th scope="col">${vl(v)}</th>`).join('')}</tr>`;
+  const row = (lab, idx) => `<tr><th scope="row">${lab}</th>${G.V.map(v => `<td>${d.get(v.id)[idx]}</td>`).join('')}</tr>`;
+  if (A.hasDir) {
+    let si = 0, so = 0; d.forEach(x => { si += x[1]; so += x[2]; });
+    return `<div class="blk"><h4>In-degree and out-degree</h4><div class="scroll-x"><table class="deg-t">${head}${row('deg<sup>−</sup>(<i>v</i>)', 1)}${row('deg<sup>+</sup>(<i>v</i>)', 2)}</table></div>
+      <p class="formula">Σ deg<sup>−</sup>(<i>v</i>) = ${si} and Σ deg<sup>+</sup>(<i>v</i>) = ${so}. Both sums always equal |<i>E</i>| = ${A.nE}.</p></div>`;
+  }
+  let s = 0; d.forEach(x => { s += x[0]; });
+  return `<div class="blk"><h4>Degrees</h4><div class="scroll-x"><table class="deg-t">${head}${row('deg(<i>v</i>)', 0)}</table></div>
+    <p class="formula">Handshaking theorem: Σ deg(<i>v</i>) = ${s} = 2|<i>E</i>| = 2 × ${A.nE}.${A.loops.length ? ' A loop adds 2 to the degree of its vertex.' : ''}</p></div>`;
+}
+function bPanel(A) {
+  const c = classify(A), D = describe(A);
+  const par = A.parallelGroups.length > 0, loop = A.loops.length > 0;
+  if (!A.nV) {
+    $('#bPanel').innerHTML = `<div class="blk"><h3 class="vname">Empty canvas</h3><p class="muted">Add vertices and edges, or load an example, and the graph type will appear here.</p></div><div class="blk"><h4>Where it sits in the table</h4><div class="scroll-x">${miniTable('')}</div></div>`;
+    return;
+  }
+  $('#bPanel').innerHTML = `<div class="blk">
+      <p class="vsub">Your graph is a</p>
+      <h3 class="vname">${typeName(c.key)}</h3>
+      <dl class="props">
+        <div><dt>Edges</dt><dd>${D.edgesTxt}</dd></div>
+        <div><dt>Multiple edges</dt><dd>${par ? `<span class="yes">Yes</span>, ${D.multiTxt}` : '<span class="no">No</span>'}</dd></div>
+        <div><dt>Loops</dt><dd>${loop ? `<span class="yes">Yes</span>, ${D.loopTxt}` : '<span class="no">No</span>'}</dd></div>
+      </dl>
+      ${c.note ? `<p class="note">${c.note}</p>` : ''}
+      ${D.antiTxt ? `<p class="note">${D.antiTxt} are different directed edges, so they are not multiple edges.</p>` : ''}
+      ${A.nE && HIER[c.key] ? `<p class="muted">${HIER[c.key]}</p>` : ''}
+    </div>
+    <div class="blk"><h4>Where it sits in the table</h4><div class="scroll-x">${miniTable(c.key)}</div></div>
+    ${degHtml(B.G, A)}`;
+}
+function svgPt(svg, ev) {
+  const m = svg.getScreenCTM();
+  if (!m) return { x: 0, y: 0 };
+  const p = svg.createSVGPoint(); p.x = ev.clientX; p.y = ev.clientY;
+  const q = p.matrixTransform(m.inverse());
+  return { x: q.x, y: q.y };
+}
+function bInit() {
+  setupSvg(Bsvg, 15);
+  const sel = $('#bPreset');
+  sel.innerHTML += TYPE_ORDER.map(k => `<option value="${k}">${TYPES[k].name}</option>`).join('');
+  sel.addEventListener('change', () => { if (sel.value) { bLoad(sel.value); sel.value = ''; } });
+  $$('#bModes button').forEach(b => b.addEventListener('click', () => {
+    B.mode = b.dataset.mode;
+    $$('#bModes button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+    $('#bBoard').classList.toggle('erase', B.mode === 'erase');
+    B.sel = null; bRender();
+  }));
+  $('#bUndo').addEventListener('click', bUndo);
+  $('#bClear').addEventListener('click', () => { if (!B.G.V.length) return; pushHist(); B.G = { V: [], E: [] }; B.sel = null; bRender(); });
+  $('#bHl').addEventListener('change', e => { B.hl = e.target.checked; bRender(); });
+
+  let drag = null;
+  Bsvg.addEventListener('pointerdown', ev => {
+    if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+    const vEl = ev.target.closest('[data-vid]'), eEl = ev.target.closest('[data-eid]');
+    const p = svgPt(Bsvg, ev);
+    drag = { vid: vEl ? +vEl.dataset.vid : null, eid: eEl ? +eEl.dataset.eid : null, sx: ev.clientX, sy: ev.clientY, moved: false, p };
+    if (drag.vid != null) { const v = B.G.V.find(v => v.id === drag.vid); drag.ox = v.x - p.x; drag.oy = v.y - p.y; }
+    try { Bsvg.setPointerCapture(ev.pointerId); } catch (e) { /* ignore */ }
+    ev.preventDefault();
+  });
+  Bsvg.addEventListener('pointermove', ev => {
+    if (!drag || drag.vid == null) return;
+    if (!drag.moved && Math.hypot(ev.clientX - drag.sx, ev.clientY - drag.sy) < 5) return;
+    if (!drag.moved) { drag.moved = true; pushHist(); }
+    const p = svgPt(Bsvg, ev), v = B.G.V.find(v => v.id === drag.vid);
+    if (!v) return;
+    v.x = clamp(p.x + drag.ox, 26, BW - 26); v.y = clamp(p.y + drag.oy, 26, BH - 26);
+    bRender();
+  });
+  Bsvg.addEventListener('pointercancel', () => { drag = null; });
+  Bsvg.addEventListener('pointerup', () => {
+    if (!drag) return;
+    const d = drag; drag = null;
+    if (d.moved) return;
+    if (B.mode === 'erase') {
+      if (d.vid != null) { pushHist(); B.G.V = B.G.V.filter(v => v.id !== d.vid); B.G.E = B.G.E.filter(e => e.u !== d.vid && e.v !== d.vid); }
+      else if (d.eid != null) { pushHist(); B.G.E = B.G.E.filter(e => e.id !== d.eid); }
+      bRender(); return;
+    }
+    if (d.vid != null) {
+      if (B.sel == null) B.sel = d.vid;
+      else { pushHist(); B.G.E.push({ id: B.ne++, u: B.sel, v: d.vid, d: B.mode === 'dir' }); B.sel = null; }
+    } else if (B.sel != null) B.sel = null;
+    else if (B.G.V.length < 16) {
+      pushHist();
+      const used = new Set(B.G.V.map(v => v.label));
+      B.G.V.push({ id: B.nv++, x: clamp(d.p.x, 26, BW - 26), y: clamp(d.p.y, 26, BH - 26), label: [...LET].find(c => !used.has(c)) });
+    }
+    bRender();
+  });
+  document.addEventListener('keydown', e => {
+    if ($('#p-build').hidden) return;
+    if (e.key === 'Escape' && B.sel != null) { B.sel = null; bRender(); }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); bUndo(); }
+  });
+  bLoad('simple', false);
+}
+
+/* ================= 3. Special simple graphs ================= */
+function specialGraph(fam, n, m, W, H) {
+  const cx = W / 2, cy = H / 2, R = Math.min(W, H) * 0.36;
+  let pts = [], E = [], labs = [];
+  if (fam === 'K' || fam === 'C') {
+    pts = n === 1 ? [[cx, cy]] : ring(n, cx, cy, R);
+    labs = range(n).map(i => ['v', i + 1]);
+    if (fam === 'K') { for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) E.push([i, j]); }
+    else for (let i = 0; i < n; i++) E.push([i, (i + 1) % n]);
+  } else if (fam === 'W') {
+    pts = ring(n, cx, cy, R).concat([[cx, cy]]);
+    labs = range(n).map(i => ['v', i + 1]).concat([['h', null]]);
+    for (let i = 0; i < n; i++) E.push([i, (i + 1) % n]);
+    for (let i = 0; i < n; i++) E.push([n, i]);
+  } else {
+    const colY = (k, i) => cy + (i - (k - 1) / 2) * Math.min(66, (H - 110) / Math.max(1, k - 1));
+    pts = range(m).map(i => [cx - 120, colY(m, i)]).concat(range(n).map(j => [cx + 120, colY(n, j)]));
+    labs = range(m).map(i => ['u', i + 1]).concat(range(n).map(j => ['v', j + 1]));
+    for (let i = 0; i < m; i++) for (let j = 0; j < n; j++) E.push([i, m + j]);
+  }
+  return {
+    V: pts.map((p, i) => ({ id: i, x: p[0], y: p[1], label: labs[i][0], sub: labs[i][1] })),
+    E: E.map((e, i) => ({ id: i, u: e[0], v: e[1], d: false }))
+  };
+}
+function twoSideLayout(G, col, W, H) {
+  const cx = W / 2, cy = H / 2, pos = new Map();
+  const gap = k => Math.min(66, (H - 90) / Math.max(1, k - 1));
+  const L = G.V.filter(v => col.get(v.id) === 0), R = G.V.filter(v => col.get(v.id) === 1);
+  L.forEach((v, i) => pos.set(v.id, [cx - 110, cy + (i - (L.length - 1) / 2) * gap(L.length)]));
+  R.forEach((v, i) => pos.set(v.id, [cx + 110, cy + (i - (R.length - 1) / 2) * gap(R.length)]));
+  return G.V.map(v => pos.get(v.id));
+}
+const famName = (fam, n, m) => fam === 'B' ? `<i>K</i><sub>${m},${n}</sub>` : `<i>${fam}</i><sub>${n}</sub>`;
+
+const SW = 640, SH = 440, Ssvg = $('#ssvg');
+const LIM = { K: [1, 10], C: [3, 12], W: [3, 12], B: [1, 6] };
+const S = { fam: 'K', n: 5, m: 3, labels: true, color: false, bip: false, sel: null, reveal: null, timer: null, G: null, res: null, natural: null };
+
+function stopReplay() { if (S.timer) clearInterval(S.timer); S.timer = null; S.reveal = null; }
+function sBuild() {
+  stopReplay();
+  if (animId) { cancelAnimationFrame(animId); animId = null; }
+  const G = specialGraph(S.fam, S.n, S.m, SW, SH);
+  S.natural = G.V.map(v => [v.x, v.y]);
+  S.res = bipInfo(G, maxDegVertex(G));
+  S.G = G; S.sel = null;
+  if (S.bip) { const t = twoSideLayout(G, S.res.col, SW, SH); G.V.forEach((v, i) => { v.x = t[i][0]; v.y = t[i][1]; }); }
+  sRender(); sFacts();
+}
+function sRender() {
+  const { G, res } = S, showCol = S.color || S.bip;
+  const nb = new Set();
+  if (S.sel != null) G.E.forEach(e => { if (e.u === S.sel) nb.add(e.v); if (e.v === S.sel) nb.add(e.u); });
+  const same = e => res.col.get(e.u) === res.col.get(e.v);
+  drawGraph(Ssvg, G, { r: 18, spacing: 22, font: 18, labels: S.labels, visibleEdges: S.reveal,
+    eKind: e => showCol && same(e) ? 'conflict' : S.sel != null ? ((e.u === S.sel || e.v === S.sel) ? 'hl' : 'dim') : 'base',
+    vCls: v => [showCol ? (res.col.get(v.id) ? 'pb' : 'pa') : '', v.id === S.sel ? 'sel' : '', S.sel != null && v.id !== S.sel && !nb.has(v.id) ? 'faded' : ''].join(' '),
+    bend: S.bip ? (e, A, Bv) => same(e) ? { x: res.col.get(e.u) ? 1 : -1, y: 0, m: 24 + 0.28 * Math.abs(A.y - Bv.y) } : null : null
+  });
+}
+function sFacts() {
+  const { fam, n, m, G, res } = S;
+  const vm = new Map(G.V.map(v => [v.id, v]));
+  const nm = famName(fam, n, m), iN = '<i>n</i>', iM = '<i>m</i>';
+  let title, def, rows, bip, extra = '';
+  if (fam === 'K') {
+    title = `Complete graph ${nm}`;
+    def = 'A simple graph with exactly one edge between every pair of distinct vertices.';
+    rows = [['Vertices', `${iN} = <b>${n}</b>`], ['Edges', `${iN}(${iN} − 1)/2 = ${n}·${n - 1}/2 = <b>${n * (n - 1) / 2}</b>`], ['Degrees', `every vertex has degree ${iN} − 1 = <b>${n - 1}</b>`]];
+    bip = n === 1 ? [true, 'There are no edges, so no edge can join two vertices of the same color. (Some books require both sides to be nonempty, which rules out <i>K</i><sub>1</sub>.)']
+      : n === 2 ? [true, 'A single edge: put one endpoint on each side.']
+      : [false, 'Any three vertices form a triangle, which is an odd cycle.'];
+  } else if (fam === 'C') {
+    title = `Cycle ${nm}`;
+    def = `For ${iN} ≥ 3: vertices <i>v</i><sub>1</sub>, <i>v</i><sub>2</sub>, …, <i>v</i><sub><i>n</i></sub> and edges {<i>v</i><sub>1</sub>, <i>v</i><sub>2</sub>}, {<i>v</i><sub>2</sub>, <i>v</i><sub>3</sub>}, …, {<i>v</i><sub><i>n</i>−1</sub>, <i>v</i><sub><i>n</i></sub>}, {<i>v</i><sub><i>n</i></sub>, <i>v</i><sub>1</sub>}.`;
+    rows = [['Vertices', `${iN} = <b>${n}</b>`], ['Edges', `${iN} = <b>${n}</b>`], ['Degrees', 'every vertex has degree <b>2</b>']];
+    bip = n % 2 === 0 ? [true, `${n} is even, so the two colors can alternate all the way around the cycle.`]
+      : [false, `${n} is odd, so alternating colors around the cycle makes the last vertex clash with the first.`];
+  } else if (fam === 'W') {
+    title = `Wheel ${nm}`;
+    def = `For ${iN} ≥ 3: take the cycle <i>C</i><sub><i>n</i></sub>, add one new vertex (the hub <i>h</i>) and join it to each of the ${iN} vertices of the cycle.`;
+    rows = [['Vertices', `${iN} + 1 = <b>${n + 1}</b>`], ['Edges', `2${iN} = ${n} rim + ${n} spokes = <b>${2 * n}</b>`], ['Degrees', `hub: ${iN} = <b>${n}</b>; rim vertices: <b>3</b>`]];
+    bip = [false, 'The hub and any two neighboring rim vertices form a triangle, which is an odd cycle.'];
+    extra = `<p class="warn">The subscript counts only the rim, so <i>W</i><sub>${n}</sub> has ${n + 1} vertices, not ${n}.</p>`;
+  } else {
+    title = `Complete bipartite graph ${nm}`;
+    def = `The vertices are split into <i>V</i><sub>1</sub> with ${iM} vertices and <i>V</i><sub>2</sub> with ${iN} vertices. Every vertex of <i>V</i><sub>1</sub> is joined to every vertex of <i>V</i><sub>2</sub>, and there are no other edges.`;
+    rows = [['Vertices', `${iM} + ${iN} = <b>${m + n}</b>`], ['Edges', `${iM}${iN} = ${m}·${n} = <b>${m * n}</b>`], ['Degrees', `in <i>V</i><sub>1</sub>: ${iN} = <b>${n}</b>; in <i>V</i><sub>2</sub>: ${iM} = <b>${m}</b>`]];
+    bip = [true, 'By definition, <i>V</i><sub>1</sub> and <i>V</i><sub>2</sub> are the two sides.'];
+  }
+  const tested = S.color || S.bip;
+  const bipRow = tested
+    ? `<span class="badge ${bip[0] ? 'ok' : 'bad'}">${bip[0] ? 'Yes' : 'No'}</span>${bip[1]}`
+    : '<span class="muted">Turn on <b>Try a 2-coloring</b> to find out.</span>';
+  let colHtml = '';
+  if (tested) {
+    const setT = arr => arr.length ? '{' + arr.map(vl).join(', ') + '}' : '∅';
+    const A0 = G.V.filter(v => res.col.get(v.id) === 0), A1 = G.V.filter(v => res.col.get(v.id) === 1);
+    const st = vl(vm.get(res.order[0]));
+    colHtml = res.bipartite
+      ? `<p>Start at ${st} and give every neighbor the opposite color. No clashes, so the coloring works:</p><p><span class="dot pa"></span><i>V</i><sub>1</sub> = ${setT(A0)}<br><span class="dot pb"></span><i>V</i><sub>2</sub> = ${setT(A1)}</p>`
+      : `<p>Start at ${st} and give every neighbor the opposite color. ${res.conflicts.length} edge${res.conflicts.length > 1 ? 's end' : ' ends'} up joining two vertices of the same color (red, dashed).</p><p>Odd cycle: ${cycleText(G, res.cycle)} (length ${res.cycle.length}).</p>`;
+    colHtml = `<div class="blk"><h4>2-coloring test</h4>${colHtml}</div>`;
+  }
+  let selHtml = 'Tap a vertex to see its degree and neighbors.';
+  if (S.sel != null) {
+    const nbs = [];
+    G.E.forEach(e => { if (e.u === S.sel) nbs.push(e.v); else if (e.v === S.sel) nbs.push(e.u); });
+    selHtml = `deg(${vl(vm.get(S.sel))}) = <b>${nbs.length}</b>. Neighbors: ${nbs.length ? nbs.map(id => vl(vm.get(id))).join(', ') : 'none'}.`;
+  }
+  const rep = S.reveal != null ? `<p class="muted">Drawing edge ${S.reveal} of ${G.E.length}</p>` : '';
+  $('#sPanel').innerHTML = `<div class="blk"><h3 class="fam-t">${title}</h3><p class="def-t">${def}</p>
+      <dl class="props">${rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}<div><dt>Bipartite?</dt><dd>${bipRow}</dd></div></dl>${extra}</div>
+    ${colHtml}
+    <div class="blk"><h4>Selected vertex</h4><p>${selHtml}</p>${rep}</div>`;
+}
+function sSyncControls() {
+  const [lo, hi] = LIM[S.fam], sN = $('#sN');
+  sN.min = lo; sN.max = hi;
+  S.n = clamp(S.n, lo, hi); sN.value = S.n; $('#sNout').textContent = S.n;
+  $('#sMwrap').hidden = S.fam !== 'B';
+  $('#sM').value = S.m; $('#sMout').textContent = S.m;
+  $$('#sFam button').forEach(b => b.setAttribute('aria-pressed', b.dataset.fam === S.fam ? 'true' : 'false'));
+}
+function sInit() {
+  setupSvg(Ssvg, 12);
+  $$('#sFam button').forEach(b => b.addEventListener('click', () => {
+    const prev = S.fam; S.fam = b.dataset.fam;
+    if (S.fam === 'B' && prev !== 'B') { S.m = 3; S.n = 3; }
+    else if (prev === 'B' && S.fam !== 'B') S.n = 5;
+    sSyncControls(); sBuild();
+  }));
+  $('#sN').addEventListener('input', e => { S.n = +e.target.value; $('#sNout').textContent = S.n; sBuild(); });
+  $('#sM').addEventListener('input', e => { S.m = +e.target.value; $('#sMout').textContent = S.m; sBuild(); });
+  $('#sLabels').addEventListener('change', e => { S.labels = e.target.checked; sRender(); });
+  $('#sColor').addEventListener('change', e => { S.color = e.target.checked; sRender(); sFacts(); });
+  $('#sBip').addEventListener('change', e => {
+    S.bip = e.target.checked; stopReplay();
+    animateTo(S.G, S.bip ? twoSideLayout(S.G, S.res.col, SW, SH) : S.natural, sRender);
+    sFacts();
+  });
+  $('#sReplay').addEventListener('click', () => {
+    stopReplay();
+    const total = S.G.E.length;
+    if (!total) return;
+    S.reveal = 0; sRender(); sFacts();
+    const delay = Math.max(60, Math.min(260, 2600 / total));
+    S.timer = setInterval(() => {
+      S.reveal++;
+      if (S.reveal >= total) { stopReplay(); }
+      sRender(); sFacts();
+    }, delay);
+  });
+  Ssvg.addEventListener('click', e => {
+    const el = e.target.closest('[data-vid]');
+    const id = el ? +el.dataset.vid : null;
+    S.sel = id == null || id === S.sel ? null : id;
+    sRender(); sFacts();
+  });
+  sSyncControls(); sBuild();
+}
+
+/* ================= 4. Bipartite challenge ================= */
+const CH = (() => {
+  const cyc = k => range(k).map(i => [i, (i + 1) % k]);
+  const hex = ring(6, 320, 210, 155);
+  const pent = ring(5, 320, 222, 105);
+  const pt = (R, i) => { const a = -Math.PI / 2 + 2 * Math.PI * i / 5; return [320 + R * Math.cos(a), 222 + R * Math.sin(a)]; };
+  const grid = [], gridE = [];
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
+    grid.push([200 + 120 * c, 90 + 120 * r]);
+    const i = r * 3 + c;
+    if (c < 2) gridE.push([i, i + 1]);
+    if (r < 2) gridE.push([i, i + 3]);
+  }
+  return [
+    { name: 'Hexagon', pts: hex, E: cyc(6), note: 'This is <i>C</i><sub>6</sub>. Every cycle of even length is bipartite.' },
+    { name: 'House', pts: [[240, 320], [400, 320], [400, 200], [240, 200], [320, 88]], E: [[0, 1], [1, 2], [2, 3], [3, 0], [3, 4], [2, 4]], note: 'The roof is a triangle, and a triangle is an odd cycle.' },
+    { name: 'Hexagon with diagonals', pts: hex, E: cyc(6).concat([[0, 3], [1, 4], [2, 5]]), note: 'Surprise: this is <i>K</i><sub>3,3</sub>, drawn in a different way.' },
+    { name: 'Pentagon with tails', pts: pent.concat([pt(190, 0), pt(190, 2)]), E: cyc(5).concat([[0, 5], [2, 6]]), note: 'The pentagon is <i>C</i><sub>5</sub>, an odd cycle. Adding tails cannot fix that.' },
+    { name: 'Cube', pts: [[170, 60], [470, 60], [470, 360], [170, 360], [265, 155], [375, 155], [375, 265], [265, 265]],
+      E: [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]], note: 'This is the cube graph <i>Q</i><sub>3</sub>. All of its cycles have even length.' },
+    { name: 'Grid with two extra edges', pts: grid, E: gridE.concat([[0, 5], [6, 1]]), note: 'Each square is an even cycle, and both extra edges join vertices of different colors, so the graph stays bipartite.' },
+    { name: 'Petersen graph', pts: ring(5, 320, 218, 172).concat(ring(5, 320, 218, 80)),
+      E: cyc(5).concat(range(5).map(i => [i, i + 5]), range(5).map(i => [5 + i, 5 + (i + 2) % 5])), note: 'The Petersen graph has no triangles, but it does have cycles of length 5.' },
+  ];
+})();
+const Csvg = $('#csvg');
+const C = { i: 0, G: null, res: null, col: new Map(), cyc: null, msg: null, solved: new Set() };
+function cLoad(i) {
+  C.i = i; C.G = mkGraph(CH[i].pts, CH[i].E); C.res = bipInfo(C.G, null);
+  C.col = new Map(); C.cyc = null; C.msg = null;
+  cRender();
+}
+function cRender() {
+  const G = C.G, same = e => { const a = C.col.get(e.u), b = C.col.get(e.v); return a != null && a === b; };
+  drawGraph(Csvg, G, { r: 19, spacing: 22, font: 19,
+    eKind: e => C.cyc && C.cyc.has(e.id) ? 'cycle' : same(e) ? 'conflict' : 'base',
+    vCls: v => C.col.get(v.id) === 0 ? 'pa' : C.col.get(v.id) === 1 ? 'pb' : '' });
+  const N = G.V.length, nCol = C.col.size, conflicts = G.E.filter(same).length;
+  let html, cls = '';
+  if (C.msg) { html = C.msg.html; cls = C.msg.ok ? 'good' : 'bad'; }
+  else if (nCol === N && !conflicts) {
+    C.solved.add(C.i); cls = 'good';
+    const setT = c => '{' + G.V.filter(v => C.col.get(v.id) === c).map(vl).join(', ') + '}';
+    html = `<p><b>Valid 2-coloring.</b> Every edge joins the two sets, so the graph is bipartite.</p><p><span class="dot pa"></span><i>V</i><sub>1</sub> = ${setT(0)}<br><span class="dot pb"></span><i>V</i><sub>2</sub> = ${setT(1)}</p><p>${CH[C.i].note}</p>`;
+  } else if (conflicts) {
+    cls = 'bad';
+    html = `<p>${conflicts} edge${conflicts > 1 ? 's join' : ' joins'} two vertices of the same color (red, dashed). Recolor, or tap <b>It can't be 2-colored</b> if you think no valid coloring exists.</p>`;
+  } else if (!nCol) html = '<p>Tap any vertex to give it the first color.</p>';
+  else html = `<p>${nCol} of ${N} vertices colored, no clashes so far.</p><p class="muted">Hint: once a vertex has a color, all of its neighbors must get the other color.</p>`;
+  const st = $('#cStatus'); st.className = 'status ' + cls; st.innerHTML = html;
+  $('#cList').innerHTML = CH.map((g, i) => `<button class="chip ${i === C.i ? 'on' : ''}" data-i="${i}" aria-pressed="${i === C.i}">${i + 1}. ${g.name}${C.solved.has(i) ? '<span class="tick" aria-label="solved">✓</span>' : ''}</button>`).join('');
+}
+function cInit() {
+  setupSvg(Csvg, 12);
+  $('#cList').addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b) cLoad(+b.dataset.i); });
+  Csvg.addEventListener('click', e => {
+    const el = e.target.closest('[data-vid]');
+    if (!el) return;
+    const id = +el.dataset.vid, c = C.col.get(id);
+    if (c == null) C.col.set(id, 0); else if (c === 0) C.col.set(id, 1); else C.col.delete(id);
+    C.msg = null; C.cyc = null; cRender();
+  });
+  $('#cReset').addEventListener('click', () => { C.col = new Map(); C.msg = null; C.cyc = null; cRender(); });
+  $('#cClaim').addEventListener('click', () => {
+    const r = C.res;
+    if (!r.bipartite) {
+      C.cyc = cycleEdgeIds(C.G, r.cycle); C.solved.add(C.i);
+      C.msg = { ok: true, html: `<p><b>Correct.</b> ${cycleText(C.G, r.cycle)} is a cycle of odd length ${r.cycle.length} (purple). Colors cannot alternate around an odd cycle, so the graph is not bipartite.</p><p>${CH[C.i].note}</p>` };
+    } else {
+      C.cyc = null;
+      C.msg = { ok: false, html: '<p><b>Not quite.</b> This graph <em>is</em> bipartite. Keep coloring, or tap <b>Show answer</b>.</p>' };
+    }
+    cRender();
+  });
+  $('#cShow').addEventListener('click', () => {
+    const r = C.res;
+    C.col = new Map(r.col);
+    if (r.bipartite) {
+      C.cyc = null;
+      C.msg = { ok: true, html: `<p><b>A valid 2-coloring.</b> Start anywhere, then give each neighbor the opposite color.</p><p>${CH[C.i].note}</p>` };
+    } else {
+      C.cyc = cycleEdgeIds(C.G, r.cycle);
+      C.msg = { ok: false, html: `<p><b>Not bipartite.</b> Whatever you try, some edge clashes. The purple odd cycle ${cycleText(C.G, r.cycle)} (length ${r.cycle.length}) is the reason.</p><p>${CH[C.i].note}</p>` };
+    }
+    cRender();
+  });
+  cLoad(0);
+}
+
+/* ================= 5. Quiz ================= */
+function genTypeGraph(t) {
+  const n = rnd(4, 5), off = Math.random() * Math.PI * 2;
+  const pts = range(n).map(i => { const a = off + i * 2 * Math.PI / n + (Math.random() - .5) * 0.34; return [320 + 140 * Math.cos(a), 200 + 128 * Math.sin(a)]; });
+  const pairs = [];
+  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) pairs.push([i, j]);
+  const base = shuffle(pairs).slice(0, Math.min(pairs.length, rnd(n, n + 1)));
+  const E = [];
+  const addU = p => E.push([p[0], p[1], 0]);
+  const addD = p => E.push(Math.random() < .5 ? [p[0], p[1], 1] : [p[1], p[0], 1]);
+  const x = rnd(0, n - 1);
+  switch (t) {
+    case 'simple': base.forEach(addU); break;
+    case 'multi': base.forEach(addU); shuffle(base).slice(0, rnd(1, 2)).forEach(p => { addU(p); if (Math.random() < .3) addU(p); }); break;
+    case 'pseudo': base.forEach(addU); E.push([x, x, 0]); if (Math.random() < .5) addU(pick(base)); break;
+    case 'sdg': base.forEach(addD); if (Math.random() < .6) { const e = pick(E); E.push([e[1], e[0], 1]); } break;
+    case 'dmulti': base.forEach(addD); { const e = pick(E); E.push([e[0], e[1], 1]); } if (Math.random() < .5) E.push([x, x, 1]); break;
+    case 'mixed': base.forEach((p, i) => (i === 0 ? addU(p) : i === 1 ? addD(p) : (Math.random() < .5 ? addU(p) : addD(p)))); if (Math.random() < .3) E.push([x, x, Math.random() < .5 ? 1 : 0]); break;
+  }
+  return mkGraph(pts, E);
+}
+function typeQ(t) {
+  let G, A, c, k = 0;
+  do { G = genTypeGraph(t); A = analyze(G); c = classify(A); } while (c.key !== t && ++k < 30);
+  const D = describe(A), par = A.parallelGroups.length > 0, loop = A.loops.length > 0;
+  return {
+    prompt: 'What is the most specific name for this graph?', G, A, labels: true, six: true,
+    opts: TYPE_ORDER.map(key => ({ html: TYPES[key].name, correct: key === c.key })),
+    explain: `Edges: ${D.edgesTxt}. Multiple edges: ${par ? D.multiTxt : 'none'}. Loops: ${loop ? D.loopTxt : 'none'}. So the most specific name is <b>${TYPES[c.key].name.toLowerCase()}</b>.${D.antiTxt ? ` Remember that ${D.antiTxt} are different directed edges, not multiple edges.` : ''}`
+  };
+}
+function specialQ() {
+  const N = rnd(5, 7), a = Math.floor(N / 2), b = N - a;
+  const cand = {
+    K: { fam: 'K', n: N, m: 0, html: `<i>K</i><sub>${N}</sub>` },
+    C: { fam: 'C', n: N, m: 0, html: `<i>C</i><sub>${N}</sub>` },
+    W: { fam: 'W', n: N - 1, m: 0, html: `<i>W</i><sub>${N - 1}</sub>` },
+    B: { fam: 'B', n: b, m: a, html: `<i>K</i><sub>${a},${b}</sub>` },
+  };
+  const ans = cand[pick(['K', 'C', 'W', 'B'])];
+  const opts = ans.fam === 'W' ? [ans, { html: `<i>W</i><sub>${N}</sub>` }, cand.C, cand.K] : [cand.K, cand.C, cand.W, cand.B];
+  const explain = {
+    K: `Every pair of distinct vertices is joined by exactly one edge, so this is <i>K</i><sub>${N}</sub>, with ${N}·${N - 1}/2 = ${N * (N - 1) / 2} edges.`,
+    C: `The vertices form one cycle and every vertex has degree 2, so this is <i>C</i><sub>${N}</sub>, with ${N} edges.`,
+    W: `A cycle of ${N - 1} rim vertices plus a hub joined to all of them: this is <i>W</i><sub>${N - 1}</sub>. The subscript counts the rim, so it has ${N} vertices and ${2 * (N - 1)} edges.`,
+    B: `Two groups of ${a} and ${b} vertices, with every vertex joined to every vertex of the other group and no edges inside a group: this is <i>K</i><sub>${a},${b}</sub>, with ${a * b} edges.`,
+  }[ans.fam];
+  return { prompt: 'Which special graph is this?', G: specialGraph(ans.fam, ans.n, ans.m, 640, 400), labels: false,
+    opts: shuffle(opts).map(o => ({ html: o.html, correct: o === ans })), explain };
+}
+function numOpts(ans, cands) {
+  const seen = new Set([ans]), out = [ans];
+  for (const c of shuffle(cands)) { if (out.length >= 4) break; if (c > 0 && Number.isInteger(c) && !seen.has(c)) { seen.add(c); out.push(c); } }
+  for (let d = 1; out.length < 4; d++) for (const c of [ans + d, ans - d]) if (out.length < 4 && c > 0 && !seen.has(c)) { seen.add(c); out.push(c); }
+  return shuffle(out).map(x => ({ html: String(x), correct: x === ans }));
+}
+function countQ(kind) {
+  const n = rnd(5, 9);
+  if (kind === 'Ke') return { prompt: `How many edges does <i>K</i><sub>${n}</sub> have?`, opts: numOpts(n * (n - 1) / 2, [n * (n - 1), n - 1, n, (n - 1) * (n - 2) / 2, n * (n + 1) / 2]),
+    explain: `Each of the ${n} vertices is joined to the other ${n - 1}, and this counts every edge twice, so |<i>E</i>| = ${n}·${n - 1}/2 = ${n * (n - 1) / 2}.` };
+  if (kind === 'We') return { prompt: `How many edges does <i>W</i><sub>${n}</sub> have?`, opts: numOpts(2 * n, [n, n + 1, 2 * n + 2, 3 * n]),
+    explain: `${n} edges around the rim plus ${n} spokes from the hub: 2<i>n</i> = ${2 * n}.` };
+  if (kind === 'Wv') return { prompt: `How many vertices does <i>W</i><sub>${n}</sub> have?`, opts: numOpts(n + 1, [n, 2 * n, n + 2, n - 1]),
+    explain: `<i>W</i><sub>${n}</sub> is <i>C</i><sub>${n}</sub> plus one hub, so it has ${n} + 1 = ${n + 1} vertices. The subscript counts only the rim.` };
+  if (kind === 'Kd') return { prompt: `What is the degree of each vertex in <i>K</i><sub>${n}</sub>?`, opts: numOpts(n - 1, [n, n * (n - 1) / 2, n - 2, 2]),
+    explain: `Each vertex is adjacent to all of the other ${n} − 1 = ${n - 1} vertices.` };
+  const m = rnd(2, 5), k = rnd(2, 6);
+  return { prompt: `How many edges does <i>K</i><sub>${m},${k}</sub> have?`, opts: numOpts(m * k, [m + k, (m + k) * (m + k - 1) / 2, m * k + m, m * k - 1]),
+    explain: `Each of the ${m} vertices on one side is joined to all ${k} vertices on the other side: ${m}·${k} = ${m * k}. There are no edges inside a side.` };
+}
+function bipQ(kind) {
+  const yn = ans => [{ html: 'Yes', correct: ans }, { html: 'No', correct: !ans }];
+  if (kind === 'C') {
+    const n = rnd(4, 11), ok = n % 2 === 0;
+    return { prompt: `Is <i>C</i><sub>${n}</sub> bipartite?`, opts: yn(ok), explain: ok
+      ? `Yes. Color the vertices alternately around the cycle. Since ${n} is even, the last vertex gets a different color from the first.`
+      : `No. ${n} is odd, so alternating colors around the cycle forces the last vertex to clash with the first. Odd cycles are never bipartite.` };
+  }
+  if (kind === 'K') {
+    const n = pick([2, 3, 4, 5, 6]), ok = n === 2;
+    return { prompt: `Is <i>K</i><sub>${n}</sub> bipartite?`, opts: yn(ok), explain: ok
+      ? 'Yes. <i>K</i><sub>2</sub> is a single edge: put one endpoint on each side.'
+      : `No. Any three vertices of <i>K</i><sub>${n}</sub> form a triangle, which is an odd cycle.` };
+  }
+  if (kind === 'W') {
+    const n = rnd(3, 8);
+    return { prompt: `Is <i>W</i><sub>${n}</sub> bipartite?`, opts: yn(false), explain: 'No. The hub and any two neighboring rim vertices form a triangle, which is an odd cycle. This is true for every wheel.' };
+  }
+  const m = rnd(1, 5), n = rnd(1, 5);
+  return { prompt: `Is <i>K</i><sub>${m},${n}</sub> bipartite?`, opts: yn(true), explain: `Yes, by definition. The group of ${m} and the group of ${n} are the two sides <i>V</i><sub>1</sub> and <i>V</i><sub>2</sub>.` };
+}
+function makeQuiz() {
+  const types = shuffle(TYPE_ORDER).slice(0, 4);
+  const counts = shuffle(['Ke', 'We', 'Wv', 'Kd', 'Be']);
+  const bips = shuffle(['C', 'K', 'W', 'B']);
+  let ti = 0, ci = 0, bi = 0;
+  return ['T', 'T', 'S', 'N', 'T', 'B', 'S', 'T', 'N', 'B'].map(p =>
+    p === 'T' ? typeQ(types[ti++]) : p === 'S' ? specialQ() : p === 'N' ? countQ(counts[ci++]) : bipQ(bips[bi++]));
+}
+const Q = { list: [], i: 0, score: 0, answered: false };
+const QO = { r: 18, spacing: 24, font: 18 };
+function qNew() { Q.list = makeQuiz(); Q.i = 0; Q.score = 0; qShow(); }
+function qShow() {
+  const box = $('#quiz'), total = Q.list.length;
+  if (Q.i >= total) {
+    const s = Q.score;
+    const msg = s === total ? 'Perfect score. You can name every graph type and special graph.'
+      : s >= 8 ? 'Strong work. Check the explanations for the ones you missed.'
+      : s >= 5 ? 'Good start. Review the summary table in section 1, then try a new set.'
+      : 'Revisit sections 1 and 3, then try a new set.';
+    box.innerHTML = `<div class="q-end"><p class="score">${s} / ${total}</p><p>${msg}</p><button class="btn primary" id="qAgain">Start a new set</button></div>`;
+    $('#qAgain').addEventListener('click', qNew);
+    return;
+  }
+  const q = Q.list[Q.i];
+  Q.answered = false;
+  box.innerHTML = `<div class="q-top"><span>Question ${Q.i + 1} of ${total}</span><span id="qScore">Score: ${Q.score}</span></div>
+    <div class="q-bar"><span style="width:${Q.i / total * 100}%"></span></div>
+    <h3 class="q-prompt">${q.prompt}</h3>
+    ${q.G ? '<div class="board q-board"><svg id="qsvg" viewBox="0 0 640 400" role="img" aria-label="Graph for this question"></svg></div>' : ''}
+    <div class="q-opts ${q.six ? 'six' : ''}">${q.opts.map((o, k) => `<button class="q-opt" data-k="${k}">${o.html}</button>`).join('')}</div>
+    <div class="q-fb" id="qfb" aria-live="polite"></div>`;
+  if (q.G) { const svg = $('#qsvg'); setupSvg(svg, 13); drawGraph(svg, q.G, { ...QO, labels: q.labels }); }
+  $$('.q-opt', box).forEach(b => b.addEventListener('click', () => qAnswer(+b.dataset.k)));
+}
+function qAnswer(k) {
+  if (Q.answered) return;
+  Q.answered = true;
+  const q = Q.list[Q.i], ok = q.opts[k].correct;
+  if (ok) Q.score++;
+  $$('.q-opt').forEach((b, j) => {
+    b.disabled = true;
+    if (q.opts[j].correct) b.classList.add('right');
+    else if (j === k) b.classList.add('wrong');
+  });
+  if (q.G && q.A) drawGraph($('#qsvg'), q.G, { ...QO, labels: q.labels, eKind: featureKind(q.A) });
+  const last = Q.i === Q.list.length - 1;
+  $('#qScore').textContent = 'Score: ' + Q.score;
+  $('#qfb').innerHTML = `<p class="${ok ? 'good' : 'bad'}"><b>${ok ? 'Correct.' : 'Not quite.'}</b> ${q.explain}</p><button class="btn primary" id="qNext">${last ? 'See your score' : 'Next question'}</button>`;
+  $('#qNext').addEventListener('click', () => { Q.i++; qShow(); });
+  $('#qNext').focus({ preventScroll: true });
+}
+
+/* ================= tabs, theme, size ================= */
+function switchTab(name) {
+  $$('.tab').forEach(t => { const on = t.dataset.tab === name; t.setAttribute('aria-selected', on ? 'true' : 'false'); t.tabIndex = on ? 0 : -1; });
+  $$('.panel').forEach(p => { p.hidden = p.id !== 'p-' + name; });
+  if (name === 'quiz' && !Q.list.length) qNew();
+  const y = $('main').getBoundingClientRect().top + window.scrollY - $('.tabs').offsetHeight;
+  if (window.scrollY > y) window.scrollTo(0, Math.max(0, y));
+}
+function initChrome() {
+  $$('.tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+  $('.tabs-in').addEventListener('keydown', e => {
+    const tabs = $$('.tab'), i = tabs.indexOf(document.activeElement);
+    if (i < 0 || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return;
+    e.preventDefault();
+    const j = (i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+    tabs[j].focus(); switchTab(tabs[j].dataset.tab);
+  });
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-open]');
+    if (b) { bLoad(b.dataset.open); switchTab('build'); }
+  });
+  const root = document.documentElement;
+  const saved = store('gt-theme');
+  if (saved === 'light' || saved === 'dark') root.dataset.theme = saved;
+  const isDark = () => root.dataset.theme ? root.dataset.theme === 'dark' : !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+  const syncTheme = () => { $('#themeBtn').textContent = isDark() ? 'Light mode' : 'Dark mode'; };
+  $('#themeBtn').addEventListener('click', () => { root.dataset.theme = isDark() ? 'light' : 'dark'; store('gt-theme', root.dataset.theme); syncTheme(); });
+  if (window.matchMedia) { const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', syncTheme); }
+  syncTheme();
+  const setSize = lg => { if (lg) root.dataset.size = 'lg'; else delete root.dataset.size; $('#sizeBtn').setAttribute('aria-pressed', lg ? 'true' : 'false'); };
+  setSize(store('gt-size') === 'lg');
+  $('#sizeBtn').addEventListener('click', () => { const lg = root.dataset.size !== 'lg'; setSize(lg); store('gt-size', lg ? 'lg' : 'normal'); });
+}
+
+renderGallery();
+bInit();
+sInit();
+cInit();
+initChrome();
+})();
+</script>
+</body>
+</html>
