@@ -2,6 +2,18 @@
 
 This repo consists of teaching materials (lectures) for IT, DSBA and AIT at IT KMITL.
 
+## Announcement
+
+> **Wednesday section: no class on 30 September**
+>
+> Due to severe flooding, there will be no onsite or online class for the Wednesday section.
+>
+> The Thursday and Friday sections are expected to proceed as normal.
+
+> **HW#2: Relations**
+>
+> The deadline is extended to Sunday **04/10/2026 at 11:00 PM**.
+
 ## Contact 
 
 Email: sirasit.lo@kmitl.ac.th
