@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Paths, Cuts and Connectivity: Interactive Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --paper:#EDF1F5; --surface:#FAFBFD; --ink:#15233A; --muted:#55657A; --rule:#C8D2DE; --grid:rgba(21,35,58,.055);
+  --edge:#8D9CAF; --v1:#0B776F; --v2:#4641AE; --match:#D8960A;
+  --bad:#C2293A; --bad-soft:#F7DEE1; --ok:#1B7A3B; --ok-soft:#DCEFE2;
+  --path:#AE2C7A; --path-soft:#F6DCEB; --on-ink:#FFFFFF; --code-bg:#E3E9F0;
+  --k0f:#D2ECE9; --k0s:#0B776F; --k1f:#E1E0F5; --k1s:#4641AE; --k2f:#FBEFCF; --k2s:#A87404;
+  --k3f:#F6DCEB; --k3s:#AE2C7A; --k4f:#DCEFE2; --k4s:#1B7A3B; --k5f:#E3E9F0; --k5s:#55657A;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --paper:#0F1520; --surface:#151E2C; --ink:#E2E8F0; --muted:#97A6B8; --rule:#2A384B; --grid:rgba(226,232,240,.045);
+    --edge:#61728A; --v1:#37BFB2; --v2:#9592F4; --match:#F0B42E;
+    --bad:#F2707D; --bad-soft:#3E1C22; --ok:#5BCB80; --ok-soft:#163222;
+    --path:#EE72BC; --path-soft:#3D1A33; --on-ink:#0F1520; --code-bg:#1E293A;
+    --k0f:#123430; --k0s:#37BFB2; --k1f:#24234C; --k1s:#9592F4; --k2f:#3A2E10; --k2s:#F0B42E;
+    --k3f:#3D1A33; --k3s:#EE72BC; --k4f:#163222; --k4s:#5BCB80; --k5f:#1E293A; --k5s:#97A6B8;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --paper:#0F1520; --surface:#151E2C; --ink:#E2E8F0; --muted:#97A6B8; --rule:#2A384B; --grid:rgba(226,232,240,.045);
+  --edge:#61728A; --v1:#37BFB2; --v2:#9592F4; --match:#F0B42E;
+  --bad:#F2707D; --bad-soft:#3E1C22; --ok:#5BCB80; --ok-soft:#163222;
+  --path:#EE72BC; --path-soft:#3D1A33; --on-ink:#0F1520; --code-bg:#1E293A;
+  --k0f:#123430; --k0s:#37BFB2; --k1f:#24234C; --k1s:#9592F4; --k2f:#3A2E10; --k2s:#F0B42E;
+  --k3f:#3D1A33; --k3s:#EE72BC; --k4f:#163222; --k4s:#5BCB80; --k5f:#1E293A; --k5s:#97A6B8;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none !important}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,sans-serif;font-size:17px;line-height:1.55;-webkit-text-size-adjust:100%;}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));}
+.math,.formula,h1,h2{font-family:"STIX Two Text","Cambria Math","Times New Roman",serif;}
+.math{font-size:1.07em;white-space:nowrap}
+.math i,.formula i{font-style:italic}
+p{margin:0 0 .8em}
+a{color:var(--v2)}
+:focus-visible{outline:3px solid var(--path);outline-offset:2px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:32px;align-items:end;padding-top:40px;padding-bottom:26px}
+h1{font-weight:600;font-size:clamp(2.1rem,4.6vw,3.3rem);line-height:1.08;margin:0 0 14px;letter-spacing:-.01em}
+.lede{color:var(--muted);max-width:52ch;font-size:1.06rem;margin:0}
+.hall-mark{margin:0;border-left:3px solid var(--ink);padding:4px 0 4px 22px}
+.formula{font-size:clamp(1.85rem,4.4vw,3.4rem);line-height:1.05;white-space:nowrap}
+.hall-mark figcaption{margin-top:12px;color:var(--muted);font-size:.95rem;max-width:48ch}
+
+/* tabs */
+.tabs{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--rule);scrollbar-width:thin}
+.tabs button{appearance:none;background:none;border:0;border-bottom:3px solid transparent;padding:12px 14px 10px;font:inherit;font-weight:700;color:var(--muted);white-space:nowrap;cursor:pointer;margin-bottom:-1px}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.tabs .n{font-family:"STIX Two Text",serif;font-weight:600;color:var(--v1);margin-right:6px}
+
+/* toolbar */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding-top:16px;padding-bottom:4px}
+.toolbar label{display:inline-flex;gap:8px;align-items:center;font-weight:700}
+.toolbar .grp{display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap}
+select,input[type=text],input[type=number]{font:inherit;font-weight:400;color:var(--ink);background:var(--surface);border:1.5px solid var(--rule);border-radius:6px;padding:6px 8px;max-width:100%}
+input[type=number]{width:4.2em}
+.gnote{flex-basis:100%;margin:0;color:var(--muted);font-size:.95rem}
+.editbar{flex-basis:100%;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding:10px 12px;border:1.5px dashed var(--path);border-radius:8px}
+.editbar .hint{color:var(--muted);font-size:.93rem;flex-basis:100%;margin:0}
+
+/* buttons */
+.btn{font:inherit;font-weight:700;font-size:.95rem;color:var(--ink);background:transparent;border:1.5px solid var(--ink);border-radius:6px;padding:7px 13px;cursor:pointer;line-height:1.25}
+.btn:hover{background:var(--code-bg)}
+.btn.primary{background:var(--ink);color:var(--paper)}
+.btn.primary:hover{opacity:.9}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.small{padding:3px 9px;font-size:.88rem}
+.btn[aria-pressed="true"]{background:var(--path);border-color:var(--path);color:var(--on-ink)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:6px;overflow:hidden;flex-wrap:wrap}
+.seg button{font:inherit;font-size:.92rem;font-weight:700;border:0;background:transparent;color:var(--ink);padding:6px 12px;cursor:pointer}
+.seg button+button{border-left:1.5px solid var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+
+/* layout */
+main{padding-bottom:60px}
+.tabpanel{padding-top:22px}
+.sim{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(290px,1fr);gap:28px;align-items:start}
+.board{background-color:var(--surface);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;border:1px solid var(--rule);border-radius:12px;padding:8px}
+.board svg{display:block;width:100%;height:auto;max-height:74vh}
+.board svg.tool-move{touch-action:none}
+.board svg.tool-move .vx{cursor:grab}
+.board svg.tool-add{cursor:crosshair}
+.side h2{margin-top:0}
+h2{font-weight:600;font-size:1.7rem;line-height:1.2;margin:0 0 12px}
+h3{font-size:1.06rem;margin:22px 0 8px}
+.how{color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.85rem;color:var(--muted);padding:8px 4px 2px;border-top:1px solid var(--rule);margin-top:6px}
+.lg{display:inline-flex;gap:6px;align-items:center}
+.lg svg{width:34px;height:16px;overflow:visible}
+
+/* svg graph */
+.edge{stroke:var(--edge);stroke-width:2.4;stroke-linecap:round;transition:stroke .2s,opacity .2s}
+.edge.k0{stroke:var(--k0s)} .edge.k1{stroke:var(--k1s)} .edge.k2{stroke:var(--k2s)} .edge.k3{stroke:var(--k3s)} .edge.k4{stroke:var(--k4s)} .edge.k5{stroke:var(--k5s)}
+.edge.walk{stroke:var(--path);stroke-width:6}
+.edge.rep{stroke:var(--bad);stroke-width:7}
+.edge.cut{stroke:var(--bad);stroke-width:6.5}
+.edge.mark{stroke:var(--path);stroke-width:6.5}
+.edge.gone{stroke:var(--edge);stroke-width:2;stroke-dasharray:3 7;opacity:.6}
+.edge.dim{opacity:.25}
+.phantom{stroke:var(--bad);stroke-width:3;stroke-dasharray:4 6;stroke-linecap:round;pointer-events:none}
+.hit{stroke:transparent;stroke-width:20;cursor:pointer}
+.hit:hover,.hit:focus-visible{stroke:var(--path);stroke-opacity:.16;outline:none}
+.elab{pointer-events:none}
+.elab rect{fill:var(--surface);stroke:var(--path);stroke-width:1.6}
+.elab text{font-family:"Atkinson Hyperlegible",system-ui,sans-serif;font-size:12.5px;font-weight:700;fill:var(--path)}
+.elab.rep rect{stroke:var(--bad)} .elab.rep text{fill:var(--bad)}
+.vx circle{fill:var(--surface);stroke:var(--ink);stroke-width:2.4;transition:fill .2s,opacity .2s}
+.vx text{fill:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,sans-serif;font-size:15px;font-weight:700;pointer-events:none}
+.vx.k0 circle{fill:var(--k0f);stroke:var(--k0s)} .vx.k1 circle{fill:var(--k1f);stroke:var(--k1s)} .vx.k2 circle{fill:var(--k2f);stroke:var(--k2s)}
+.vx.k3 circle{fill:var(--k3f);stroke:var(--k3s)} .vx.k4 circle{fill:var(--k4f);stroke:var(--k4s)} .vx.k5 circle{fill:var(--k5f);stroke:var(--k5s)}
+.vx.vis circle{stroke:var(--path);stroke-width:4}
+.vx.first circle{fill:var(--path-soft);stroke:var(--path);stroke-width:4.5}
+.vx.last circle{fill:var(--path);stroke:var(--path);stroke-width:4}
+.vx.last text{fill:var(--on-ink)}
+.vx.cutv circle{stroke:var(--bad);stroke-width:5.5}
+.vx.mark circle{stroke:var(--path);stroke-width:5;fill:var(--path-soft)}
+.vx.gone{opacity:.55}
+.vx.gone circle{fill:none;stroke:var(--muted);stroke-dasharray:4 4;stroke-width:2}
+.vx.gone text{fill:var(--muted)}
+.vx.gone.cutv circle{stroke:var(--bad)}
+.vx.pending circle{stroke:var(--path);stroke-width:5;stroke-dasharray:5 4}
+.vx.act{cursor:pointer}
+.vx.act:hover circle{stroke-width:5}
+.vx:focus-visible{outline:none}
+.vx:focus-visible circle{stroke:var(--path);stroke-width:5}
+
+/* readouts */
+.setline{font-size:1.02rem;overflow-wrap:anywhere}
+.seqline{font-size:1.1rem;font-weight:700;overflow-wrap:anywhere}
+.checks{margin:14px 0;border-top:1px solid var(--rule)}
+.checks>div{display:grid;grid-template-columns:minmax(0,10.5em) minmax(0,1fr);gap:10px;padding:8px 0;border-bottom:1px solid var(--rule)}
+.checks dt{font-weight:700}
+.checks dd{margin:0}
+.pill{display:inline-block;font-weight:700;font-size:.82rem;padding:1px 9px;border-radius:999px;margin-right:6px;vertical-align:1px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.no{background:var(--bad-soft);color:var(--bad)}
+.pill.na{background:var(--code-bg);color:var(--muted)}
+.callout{border-left:3px solid var(--v2);background:var(--surface);padding:12px 14px;margin:12px 0;border-radius:0 8px 8px 0}
+.callout:empty{display:none}
+.verdict{padding:10px 14px;border-radius:8px;margin:12px 0}
+.verdict.ok{background:var(--ok-soft)}
+.verdict.bad{background:var(--bad-soft)}
+.verdict.neutral{background:var(--surface);border:1px solid var(--rule)}
+.small{font-size:.92rem;color:var(--muted)}
+.chain{font-family:"STIX Two Text",serif;font-size:1.5rem;margin:14px 0 6px;line-height:1.3}
+.chain .q{color:var(--muted)}
+.inline-form{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+.inline-form input[type=text]{flex:1 1 12em;min-width:0}
+.try{border-top:1px solid var(--rule);margin-top:18px;padding-top:4px}
+.try ul{padding-left:1.2em;margin:6px 0}
+.try li{margin:6px 0}
+
+/* tables */
+.tablewrap{overflow:auto;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.93rem}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{background:var(--surface)}
+
+/* concepts */
+.concept{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.95fr);gap:36px;padding:26px 0;border-bottom:1px solid var(--rule);align-items:start}
+.concept:first-child{padding-top:4px}
+.prose{max-width:66ch}
+.prose ul,.prose ol{padding-left:1.25em}
+.prose li{margin:5px 0}
+dfn{font-style:normal;font-weight:700}
+.fig{margin:0}
+.fig svg{display:block;width:100%;height:auto;background-color:var(--surface);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;border:1px solid var(--rule);border-radius:10px}
+.fig figcaption{font-size:.92rem;color:var(--muted);margin-top:8px}
+.figstack{display:grid;gap:18px}
+.theorem{border:1.5px solid var(--ink);border-radius:10px;padding:16px 18px;margin:14px 0;background:var(--surface)}
+.theorem p:last-child{margin-bottom:0}
+.note{border-left:3px solid var(--match);padding:4px 0 4px 16px;margin:14px 0}
+
+/* exercises */
+.ex{padding:26px 0;border-bottom:1px solid var(--rule)}
+.ex h3{font-family:"STIX Two Text",serif;font-size:1.4rem;font-weight:600;margin:0 0 10px}
+.quiz{padding-left:1.4em;max-width:72ch}
+.quiz>li{margin:0 0 20px}
+.opts{display:flex;flex-direction:column;gap:6px;margin-top:6px;align-items:flex-start}
+.opt{font:inherit;text-align:left;background:var(--surface);color:var(--ink);border:1.5px solid var(--rule);border-radius:8px;padding:7px 12px;cursor:pointer;max-width:100%}
+.opt:hover{border-color:var(--ink)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.fb{margin:8px 0 0;font-size:.96rem}
+.fb:empty{display:none}
+.score{font-weight:700}
+.target{font-size:1.05rem;padding:10px 14px;border:1.5px solid var(--ink);border-radius:8px;background:var(--surface);margin:10px 0}
+details{border:1px solid var(--rule);border-radius:8px;background:var(--surface);margin-top:10px}
+summary{cursor:pointer;font-weight:700;padding:9px 14px}
+details>div{padding:4px 16px 12px;border-top:1px solid var(--rule)}
+footer{color:var(--muted);font-size:.9rem;padding-top:20px;padding-bottom:30px;border-top:1px solid var(--rule)}
+
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr;gap:20px;padding-top:28px}
+  .sim,.concept{grid-template-columns:1fr}
+  .concept{gap:18px}
+  .checks>div{grid-template-columns:1fr;gap:2px}
+}
+@media (max-width:520px){ body{font-size:16px} .chain{font-size:1.25rem} }
+@media (prefers-reduced-motion: reduce){ *{transition:none !important;animation:none !important} }
+</style>
+</head>
+<body>
+
+<header class="hero wrap">
+  <div>
+    <h1>Paths, cuts and connectivity</h1>
+    <p class="lede">Interactive notes for the graph theory unit of Discrete Mathematics. Trace paths and circuits, remove vertices and edges to watch a graph fall apart, and measure how strongly it holds together.</p>
+  </div>
+  <figure class="hall-mark">
+    <div class="formula" aria-label="kappa of G is at most lambda of G, which is at most delta of G"><i>κ</i>(<i>G</i>) ≤ <i>λ</i>(<i>G</i>) ≤ <i>δ</i>(<i>G</i>)</div>
+    <figcaption>Whitney's inequality. Disconnecting a graph by deleting vertices never needs more deletions than doing it by deleting edges, and that never needs more than the smallest degree.</figcaption>
+  </figure>
+</header>
+
+<nav class="tabs wrap" role="tablist" aria-label="Sections">
+  <button role="tab" id="t-concepts" data-tab="concepts" aria-selected="true" aria-controls="tab-concepts"><span class="n">1</span>Concepts</button>
+  <button role="tab" id="t-paths" data-tab="paths" aria-selected="false" aria-controls="tab-paths" tabindex="-1"><span class="n">2</span>Paths and circuits</button>
+  <button role="tab" id="t-cuts" data-tab="cuts" aria-selected="false" aria-controls="tab-cuts" tabindex="-1"><span class="n">3</span>Cut vertices and cut edges</button>
+  <button role="tab" id="t-conn" data-tab="conn" aria-selected="false" aria-controls="tab-conn" tabindex="-1"><span class="n">4</span>Connectivity κ and λ</button>
+  <button role="tab" id="t-ex" data-tab="ex" aria-selected="false" aria-controls="tab-ex" tabindex="-1"><span class="n">5</span>Exercises</button>
+</nav>
+
+<div id="toolbar" class="toolbar wrap" hidden>
+  <label>Graph <select id="preset"></select></label>
+  <span class="grp">
+    <label>Vertices <select id="rn" aria-label="Number of vertices for a random graph"></select></label>
+    <label>Edges <select id="rp" aria-label="Density of a random graph"><option value="0.12">few</option><option value="0.28" selected>some</option><option value="0.5">many</option></select></label>
+    <button id="rand" class="btn">New random graph</button>
+  </span>
+  <button id="edit" class="btn" aria-pressed="false">Edit graph</button>
+  <p id="gnote" class="gnote"></p>
+  <div id="editbar" class="editbar" hidden>
+    <div class="seg" id="tools">
+      <button data-tool="edges" aria-pressed="true">Edges</button>
+      <button data-tool="add" aria-pressed="false">Add vertex</button>
+      <button data-tool="move" aria-pressed="false">Move</button>
+      <button data-tool="delete" aria-pressed="false">Delete vertex</button>
+    </div>
+    <button class="btn small" id="clearEdges">Remove all edges</button>
+    <p class="hint" id="toolHint"></p>
+  </div>
+</div>
+
+<main class="wrap">
+
+<!-- ============ 1. CONCEPTS ============ -->
+<section id="tab-concepts" class="tabpanel" role="tabpanel" aria-labelledby="t-concepts">
+
+  <div class="concept">
+    <div class="prose">
+      <h2>Paths</h2>
+      <p>Let <span class="math"><i>n</i></span> be a nonnegative integer and let <span class="math"><i>u</i>, <i>v</i></span> be vertices of an undirected graph <span class="math"><i>G</i></span>. A <dfn>path of length <span class="math"><i>n</i></span> from <span class="math"><i>u</i></span> to <span class="math"><i>v</i></span></dfn> is a sequence of <span class="math"><i>n</i></span> edges <span class="math"><i>e</i>₁, …, <i>e</i><sub><i>n</i></sub></span> such that <span class="math"><i>e</i>₁</span> joins <span class="math"><i>x</i>₀ = <i>u</i></span> and <span class="math"><i>x</i>₁</span>, <span class="math"><i>e</i>₂</span> joins <span class="math"><i>x</i>₁</span> and <span class="math"><i>x</i>₂</span>, and so on, until <span class="math"><i>e</i><sub><i>n</i></sub></span> joins <span class="math"><i>x</i><sub><i>n</i>−1</sub></span> and <span class="math"><i>x</i><sub><i>n</i></sub> = <i>v</i></span>.</p>
+      <p>In a simple graph there is only one edge between two adjacent vertices, so we write a path by its vertex sequence <span class="math"><i>x</i>₀, <i>x</i>₁, …, <i>x</i><sub><i>n</i></sub></span>. The <dfn>length</dfn> is the number of edges, which is one less than the number of entries in the sequence. A single vertex is a path of length 0.</p>
+      <p>Two consecutive vertices in the sequence must be adjacent. Nothing else is required: a path may revisit vertices and even reuse edges.</p>
+    </div>
+    <figure class="fig"><svg id="fPath" role="img" aria-label="A path of length 4"></svg>
+      <figcaption>The path a, c, d, e, f has length 4: four edges, five vertices. The numbers show the order of the edges.</figcaption></figure>
+  </div>
+
+  <div class="concept">
+    <div class="prose">
+      <h2>Circuits and simple paths</h2>
+      <p>A path is a <dfn>circuit</dfn> (also called a <dfn>cycle</dfn>) if it begins and ends at the same vertex, that is <span class="math"><i>u</i> = <i>v</i></span>, and has length greater than zero.</p>
+      <p>A path or circuit is <dfn>simple</dfn> if it does not contain the same edge more than once. In a simple graph, the shortest simple circuit has length 3: a circuit u, v, u uses the edge {u, v} twice.</p>
+      <div class="note">
+        <p><b>A note on words.</b> These notes follow Rosen. Other textbooks use different names for the same ideas, and the Part 2 explorer reports both.</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Sequence</th><th>Rosen</th><th>Other books</th></tr></thead>
+          <tbody>
+            <tr><td>Open, edges and vertices may repeat</td><td>path</td><td>walk</td></tr>
+            <tr><td>Open, no repeated edge</td><td>simple path</td><td>trail</td></tr>
+            <tr><td>Open, no repeated vertex</td><td>simple path</td><td>path</td></tr>
+            <tr><td>Closed, may repeat anything</td><td>circuit</td><td>closed walk</td></tr>
+            <tr><td>Closed, no repeated edge</td><td>simple circuit</td><td>circuit (closed trail)</td></tr>
+            <tr><td>Closed, no repeated vertex except the ends</td><td>simple circuit</td><td>cycle</td></tr>
+          </tbody></table></div>
+      </div>
+    </div>
+    <div class="figstack">
+      <figure class="fig"><svg id="fCirc" role="img" aria-label="A simple circuit that repeats a vertex"></svg>
+        <figcaption>a, b, c, d, e, c, a is a simple circuit of length 6: no edge repeats, although the vertex c is visited twice.</figcaption></figure>
+      <figure class="fig"><svg id="fNotSimple" role="img" aria-label="A path that is not simple"></svg>
+        <figcaption>a, b, c, a, b is a path of length 4 that is not simple: the edge a–b is used as edge 1 and again as edge 4.</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="concept">
+    <div class="prose">
+      <h2>Connectedness</h2>
+      <p>An undirected graph is <dfn>connected</dfn> if there is a path between every pair of distinct vertices. Otherwise it is <dfn>disconnected</dfn>.</p>
+      <p>The maximal connected subgraphs of <span class="math"><i>G</i></span> are its <dfn>connected components</dfn>. Every vertex lies in exactly one component, and a graph is connected exactly when it has one component.</p>
+      <div class="theorem"><p><b>Theorem.</b> There is a simple path between every pair of distinct vertices of a connected undirected graph.</p></div>
+      <p>The proof takes a shortest path from <span class="math"><i>u</i></span> to <span class="math"><i>v</i></span>. If it repeated a vertex, the part between the two visits could be cut out to give a shorter path. So a shortest path repeats no vertex and therefore no edge (Exercise 6).</p>
+    </div>
+    <figure class="fig"><svg id="fComp" role="img" aria-label="A graph with three connected components"></svg>
+      <figcaption>A disconnected graph with three components, shown in three colours. There is no path from a to f.</figcaption></figure>
+  </div>
+
+  <div class="concept">
+    <div class="prose">
+      <h2>Cut vertices and cut edges</h2>
+      <p>Removing a vertex means deleting it together with all edges incident to it. Removing an edge leaves its endpoints in place.</p>
+      <ul>
+        <li>A <dfn>cut vertex</dfn> (or articulation point) is a vertex whose removal produces a graph with more connected components than <span class="math"><i>G</i></span>.</li>
+        <li>A <dfn>cut edge</dfn> (or bridge) is an edge whose removal produces a graph with more connected components than <span class="math"><i>G</i></span>.</li>
+      </ul>
+      <p>A connected graph without cut vertices is called <dfn>nonseparable</dfn>. Removing one cut edge always adds exactly one component. Removing a cut vertex can add many.</p>
+      <p>An edge is a cut edge exactly when it lies on no simple circuit (Exercise 7). That is why every edge of a tree is a cut edge.</p>
+    </div>
+    <figure class="fig"><svg id="fCut" role="img" aria-label="Cut vertices and cut edges highlighted"></svg>
+      <figcaption>Cut vertices c, e, f, i (red rings) and cut edges e–f, i–j (red). Edges on the triangles and the square lie on circuits, so none of them is a cut edge.</figcaption></figure>
+  </div>
+
+  <div class="concept">
+    <div class="prose">
+      <h2>Vertex cuts and vertex connectivity</h2>
+      <p>A subset <span class="math"><i>V</i>′ ⊆ <i>V</i></span> is a <dfn>vertex cut</dfn> (or separating set) if <span class="math"><i>G</i> − <i>V</i>′</span> is disconnected. A cut vertex is a vertex cut with one element.</p>
+      <p>The <dfn>vertex connectivity</dfn> <span class="math"><i>κ</i>(<i>G</i>)</span> of a noncomplete graph is the minimum number of vertices in a vertex cut.</p>
+      <ul>
+        <li>A complete graph <span class="math"><i>K</i><sub><i>n</i></sub></span> has no vertex cut: whatever we delete, the rest is still complete. By convention <span class="math"><i>κ</i>(<i>K</i><sub><i>n</i></sub>) = <i>n</i> − 1</span>, the number of deletions that leave a single vertex.</li>
+        <li><span class="math"><i>κ</i>(<i>G</i>) = 0</span> exactly when <span class="math"><i>G</i></span> is disconnected or <span class="math"><i>G</i> = <i>K</i>₁</span>.</li>
+        <li><span class="math"><i>G</i></span> is <dfn><span class="math"><i>k</i></span>-connected</dfn> if <span class="math"><i>κ</i>(<i>G</i>) ≥ <i>k</i></span>. A connected graph with at least 3 vertices is 2-connected exactly when it has no cut vertex.</li>
+      </ul>
+    </div>
+    <figure class="fig"><svg id="fVcut" role="img" aria-label="A vertex cut of size two"></svg>
+      <figcaption><span class="math"><i>V</i>′ = {c, d}</span> is a vertex cut: <span class="math"><i>G</i> − <i>V</i>′</span> splits into {a, b} and {e, f}. No single vertex disconnects this graph, so <span class="math"><i>κ</i>(<i>G</i>) = 2</span>.</figcaption></figure>
+  </div>
+
+  <div class="concept">
+    <div class="prose">
+      <h2>Edge cuts and edge connectivity</h2>
+      <p>A set of edges <span class="math"><i>E</i>′</span> is an <dfn>edge cut</dfn> if <span class="math"><i>G</i> − <i>E</i>′</span> is disconnected. A cut edge is an edge cut with one element.</p>
+      <p>The <dfn>edge connectivity</dfn> <span class="math"><i>λ</i>(<i>G</i>)</span> is the minimum number of edges in an edge cut. We set <span class="math"><i>λ</i>(<i>G</i>) = 0</span> when <span class="math"><i>G</i></span> is disconnected or <span class="math"><i>G</i> = <i>K</i>₁</span>. <span class="math"><i>G</i></span> is <dfn><span class="math"><i>k</i></span>-edge-connected</dfn> if <span class="math"><i>λ</i>(<i>G</i>) ≥ <i>k</i></span>.</p>
+      <p>One edge cut is always available: delete all edges at a vertex of smallest degree. That vertex becomes isolated, so <span class="math"><i>λ</i>(<i>G</i>) ≤ <i>δ</i>(<i>G</i>)</span>, where <span class="math"><i>δ</i>(<i>G</i>) = min<sub><i>v</i>∈<i>V</i></sub> deg(<i>v</i>)</span>.</p>
+      <p>In network terms, <span class="math"><i>κ</i>(<i>G</i>)</span> counts how many routers must fail, and <span class="math"><i>λ</i>(<i>G</i>)</span> how many cables must fail, before some computers can no longer reach each other.</p>
+    </div>
+    <figure class="fig"><svg id="fEcut" role="img" aria-label="An edge cut isolating one vertex"></svg>
+      <figcaption><span class="math"><i>E</i>′ = {a–b, a–c, a–d}</span> is an edge cut that isolates a. No two edges disconnect this graph, so <span class="math"><i>λ</i>(<i>G</i>) = 3</span>.</figcaption></figure>
+  </div>
+
+  <div class="concept">
+    <div class="prose">
+      <h2>Whitney's inequality</h2>
+      <div class="theorem">
+        <p><b>Theorem (Whitney, 1932).</b> For every graph <span class="math"><i>G</i></span>,</p>
+        <p style="text-align:center;font-size:1.25rem"><span class="math"><i>κ</i>(<i>G</i>) ≤ <i>λ</i>(<i>G</i>) ≤ min<sub><i>v</i>∈<i>V</i></sub> deg(<i>v</i>).</span></p>
+      </div>
+      <p>The right-hand inequality was shown above. For the left-hand one, take a minimum edge cut and replace each of its edges by a well-chosen endpoint; the chosen vertices form a vertex cut that is no larger (Exercise 13).</p>
+      <p>Both inequalities can be strict. In the graph on the right, two copies of <span class="math"><i>K</i>₄</span> are joined through the vertex d.</p>
+      <p>The general lesson for networks: a design can survive any single cable failure and still have a single router whose failure splits it.</p>
+    </div>
+    <figure class="fig"><svg id="fGap" role="img" aria-label="A graph with kappa 1, lambda 2 and delta 3"></svg>
+      <figcaption><span class="math"><i>κ</i>(<i>G</i>) = 1</span> (remove d), <span class="math"><i>λ</i>(<i>G</i>) = 2</span> (remove d–e and d–f), <span class="math"><i>δ</i>(<i>G</i>) = 3</span> (for example deg a = 3).</figcaption></figure>
+  </div>
+
+  <div class="concept" style="grid-template-columns:1fr;border-bottom:0">
+    <div>
+      <h2>At a glance</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Term</th><th>Definition</th><th>Quick test</th></tr></thead>
+        <tbody>
+          <tr><td>Path of length <span class="math"><i>n</i></span></td><td>Sequence of <span class="math"><i>n</i></span> edges, each starting where the previous one ends.</td><td>Consecutive vertices are adjacent.</td></tr>
+          <tr><td>Circuit (cycle)</td><td>Path of length &gt; 0 that ends where it starts.</td><td>First vertex = last vertex.</td></tr>
+          <tr><td>Simple path or circuit</td><td>No edge is used more than once.</td><td>Every edge appears at most once in the sequence.</td></tr>
+          <tr><td>Cut vertex</td><td>Removing it increases the number of components.</td><td>Some two of its neighbours are joined only through it.</td></tr>
+          <tr><td>Cut edge (bridge)</td><td>Removing it increases the number of components.</td><td>It lies on no simple circuit.</td></tr>
+          <tr><td>Vertex cut <span class="math"><i>V</i>′</span></td><td><span class="math"><i>G</i> − <i>V</i>′</span> is disconnected.</td><td><span class="math"><i>κ</i>(<i>G</i>)</span> = size of a smallest one (<span class="math"><i>n</i> − 1</span> for <span class="math"><i>K</i><sub><i>n</i></sub></span>).</td></tr>
+          <tr><td>Edge cut <span class="math"><i>E</i>′</span></td><td><span class="math"><i>G</i> − <i>E</i>′</span> is disconnected.</td><td><span class="math"><i>λ</i>(<i>G</i>)</span> = size of a smallest one.</td></tr>
+          <tr><td>Whitney</td><td colspan="2"><span class="math"><i>κ</i>(<i>G</i>) ≤ <i>λ</i>(<i>G</i>) ≤ <i>δ</i>(<i>G</i>)</span></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. PATHS ============ -->
+<section id="tab-paths" class="tabpanel" role="tabpanel" aria-labelledby="t-paths" hidden>
+  <div class="sim">
+    <div class="board">
+      <svg id="pathSvg" role="group" aria-label="Graph for building paths"></svg>
+      <div class="legend" id="pathLegend"></div>
+    </div>
+    <div class="side">
+      <h2>Path and circuit explorer</h2>
+      <p class="how">Click vertices one after another to walk through the graph. Each click must go to a neighbour of the last vertex. Click the first vertex again to close a circuit.</p>
+      <div class="btns">
+        <button class="btn" id="pUndo">Undo last step</button>
+        <button class="btn" id="pClear">Clear</button>
+      </div>
+      <div class="inline-form">
+        <input type="text" id="pType" placeholder="Or type a sequence, e.g. a, b, c, a" aria-label="Type a vertex sequence">
+        <button class="btn" id="pTypeBtn">Check sequence</button>
+      </div>
+      <div id="pMsg" class="callout" aria-live="polite"></div>
+      <div id="pathOut" aria-live="polite"></div>
+      <h3>Shortest path</h3>
+      <div class="inline-form">
+        <label>From <select id="pFrom"></select></label>
+        <label>to <select id="pTo"></select></label>
+        <button class="btn" id="pShort">Show a shortest path</button>
+      </div>
+      <p class="small" id="pConn"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. CUTS ============ -->
+<section id="tab-cuts" class="tabpanel" role="tabpanel" aria-labelledby="t-cuts" hidden>
+  <div class="sim">
+    <div class="board">
+      <svg id="cutSvg" role="group" aria-label="Graph for testing cut vertices and cut edges"></svg>
+      <div class="legend" id="cutLegend"></div>
+    </div>
+    <div class="side">
+      <h2>One deletion at a time</h2>
+      <p class="how">Click a vertex or an edge to remove it. Click it again to put it back. After a removal, each connected component gets its own colour.</p>
+      <div id="cutOut" aria-live="polite"></div>
+      <div class="btns">
+        <button class="btn" id="cShowV" aria-pressed="false">Show all cut vertices</button>
+        <button class="btn" id="cShowE" aria-pressed="false">Show all cut edges</button>
+      </div>
+      <div id="cutAll"></div>
+      <div class="try">
+        <h3>Things to try</h3>
+        <ul>
+          <li>On <b>Bowtie and square</b>, predict every cut vertex and cut edge before pressing the buttons.</li>
+          <li>On <b>Tree</b>, check that every edge is a cut edge and every vertex of degree at least 2 is a cut vertex.</li>
+          <li>On <b>Petersen graph</b> or <b>Cycle C₆</b>, no single deletion disconnects the graph. Continue in Part 4.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. CONNECTIVITY ============ -->
+<section id="tab-conn" class="tabpanel" role="tabpanel" aria-labelledby="t-conn" hidden>
+  <div class="sim">
+    <div class="board">
+      <svg id="connSvg" role="group" aria-label="Graph for vertex and edge cuts"></svg>
+      <div class="legend" id="connLegend"></div>
+    </div>
+    <div class="side">
+      <h2>Vertex cuts, edge cuts, <span class="math"><i>κ</i></span> and <span class="math"><i>λ</i></span></h2>
+      <p style="margin-bottom:6px;font-weight:700">What to remove</p>
+      <div class="seg" id="connMode">
+        <button data-mode="v" aria-pressed="true">Vertices</button>
+        <button data-mode="e" aria-pressed="false">Edges</button>
+      </div>
+      <p class="how" id="connHow" style="margin-top:10px"></p>
+      <div id="connOut" aria-live="polite"></div>
+      <div class="chain" id="chain"></div>
+      <p class="small" id="chainNote"></p>
+      <div class="btns">
+        <button class="btn" id="kFind">Find a minimum vertex cut</button>
+        <button class="btn" id="lFind">Find a minimum edge cut</button>
+        <button class="btn" id="connClear">Clear selection</button>
+      </div>
+      <div class="try">
+        <h3>Things to try</h3>
+        <ul>
+          <li>On <b>Whitney gap</b>, find a vertex cut of size 1 and an edge cut of size 2. Then look up <span class="math"><i>δ</i>(<i>G</i>)</span>.</li>
+          <li>On <b>Complete graph K₅</b>, try to find any vertex cut at all.</li>
+          <li>Build a 6-vertex graph with <span class="math"><i>κ</i> = <i>λ</i> = 3</span> using as few edges as possible (Exercise 12).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. EXERCISES ============ -->
+<section id="tab-ex" class="tabpanel" role="tabpanel" aria-labelledby="t-ex" hidden>
+  <div class="prose">
+    <h2>Exercises for self-practice</h2>
+    <p>Exercises 1 to 4 check your answers automatically. For Exercises 5 to 14, work on paper first, then open the solution to compare. Several of them can also be checked in Parts 2 to 4.</p>
+  </div>
+
+  <article class="ex">
+    <h3>Exercise 1. Quick checks</h3>
+    <p class="score" id="quizScore"></p>
+    <ol class="quiz" id="quiz"></ol>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 2. Build a path to order</h3>
+    <div class="sim">
+      <div class="board"><svg id="ex2Svg" role="group" aria-label="Graph for exercise 2"></svg></div>
+      <div class="side">
+        <p>Choose a task, then click vertices to build the sequence it asks for.</p>
+        <div class="seg" id="ex2Tasks"></div>
+        <p class="target" id="ex2Target"></p>
+        <p class="seqline" id="ex2Seq"></p>
+        <div class="btns">
+          <button class="btn primary" id="ex2Check">Check my answer</button>
+          <button class="btn" id="ex2Undo">Undo last step</button>
+          <button class="btn" id="ex2Clear">Clear</button>
+        </div>
+        <div id="ex2Msg" class="callout" aria-live="polite"></div>
+        <details><summary>Show sample answers</summary><div>
+          <p>(a) a, c, e, f, e, f, g, or a, b, a, c, e, f, g.<br>(b) a, b, c, d, e, c, a (essentially the only answer).<br>(c) a, b, c, b, a, or any circuit that goes back and forth twice.<br>(d) a, b, c, d, e, f, g, of length 6. A trail from a to e cannot use all six bowtie edges, because a would need odd degree in the edges used.</p>
+        </div></details>
+      </div>
+    </div>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 3. Find every cut vertex and cut edge</h3>
+    <div class="sim">
+      <div class="board"><svg id="ex3Svg" role="group" aria-label="Graph for exercise 3"></svg></div>
+      <div class="side">
+        <p>Click every vertex you think is a cut vertex and every edge you think is a cut edge. Click again to unmark. Then press <b>Check</b>.</p>
+        <p class="setline" id="ex3Live"></p>
+        <div class="btns">
+          <button class="btn primary" id="ex3Check">Check</button>
+          <button class="btn" id="ex3Clear">Clear marks</button>
+        </div>
+        <div id="ex3Msg" class="callout" aria-live="polite"></div>
+        <details><summary>Show solution</summary><div id="ex3Sol"></div></details>
+      </div>
+    </div>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 4. Minimum cuts and Whitney's inequality</h3>
+    <div class="sim">
+      <div class="board"><svg id="ex4Svg" role="group" aria-label="Graph for exercise 4"></svg></div>
+      <div class="side">
+        <p>(a) Select a vertex cut with as few vertices as possible. (b) Select an edge cut with as few edges as possible. (c) Enter <span class="math"><i>κ</i>(<i>G</i>)</span>, <span class="math"><i>λ</i>(<i>G</i>)</span> and <span class="math"><i>δ</i>(<i>G</i>)</span>.</p>
+        <div class="seg" id="ex4Mode">
+          <button data-mode="v" aria-pressed="true">(a) Select vertices</button>
+          <button data-mode="e" aria-pressed="false">(b) Select edges</button>
+        </div>
+        <p class="setline" id="ex4Live" style="margin-top:10px"></p>
+        <div class="btns">
+          <button class="btn primary" id="ex4Check">Check my cut</button>
+          <button class="btn" id="ex4Clear">Clear</button>
+        </div>
+        <div id="ex4Msg" class="callout" aria-live="polite"></div>
+        <div class="inline-form">
+          <label><span class="math"><i>κ</i>(<i>G</i>)</span> = <input type="number" id="ex4k" min="0" max="12"></label>
+          <label><span class="math"><i>λ</i>(<i>G</i>)</span> = <input type="number" id="ex4l" min="0" max="12"></label>
+          <label><span class="math"><i>δ</i>(<i>G</i>)</span> = <input type="number" id="ex4d" min="0" max="12"></label>
+          <button class="btn" id="ex4Nums">Check numbers</button>
+        </div>
+        <div id="ex4NumMsg" class="callout" aria-live="polite"></div>
+      </div>
+    </div>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 5. Classify sequences</h3>
+    <div class="sim">
+      <figure class="fig"><svg id="fEx5" role="img" aria-label="Graph for exercise 5"></svg></figure>
+      <div class="prose">
+        <p>For each sequence in this graph, decide: is it a path? If so, what is its length, is it a circuit, and is it simple? To check your answers, choose the graph <b>Bowtie and path</b> in Part 2 and type each sequence into the box.</p>
+        <ol type="i">
+          <li>a, c, d, e, f</li>
+          <li>a, b, c, a, b</li>
+          <li>c, d, e, c</li>
+          <li>a, b, c, d, e, c, a</li>
+          <li>a, c, f, g</li>
+          <li>e, f, e</li>
+        </ol>
+      </div>
+    </div>
+    <details><summary>Show solution</summary><div class="prose">
+      <p>(i) Simple path of length 4 from a to f. No vertex repeats either.</p>
+      <p>(ii) Path of length 4 from a to b, not simple: a–b is used twice.</p>
+      <p>(iii) Simple circuit of length 3 (a cycle in every book's terms).</p>
+      <p>(iv) Simple circuit of length 6. It repeats the vertex c, so books that use walk/trail/cycle call it a circuit but not a cycle.</p>
+      <p>(v) Not a path: c and f are not adjacent.</p>
+      <p>(vi) Circuit of length 2 that is not simple: e–f is used twice.</p>
+    </div></details>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 6. Shortest paths are simple</h3>
+    <div class="prose"><p>Let <span class="math"><i>u</i> ≠ <i>v</i></span> be vertices of a graph and suppose there is a path from <span class="math"><i>u</i></span> to <span class="math"><i>v</i></span>. Prove that a path of minimum length from <span class="math"><i>u</i></span> to <span class="math"><i>v</i></span> repeats no vertex, and conclude that it is simple.</p></div>
+    <details><summary>Show solution</summary><div class="prose">
+      <p>Let <span class="math"><i>x</i>₀, <i>x</i>₁, …, <i>x</i><sub><i>n</i></sub></span> be a path of minimum length <span class="math"><i>n</i></span> from <span class="math"><i>u</i></span> to <span class="math"><i>v</i></span>. Suppose <span class="math"><i>x</i><sub><i>i</i></sub> = <i>x</i><sub><i>j</i></sub></span> for some <span class="math"><i>i</i> &lt; <i>j</i></span>. Then <span class="math"><i>x</i>₀, …, <i>x</i><sub><i>i</i></sub>, <i>x</i><sub><i>j</i>+1</sub>, …, <i>x</i><sub><i>n</i></sub></span> is still a path from <span class="math"><i>u</i></span> to <span class="math"><i>v</i></span>, of length <span class="math"><i>n</i> − (<i>j</i> − <i>i</i>) &lt; <i>n</i></span>. This contradicts minimality.</p>
+      <p>A repeated edge {<span class="math"><i>x</i>, <i>y</i></span>} would force its endpoints to appear twice, so a path without repeated vertices has no repeated edges. It is simple. ∎</p>
+    </div></details>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 7. Cut edges and circuits</h3>
+    <div class="prose"><p>Prove that an edge <span class="math"><i>e</i> = {<i>u</i>, <i>v</i>}</span> of a graph <span class="math"><i>G</i></span> is a cut edge if and only if <span class="math"><i>e</i></span> lies on no simple circuit of <span class="math"><i>G</i></span>.</p></div>
+    <details><summary>Show solution</summary><div class="prose">
+      <p>(⇒, by contrapositive) Suppose <span class="math"><i>e</i></span> lies on a simple circuit <span class="math"><i>C</i></span>. Removing <span class="math"><i>e</i></span> from <span class="math"><i>C</i></span> leaves a path from <span class="math"><i>u</i></span> to <span class="math"><i>v</i></span> in <span class="math"><i>G</i> − <i>e</i></span>. Any path that used <span class="math"><i>e</i></span> can be rerouted along it, so <span class="math"><i>G</i> − <i>e</i></span> has the same components as <span class="math"><i>G</i></span>. So <span class="math"><i>e</i></span> is not a cut edge.</p>
+      <p>(⇐, by contrapositive) Suppose <span class="math"><i>e</i></span> is not a cut edge. Then <span class="math"><i>u</i></span> and <span class="math"><i>v</i></span> are still in the same component of <span class="math"><i>G</i> − <i>e</i></span>, so by Exercise 6 there is a path from <span class="math"><i>v</i></span> to <span class="math"><i>u</i></span> in <span class="math"><i>G</i> − <i>e</i></span> with no repeated vertex. Adding <span class="math"><i>e</i></span> at the start gives a simple circuit through <span class="math"><i>e</i></span>. ∎</p>
+    </div></details>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 8. Ends of a bridge</h3>
+    <div class="prose"><p>Let <span class="math"><i>e</i> = {<i>u</i>, <i>v</i>}</span> be a cut edge of a connected graph <span class="math"><i>G</i></span>. Prove that if <span class="math">deg(<i>u</i>) ≥ 2</span>, then <span class="math"><i>u</i></span> is a cut vertex. Deduce that a connected graph with at least 3 vertices and a cut edge has a cut vertex.</p></div>
+    <details><summary>Show solution</summary><div class="prose">
+      <p>Since <span class="math">deg(<i>u</i>) ≥ 2</span>, <span class="math"><i>u</i></span> has a neighbour <span class="math"><i>w</i> ≠ <i>v</i></span>. Suppose <span class="math"><i>G</i> − <i>u</i></span> were connected. Then it contains a path from <span class="math"><i>w</i></span> to <span class="math"><i>v</i></span> that avoids <span class="math"><i>u</i></span>, and in particular avoids <span class="math"><i>e</i></span>. Together with the edge {<span class="math"><i>u</i>, <i>w</i></span>} this gives a path from <span class="math"><i>u</i></span> to <span class="math"><i>v</i></span> in <span class="math"><i>G</i> − <i>e</i></span>, so <span class="math"><i>e</i></span> is not a cut edge, a contradiction. Hence <span class="math"><i>G</i> − <i>u</i></span> is disconnected and <span class="math"><i>u</i></span> is a cut vertex.</p>
+      <p>If <span class="math"><i>G</i></span> has at least 3 vertices and is connected, <span class="math"><i>u</i></span> and <span class="math"><i>v</i></span> cannot both have degree 1 (otherwise {<span class="math"><i>u</i>, <i>v</i></span>} would be a whole component). So one endpoint has degree at least 2 and is a cut vertex. ∎</p>
+    </div></details>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 9. A table of connectivities</h3>
+    <div class="prose"><p>Find <span class="math"><i>κ</i></span> and <span class="math"><i>λ</i></span> for each graph. Check small cases in Part 4 by building them.</p>
+      <ol type="a"><li><span class="math"><i>K</i><sub><i>n</i></sub></span>, <span class="math"><i>n</i> ≥ 2</span></li><li>the cycle <span class="math"><i>C</i><sub><i>n</i></sub></span>, <span class="math"><i>n</i> ≥ 3</span></li><li>a tree with at least 2 vertices</li><li>the star <span class="math"><i>K</i><sub>1,<i>n</i></sub></span>, <span class="math"><i>n</i> ≥ 2</span></li><li><span class="math"><i>K</i><sub><i>m</i>,<i>n</i></sub></span> with <span class="math">2 ≤ <i>m</i> ≤ <i>n</i></span></li><li>the wheel <span class="math"><i>W</i><sub><i>n</i></sub></span> (a hub joined to every vertex of <span class="math"><i>C</i><sub><i>n</i></sub></span>), <span class="math"><i>n</i> ≥ 4</span></li></ol></div>
+    <details><summary>Show solution</summary><div class="prose">
+      <div class="tablewrap"><table><thead><tr><th>Graph</th><th><span class="math"><i>κ</i></span></th><th><span class="math"><i>λ</i></span></th><th>Reason</th></tr></thead><tbody>
+        <tr><td><span class="math"><i>K</i><sub><i>n</i></sub></span></td><td><span class="math"><i>n</i> − 1</span></td><td><span class="math"><i>n</i> − 1</span></td><td>Convention for <span class="math"><i>κ</i></span>; separating <span class="math"><i>k</i></span> vertices from the other <span class="math"><i>n</i> − <i>k</i></span> needs <span class="math"><i>k</i>(<i>n</i> − <i>k</i>) ≥ <i>n</i> − 1</span> edges.</td></tr>
+        <tr><td><span class="math"><i>C</i><sub><i>n</i></sub></span></td><td>2</td><td>2</td><td>One deletion leaves a path; two non-adjacent vertices or two edges split it.</td></tr>
+        <tr><td>tree</td><td>1</td><td>1</td><td>Every edge is a cut edge. With 3 or more vertices, every non-leaf is a cut vertex; <span class="math"><i>K</i>₂</span> has <span class="math"><i>κ</i> = 1</span> by convention.</td></tr>
+        <tr><td><span class="math"><i>K</i><sub>1,<i>n</i></sub></span></td><td>1</td><td>1</td><td>The centre is a cut vertex; each edge is a cut edge.</td></tr>
+        <tr><td><span class="math"><i>K</i><sub><i>m</i>,<i>n</i></sub></span></td><td><span class="math"><i>m</i></span></td><td><span class="math"><i>m</i></span></td><td>Removing the smaller side disconnects; <span class="math"><i>δ</i> = <i>m</i></span>, so Whitney gives <span class="math"><i>λ</i> ≤ <i>m</i></span>, and fewer than <span class="math"><i>m</i></span> deletions leave every remaining pair joined.</td></tr>
+        <tr><td><span class="math"><i>W</i><sub><i>n</i></sub></span></td><td>3</td><td>3</td><td>Hub plus two non-adjacent rim vertices form a vertex cut; <span class="math"><i>δ</i> = 3</span>; removing any 2 vertices leaves the rest connected.</td></tr>
+      </tbody></table></div>
+    </div></details>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 10. Edge connectivity and degree</h3>
+    <div class="prose"><p>Prove that <span class="math"><i>λ</i>(<i>G</i>) ≤ <i>δ</i>(<i>G</i>)</span> for every graph <span class="math"><i>G</i></span> with at least 2 vertices. Give an example where the inequality is strict.</p></div>
+    <details><summary>Show solution</summary><div class="prose">
+      <p>If <span class="math"><i>G</i></span> is disconnected, <span class="math"><i>λ</i>(<i>G</i>) = 0 ≤ <i>δ</i>(<i>G</i>)</span>. Otherwise let <span class="math"><i>v</i></span> have degree <span class="math"><i>δ</i>(<i>G</i>)</span> and let <span class="math"><i>E</i>′</span> be the set of edges at <span class="math"><i>v</i></span>. In <span class="math"><i>G</i> − <i>E</i>′</span>, the vertex <span class="math"><i>v</i></span> is isolated while at least one other vertex remains, so <span class="math"><i>G</i> − <i>E</i>′</span> is disconnected. Hence <span class="math"><i>λ</i>(<i>G</i>) ≤ |<i>E</i>′| = <i>δ</i>(<i>G</i>)</span>. ∎</p>
+      <p>Strict example: the Whitney gap graph, with <span class="math"><i>λ</i> = 2 &lt; 3 = <i>δ</i></span>. A simpler one: two triangles joined by one edge have <span class="math"><i>λ</i> = 1 &lt; 2 = <i>δ</i></span>.</p>
+    </div></details>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 11. Build the gap yourself</h3>
+    <div class="prose"><p>Using <b>Edit graph</b>, build a graph with <span class="math"><i>κ</i>(<i>G</i>) = 1</span>, <span class="math"><i>λ</i>(<i>G</i>) = 2</span> and <span class="math"><i>δ</i>(<i>G</i>) = 3</span> that is different from the Whitney gap preset. Verify the three numbers in Part 4. Explain in one sentence why each number is correct.</p></div>
+    <details><summary>Show solution</summary><div class="prose">
+      <p>One answer: take two copies of <span class="math"><i>K</i>₄</span>, on a, b, c, d and on e, f, g, h, and add a new vertex x joined to c, d, e and f.</p>
+      <ul>
+        <li><span class="math"><i>κ</i> = 1</span>: removing x separates the two copies of <span class="math"><i>K</i>₄</span>.</li>
+        <li><span class="math"><i>λ</i> = 2</span>: the edges x–c and x–d form an edge cut. No single edge is a cut edge, because every edge lies on a triangle (for example x, c, d, x).</li>
+        <li><span class="math"><i>δ</i> = 3</span>: a, b, g and h have degree 3, and every other vertex has degree 4.</li>
+      </ul>
+    </div></details>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 12. Designing a reliable network</h3>
+    <div class="prose"><p>Six servers must be linked so that the network stays connected after any two cables fail and after any two servers fail. In graph terms, <span class="math"><i>λ</i>(<i>G</i>) ≥ 3</span> and <span class="math"><i>κ</i>(<i>G</i>) ≥ 3</span>.</p>
+      <ol type="a"><li>Show that at least 9 cables are needed.</li><li>Give a design with exactly 9 cables and verify it in Part 4.</li></ol></div>
+    <details><summary>Show solution</summary><div class="prose">
+      <p>(a) By Whitney, <span class="math"><i>δ</i>(<i>G</i>) ≥ <i>λ</i>(<i>G</i>) ≥ 3</span>, so every server has at least 3 cables. By the handshaking theorem, <span class="math">2|<i>E</i>| = Σ deg(<i>v</i>) ≥ 6 · 3 = 18</span>, so <span class="math">|<i>E</i>| ≥ 9</span>.</p>
+      <p>(b) The complete bipartite graph <span class="math"><i>K</i><sub>3,3</sub></span> has 9 edges and <span class="math"><i>κ</i> = <i>λ</i> = 3</span>. The triangular prism (two triangles a, b, c and d, e, f with edges a–d, b–e, c–f) also works.</p>
+    </div></details>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 13. Challenge: the left half of Whitney</h3>
+    <div class="prose"><p>Prove that <span class="math"><i>κ</i>(<i>G</i>) ≤ <i>λ</i>(<i>G</i>)</span> for every connected graph <span class="math"><i>G</i></span> with at least 2 vertices.</p></div>
+    <details><summary>Show solution</summary><div class="prose">
+      <p>Let <span class="math"><i>F</i></span> be an edge cut with <span class="math">|<i>F</i>| = <i>λ</i>(<i>G</i>)</span>. Since <span class="math"><i>F</i></span> is minimum, <span class="math"><i>G</i> − <i>F</i></span> has exactly two components <span class="math"><i>S</i></span> and <span class="math"><i>T</i></span>, and <span class="math"><i>F</i></span> is exactly the set of edges between them.</p>
+      <p><b>Case 1.</b> Every vertex of <span class="math"><i>S</i></span> is adjacent to every vertex of <span class="math"><i>T</i></span>. Then <span class="math"><i>λ</i> = |<i>S</i>||<i>T</i>| ≥ |<i>S</i>| + |<i>T</i>| − 1 = <i>n</i> − 1 ≥ <i>κ</i>(<i>G</i>)</span>, because <span class="math"><i>κ</i>(<i>G</i>) ≤ <i>n</i> − 1</span> always.</p>
+      <p><b>Case 2.</b> Some <span class="math"><i>x</i> ∈ <i>S</i></span> and <span class="math"><i>y</i> ∈ <i>T</i></span> are not adjacent. For each edge of <span class="math"><i>F</i></span>, put one endpoint into a set <span class="math"><i>U</i></span>: its endpoint in <span class="math"><i>S</i></span>, unless that endpoint is <span class="math"><i>x</i></span>, in which case its endpoint in <span class="math"><i>T</i></span>. Then <span class="math">|<i>U</i>| ≤ |<i>F</i>|</span>, and <span class="math"><i>x</i>, <i>y</i> ∉ <i>U</i></span> (the endpoint in <span class="math"><i>T</i></span> of an edge at <span class="math"><i>x</i></span> is not <span class="math"><i>y</i></span>). Every path from <span class="math"><i>x</i></span> to <span class="math"><i>y</i></span> uses an edge of <span class="math"><i>F</i></span>, and the vertex of <span class="math"><i>U</i></span> chosen for that edge lies on the path. So <span class="math"><i>U</i></span> separates <span class="math"><i>x</i></span> from <span class="math"><i>y</i></span>, and <span class="math"><i>κ</i>(<i>G</i>) ≤ |<i>U</i>| ≤ <i>λ</i>(<i>G</i>)</span>. ∎</p>
+    </div></details>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 14. Challenge: not everything is a cut vertex</h3>
+    <div class="prose"><p>Prove that every connected graph with at least 2 vertices has at least two vertices that are not cut vertices.</p></div>
+    <details><summary>Show solution</summary><div class="prose">
+      <p>Take a path <span class="math"><i>P</i> = <i>x</i>₀, <i>x</i>₁, …, <i>x</i><sub><i>k</i></sub></span> with no repeated vertex and with <span class="math"><i>k</i></span> as large as possible; <span class="math"><i>k</i> ≥ 1</span> since <span class="math"><i>G</i></span> is connected with 2 or more vertices. We show <span class="math"><i>x</i>₀</span> is not a cut vertex; the same argument works for <span class="math"><i>x</i><sub><i>k</i></sub></span>.</p>
+      <p>Every neighbour of <span class="math"><i>x</i>₀</span> lies on <span class="math"><i>P</i></span>, otherwise <span class="math"><i>P</i></span> could be extended. Let <span class="math"><i>w</i></span> be any vertex other than <span class="math"><i>x</i>₀</span>. Since <span class="math"><i>G</i></span> is connected, follow a shortest path from <span class="math"><i>w</i></span> to the set <span class="math">{<i>x</i>₁, …, <i>x</i><sub><i>k</i></sub>}</span>. It cannot pass through <span class="math"><i>x</i>₀</span>: the vertex just before <span class="math"><i>x</i>₀</span> would be a neighbour of <span class="math"><i>x</i>₀</span>, hence already in <span class="math">{<i>x</i>₁, …, <i>x</i><sub><i>k</i></sub>}</span>, and the path would have stopped there. So every vertex reaches <span class="math"><i>x</i>₁, …, <i>x</i><sub><i>k</i></sub></span> without using <span class="math"><i>x</i>₀</span>, and these are joined to each other along <span class="math"><i>P</i></span>. Hence <span class="math"><i>G</i> − <i>x</i>₀</span> is connected. ∎</p>
+    </div></details>
+  </article>
+</section>
+
+<footer>
+  <p>Definitions follow the connectivity section of Rosen, <i>Discrete Mathematics and Its Applications</i>. Previous topic: <a href="https://claude.ai/artifact/J95FBzjYvGiWXf4YTwmnSq">Matchings in bipartite graphs</a>.</p>
+</footer>
+</main>
+
+<script>
+"use strict";
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const mth=s=>`<span class="math">${s}</span>`;
+const PILL={ok:'<span class="pill ok">Yes</span>',no:'<span class="pill no">No</span>'};
+const KAP=mth('<i>κ</i>(<i>G</i>)'),LAM=mth('<i>λ</i>(<i>G</i>)'),DEL=mth('<i>δ</i>(<i>G</i>)');
+const W=640,H=420,RAD=21,MAXN=12,LETTERS='abcdefghijklmnopqrstuvwxyz';
+const ek=(u,v)=>u<v?u+'-'+v:v+'-'+u;
+const pk=k=>k.split('-').map(Number);
+const plural=(n,w,pl)=>n+' '+(n===1?w:(pl||w+'s'));
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+
+/* ---------------- graphs ---------------- */
+function mkG(id,title,note,vs,es){
+  const V=vs.trim().split(/\s+/).map(t=>{const[l,xy]=t.split(':');const[x,y]=xy.split(',').map(Number);return {l,x,y};});
+  const ix=l=>V.findIndex(v=>v.l===l);
+  const E=es.trim()?es.trim().split(/\s+/).map(t=>{const u=ix(t[0]),v=ix(t[1]);return u<v?[u,v]:[v,u];}):[];
+  return {id,title,note,V,E};
+}
+function ring(n,r,cx,cy,start){return Array.from({length:n},(_,i)=>{const a=(start+360*i/n)*Math.PI/180;return [Math.round(cx+r*Math.cos(a)),Math.round(cy+r*Math.sin(a))];});}
+function ringStr(labels,r,cx,cy,start){return ring(labels.length,r,cx,cy,start).map(([x,y],i)=>`${labels[i]}:${x},${y}`).join(' ');}
+const PRESETS=[
+  mkG('bowtie','Bowtie and square','Two triangles share c, a single edge e–f leads to a square, and j hangs off i. Where are the weak points?',
+    'a:60,100 b:60,300 c:165,200 d:270,100 e:270,300 f:390,300 g:390,140 h:530,140 i:530,300 j:610,385','ab ac bc cd ce de ef fg gh hi fi ij'),
+  mkG('bowpath','Bowtie and path','Two triangles share c, followed by a path e, f, g. Good for practising paths, circuits and the difference between repeated edges and repeated vertices.',
+    'a:110,110 b:110,310 c:220,210 d:330,110 e:330,310 f:450,310 g:570,310','ab ac bc cd ce de ef fg'),
+  mkG('gap','Whitney gap','Two copies of K₄ joined through the vertex d. Compare κ(G), λ(G) and δ(G) in Part 4: all three are different.',
+    'a:70,90 b:70,330 c:140,210 d:260,210 e:390,120 f:390,300 g:570,120 h:570,300','ab ac ad bc bd cd de df ef eg eh fg fh gh'),
+  mkG('petersen','Petersen graph','The Petersen graph: 10 vertices, each of degree 3. Can two deletions disconnect it?',
+    ringStr(['a','b','c','d','e'],185,320,218,-90)+' '+ringStr(['f','g','h','i','j'],88,320,218,-90),'ab bc cd de ae af bg ch di ej fh hj gj gi fi'),
+  mkG('k5','Complete graph K₅','A complete graph has no vertex cut at all. See how Part 4 handles κ(K₅).',
+    ringStr(['a','b','c','d','e'],170,320,215,-90),'ab ac ad ae bc bd be cd ce de'),
+  mkG('tree','Tree','In a tree there is exactly one simple path between two vertices. What does that mean for cut edges?',
+    'a:320,60 b:170,170 c:470,170 d:90,290 e:250,290 f:400,290 g:550,290 h:250,385 i:550,385','ab ac bd be cf cg eh gi'),
+  mkG('c6','Cycle C₆','Removing one vertex of a cycle never disconnects it. What about two?',
+    ringStr(['a','b','c','d','e','f'],170,320,212,-90),'ab bc cd de ef af')
+];
+const cloneG=g=>({id:g.id,title:g.title,note:g.note,V:g.V.map(v=>({...v})),E:g.E.map(e=>[...e])});
+const EXA=mkG('exa','','', 'a:70,90 b:70,290 c:180,190 d:290,90 e:290,290 f:410,290 g:530,290','ab ac bc cd ce de ef fg');
+const EXB=mkG('exb','','', 'a:60,90 b:60,270 c:160,180 d:280,180 e:390,80 f:500,180 g:390,280 h:595,95 i:600,300 j:300,380 k:470,380','ab ac bc cd de ef fg dg fh hi gj gk jk');
+const EXC=mkG('exc','','', 'a:110,120 b:110,300 c:320,90 d:320,330 e:530,120 f:530,300','ab ac ad bc bd cd ce cf de df ef');
+
+/* ---------------- algorithms ---------------- */
+const hasE=(g,u,v)=>{const a=Math.min(u,v),b=Math.max(u,v);return g.E.some(([x,y])=>x===a&&y===b);};
+const adjOf=g=>{const a=g.V.map(()=>[]);for(const[u,v] of g.E){a[u].push(v);a[v].push(u);}return a;};
+const deg=(g,i)=>g.E.filter(([u,v])=>u===i||v===i).length;
+function comps(g,rv=new Set(),re=new Set()){
+  const n=g.V.length,comp=Array(n).fill(-1),adj=g.V.map(()=>[]);
+  for(const[u,v] of g.E){if(rv.has(u)||rv.has(v)||re.has(ek(u,v)))continue;adj[u].push(v);adj[v].push(u);}
+  let c=0;
+  for(let s=0;s<n;s++){if(rv.has(s)||comp[s]>=0)continue;comp[s]=c;const q=[s];while(q.length){const x=q.pop();for(const y of adj[x])if(comp[y]<0){comp[y]=c;q.push(y);}}c++;}
+  return {comp,count:c};
+}
+function cutVertices(g){const b=comps(g).count;return g.V.map((_,i)=>i).filter(i=>comps(g,new Set([i])).count>b);}
+function cutEdges(g){const b=comps(g).count;return g.E.map(([u,v])=>ek(u,v)).filter(k=>comps(g,new Set(),new Set([k])).count>b);}
+const isComplete=g=>g.E.length===g.V.length*(g.V.length-1)/2;
+const popc=m=>{let c=0;while(m){m&=m-1;c++;}return c;};
+function kappa(g){
+  const n=g.V.length;
+  if(n<=1)return {k:0,cut:[],why:'single'};
+  if(comps(g).count>1)return {k:0,cut:[],why:'disc'};
+  if(isComplete(g))return {k:n-1,cut:null,why:'complete'};
+  const by=[];for(let m=0;m<(1<<n);m++)(by[popc(m)]=by[popc(m)]||[]).push(m);
+  for(let s=1;s<=n-2;s++)for(const m of by[s]){
+    const rv=new Set();for(let i=0;i<n;i++)if(m>>i&1)rv.add(i);
+    if(comps(g,rv).count>=2)return {k:s,cut:[...rv],why:'cut'};
+  }
+  return {k:n-1,cut:null,why:'complete'};
+}
+function lambda(g){
+  const n=g.V.length;
+  if(n<=1)return {l:0,cut:[],why:'single'};
+  if(comps(g).count>1)return {l:0,cut:[],why:'disc'};
+  let best=null;
+  for(let m=1;m<(1<<n)-1;m+=2){const cr=g.E.filter(([u,v])=>((m>>u)&1)!==((m>>v)&1));if(!best||cr.length<best.length)best=cr;}
+  return {l:best.length,cut:best.map(([u,v])=>ek(u,v)),why:'cut'};
+}
+function minDeg(g){const d=g.V.map((_,i)=>deg(g,i));const m=Math.min(...d);return {d:m,at:d.map((x,i)=>x===m?i:-1).filter(i=>i>=0)};}
+function bfsPath(g,s,t){
+  const adj=adjOf(g),prev=Array(g.V.length).fill(-2);prev[s]=-1;const q=[s];
+  while(q.length){const x=q.shift();if(x===t)break;for(const y of adj[x])if(prev[y]===-2){prev[y]=x;q.push(y);}}
+  if(prev[t]===-2)return null;const p=[];for(let x=t;x!==-1;x=prev[x])p.unshift(x);return p;
+}
+function maxTrail(g,s,t){
+  const adj=adjOf(g),used=new Set();let best=-1;
+  const dfs=(x,len)=>{if(x===t)best=Math.max(best,len);for(const y of adj[x]){const k=ek(x,y);if(used.has(k))continue;used.add(k);dfs(y,len+1);used.delete(k);}};
+  dfs(s,0);return best;
+}
+function describe(g,seq){
+  const n=seq.length;if(!n)return null;
+  const len=n-1,bad=[];
+  for(let t=0;t<len;t++)if(seq[t]===seq[t+1]||!hasE(g,seq[t],seq[t+1]))bad.push([seq[t],seq[t+1]]);
+  if(bad.length)return {ok:false,len,bad};
+  const keys=[];for(let t=0;t<len;t++)keys.push(ek(seq[t],seq[t+1]));
+  const ce=new Map();keys.forEach(k=>ce.set(k,(ce.get(k)||0)+1));
+  const repE=[...ce].filter(([,c])=>c>1).map(([k])=>k);
+  const closed=len>0&&seq[0]===seq[len];
+  const body=closed?seq.slice(0,-1):seq;
+  const cv=new Map();body.forEach(v=>cv.set(v,(cv.get(v)||0)+1));
+  const repV=[...cv].filter(([,c])=>c>1).map(([v,c])=>({v,c}));
+  return {ok:true,len,closed,simple:!repE.length,repE,repV,keys,ce};
+}
+const L=(g,i)=>g.V[i].l;
+const eName=(g,k)=>{const[u,v]=pk(k);return L(g,u)+'–'+L(g,v);};
+const setTxt=a=>a.length?'{'+a.join(', ')+'}':'∅';
+function names(g,seq,d){
+  const from=L(g,seq[0]),to=L(g,seq[seq.length-1]);
+  const rv=d.repV.map(x=>`${L(g,x.v)}`).join(', '),rvVerb=d.repV.length>1?'repeat':'repeats';
+  let rosen,other;
+  if(d.len===0){rosen='a path of length 0 (a single vertex)';other='a trivial walk';}
+  else if(!d.closed){
+    rosen=d.simple?`a simple path of length ${d.len} from ${from} to ${to}`:`a path of length ${d.len} from ${from} to ${to} that is not simple`;
+    other=!d.simple?'a walk, but not a trail (an edge repeats)':d.repV.length?`a trail, but not a path (${rv} ${rvVerb})`:'a path (no vertex repeats)';
+  }else{
+    rosen=d.simple?`a simple circuit of length ${d.len}`:`a circuit of length ${d.len} that is not simple`;
+    other=!d.simple?'a closed walk, but not a circuit (an edge repeats)':d.repV.length?`a circuit (closed trail), but not a cycle (${rv} ${rvVerb})`:'a cycle (no vertex repeats except first = last)';
+  }
+  return {rosen,other};
+}
+function parseSeq(g,txt){
+  const toks=txt.split(/[\s,;–—\-]+/).filter(Boolean);
+  const seq=[];
+  for(const t of toks){const i=g.V.findIndex(v=>v.l.toLowerCase()===t.toLowerCase());if(i<0)return {err:`There is no vertex called "${t}" in this graph.`};seq.push(i);}
+  if(!seq.length)return {err:'Type at least one vertex, for example: a, b, c'};
+  return {seq};
+}
+
+/* ---------------- drawing ---------------- */
+let drag=null;
+function svgPt(svg,e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const m=svg.getScreenCTM();if(!m)return {x:0,y:0};const q=pt.matrixTransform(m.inverse());return {x:q.x,y:q.y};}
+function drawG(svg,g,o={}){
+  const ec=o.edgeClass||(()=>''),vc=o.vClass||(()=>'');
+  let base='',ph='',hit='',labs='',vs='';
+  for(const[u,v] of g.E){
+    const k=ek(u,v),a=g.V[u],b=g.V[v],p=`x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"`;
+    base+=`<line class="edge ${ec(u,v,k)||''}" ${p}/>`;
+    if(o.onEdge)hit+=`<line class="hit" ${p} data-e="${k}" tabindex="0" role="button" aria-label="Edge ${esc(a.l)} ${esc(b.l)}"/>`;
+    if(o.edgeLabel){const t=o.edgeLabel(k);if(t){const w=Math.max(20,t.length*7.6+10);labs+=`<g class="elab ${o.edgeLabelClass?o.edgeLabelClass(k):''}" transform="translate(${(a.x+b.x)/2} ${(a.y+b.y)/2})"><rect x="${-w/2}" y="-10.5" width="${w}" height="21" rx="10.5"/><text text-anchor="middle" dy="0.36em">${esc(t)}</text></g>`;}}
+  }
+  for(const[u,v] of (o.phantoms||[])){const a=g.V[u],b=g.V[v];ph+=`<line class="phantom" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"/>`;}
+  g.V.forEach((p,i)=>{
+    const act=!!(o.onVertex||o.onDrag)&&(!o.vClickable||o.vClickable(i));
+    vs+=`<g class="vx ${vc(i)||''}${act?' act':''}" data-v="${i}" transform="translate(${p.x} ${p.y})"${act?` tabindex="0" role="button" aria-label="Vertex ${esc(p.l)}"`:''}><circle r="${RAD}"/><text text-anchor="middle" dy="0.36em">${esc(p.l)}</text></g>`;
+  });
+  if(o.fit&&g.V.length){
+    const xs=g.V.map(v=>v.x),ys=g.V.map(v=>v.y),m=46;
+    const x0=Math.min(...xs)-m,y0=Math.min(...ys)-m;
+    svg.setAttribute('viewBox',`${x0} ${y0} ${Math.max(...xs)-x0+m} ${Math.max(...ys)-y0+m}`);
+  }else svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.innerHTML=base+ph+hit+labs+vs;
+  svg.classList.toggle('tool-move',!!o.onDrag);
+  svg.classList.toggle('tool-add',!!o.onBg);
+  const fire=t=>{
+    if(t.dataset.e!==undefined&&o.onEdge)o.onEdge(t.dataset.e);
+    else if(t.dataset.v!==undefined&&o.onVertex&&t.classList.contains('act'))o.onVertex(+t.dataset.v);
+  };
+  svg.onclick=e=>{
+    if(o.onDrag)return;
+    const t=e.target.closest('[data-e],[data-v]');
+    if(t)fire(t);else if(o.onBg){const p=svgPt(svg,e);o.onBg(clamp(p.x,RAD+4,W-RAD-4),clamp(p.y,RAD+4,H-RAD-4));}
+  };
+  svg.onkeydown=e=>{
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    const t=e.target.closest('[data-e],[data-v]');if(!t)return;
+    e.preventDefault();
+    const sel=t.dataset.e!==undefined?`[data-e="${t.dataset.e}"]`:`[data-v="${t.dataset.v}"]`;
+    fire(t);
+    const again=svg.querySelector(sel);if(again&&again.getAttribute('tabindex'))again.focus();
+  };
+  svg.onpointerdown=o.onDrag?(e=>{const t=e.target.closest('[data-v]');if(!t)return;drag={i:+t.dataset.v,cb:o.onDrag};try{svg.setPointerCapture(e.pointerId);}catch(_){}e.preventDefault();}):null;
+  svg.onpointermove=o.onDrag?(e=>{if(!drag)return;const p=svgPt(svg,e);drag.cb(drag.i,Math.round(clamp(p.x,RAD+2,W-RAD-2)),Math.round(clamp(p.y,RAD+2,H-RAD-2)));}):null;
+  svg.onpointerup=svg.onpointercancel=()=>{drag=null;};
+}
+const SW={
+  walk:'<line class="edge walk" x1="2" y1="8" x2="32" y2="8"/>',
+  rep:'<line class="edge rep" x1="2" y1="8" x2="32" y2="8"/>',
+  phantom:'<line class="phantom" x1="2" y1="8" x2="32" y2="8"/>',
+  first:'<g class="vx first" transform="translate(17 8)"><circle r="6.5" style="stroke-width:2.5"/></g>',
+  last:'<g class="vx last" transform="translate(17 8)"><circle r="6.5"/></g>',
+  comps:'<g class="vx k0" transform="translate(6 8)"><circle r="5.5" style="stroke-width:2"/></g><g class="vx k1" transform="translate(17 8)"><circle r="5.5" style="stroke-width:2"/></g><g class="vx k2" transform="translate(28 8)"><circle r="5.5" style="stroke-width:2"/></g>',
+  gone:'<line class="edge gone" x1="2" y1="8" x2="32" y2="8"/>',
+  cut:'<line class="edge cut" x1="2" y1="8" x2="32" y2="8"/>',
+  cutv:'<g class="vx cutv" transform="translate(17 8)"><circle r="6.5" style="stroke-width:3"/></g>'
+};
+const LG={walk:'edge used once',rep:'edge used twice or more',phantom:'missing edge',first:'start',last:'current end',comps:'one colour per component',gone:'removed',cut:'cut edge',cutv:'cut vertex'};
+const legend=items=>items.map(k=>`<span class="lg"><svg viewBox="0 0 34 16" aria-hidden="true">${SW[k]}</svg>${LG[k]}</span>`).join('');
+const compClass=(c,i)=>c.count>=2&&c.comp[i]>=0?'k'+(c.comp[i]%6):'';
+
+/* ---------------- state ---------------- */
+let G=cloneG(PRESETS[0]);
+const st={tab:'concepts',edit:false,tool:'edges',pending:null,
+  path:{seq:[],msg:'',from:0,to:1},
+  cut:{v:null,e:null,showV:false,showE:false},
+  conn:{mode:'v',V:new Set(),E:new Set(),rk:false,rl:false}};
+
+/* ---------------- toolbar and editing ---------------- */
+const HINTS={edges:'Click a vertex, then another vertex, to add or remove the edge between them. Click an edge to remove it.',
+  add:'Click an empty spot on the board to add a vertex (up to 12 vertices).',move:'Drag vertices to tidy the drawing.',delete:'Click a vertex to delete it together with its edges.'};
+function initToolbar(){
+  const ps=$('#preset');
+  ps.innerHTML=PRESETS.map(p=>`<option value="${p.id}">${esc(p.title)}</option>`).join('')+'<option value="custom">Custom graph</option>';
+  $('#rn').innerHTML=[4,5,6,7,8,9,10,11,12].map(k=>`<option ${k===8?'selected':''}>${k}</option>`).join('');
+  ps.onchange=()=>{const p=PRESETS.find(x=>x.id===ps.value);if(!p){ps.value=G.id;return;}G=cloneG(p);resetAll();};
+  $('#rand').onclick=()=>{
+    const n=+$('#rn').value,p=+$('#rp').value;
+    const pos=ring(n,175,320,212,-90),V=pos.map(([x,y],i)=>({l:LETTERS[i],x,y}));
+    const order=[...Array(n).keys()].sort(()=>Math.random()-.5),E=new Set();
+    for(let t=1;t<n;t++){const u=order[t],v=order[Math.floor(Math.random()*t)];E.add(ek(u,v));}
+    for(let u=0;u<n;u++)for(let v=u+1;v<n;v++)if(Math.random()<p)E.add(ek(u,v));
+    G={id:'custom',title:'Random graph',note:`A random connected graph on ${n} vertices. Predict its cut vertices, κ(G) and λ(G) before revealing them.`,V,E:[...E].map(pk)};
+    resetAll();
+  };
+  $('#edit').onclick=()=>{st.edit=!st.edit;st.pending=null;updateToolbar();renderCurrent();};
+  $('#tools').onclick=e=>{const b=e.target.closest('[data-tool]');if(!b)return;st.tool=b.dataset.tool;st.pending=null;updateToolbar();renderCurrent();};
+  $('#clearEdges').onclick=()=>{G.E=[];graphEdited();};
+}
+function updateToolbar(){
+  $('#preset').value=G.id==='custom'?'custom':G.id;
+  $('#gnote').textContent=G.note||'';
+  $('#edit').setAttribute('aria-pressed',st.edit);
+  $('#edit').textContent=st.edit?'Done editing':'Edit graph';
+  $('#editbar').hidden=!st.edit;
+  $$('#tools [data-tool]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tool===st.tool));
+  $('#toolHint').textContent=HINTS[st.tool];
+  $('#clearEdges').disabled=!G.E.length;
+}
+function markCustom(){if(G.id!=='custom'){G.id='custom';G.title='Custom graph';G.note='Your own graph. It is shared by Parts 2, 3 and 4.';}}
+function graphEdited(){markCustom();resetAll();}
+function resetAll(){
+  st.pending=null;
+  st.path.seq=[];st.path.msg='';st.path.from=0;st.path.to=Math.min(1,G.V.length-1);
+  st.cut.v=null;st.cut.e=null;
+  st.conn.V=new Set();st.conn.E=new Set();st.conn.rk=false;st.conn.rl=false;
+  updateToolbar();renderCurrent();
+}
+function editHandlers(){
+  const t=st.tool;
+  if(t==='edges')return {
+    onEdge:k=>{G.E=G.E.filter(([u,v])=>ek(u,v)!==k);graphEdited();},
+    onVertex:i=>{
+      if(st.pending===null||st.pending===i){st.pending=st.pending===i?null:i;renderCurrent();return;}
+      const u=st.pending,a=Math.min(u,i),b=Math.max(u,i);
+      if(hasE(G,a,b))G.E=G.E.filter(([x,y])=>!(x===a&&y===b));else{G.E.push([a,b]);G.E.sort((x,y)=>x[0]-y[0]||x[1]-y[1]);}
+      st.pending=null;graphEdited();
+    }};
+  if(t==='add')return {onBg:(x,y)=>{
+    if(G.V.length>=MAXN){$('#toolHint').textContent=`This board allows at most ${MAXN} vertices, so that κ and λ can be computed exactly.`;return;}
+    const l=[...LETTERS].find(c=>!G.V.some(v=>v.l===c));G.V.push({l,x:Math.round(x),y:Math.round(y)});graphEdited();}};
+  if(t==='move')return {onDrag:(i,x,y)=>{G.V[i].x=x;G.V[i].y=y;if(G.id!=='custom'){markCustom();updateToolbar();}renderCurrent();}};
+  return {onVertex:i=>{
+    if(G.V.length<=1)return;
+    G.V.splice(i,1);G.E=G.E.filter(([u,v])=>u!==i&&v!==i).map(([u,v])=>[u>i?u-1:u,v>i?v-1:v]);graphEdited();}};
+}
+const pend=i=>st.edit&&st.pending===i?' pending':'';
+
+/* ---------------- Part 2: paths ---------------- */
+function seqUsage(g,seq){
+  const use=new Map(),phantoms=[];
+  for(let t=0;t+1<seq.length;t++){const u=seq[t],v=seq[t+1];if(u!==v&&hasE(g,u,v)){const k=ek(u,v);if(!use.has(k))use.set(k,[]);use.get(k).push(t+1);}else phantoms.push([u,v]);}
+  return {use,phantoms};
+}
+function seqVClass(seq,i){
+  if(!seq.length)return '';
+  const last=seq[seq.length-1];
+  if(i===last)return 'last';
+  if(i===seq[0])return 'first';
+  return seq.includes(i)?'vis':'';
+}
+function pathDraw(svg,g,seq,handlers){
+  const {use,phantoms}=seqUsage(g,seq);
+  drawG(svg,g,{
+    edgeClass:(u,v,k)=>use.has(k)?(use.get(k).length>1?'rep':'walk'):'',
+    edgeLabel:k=>use.has(k)?use.get(k).join(','):'',
+    edgeLabelClass:k=>use.has(k)&&use.get(k).length>1?'rep':'',
+    phantoms,vClass:i=>seqVClass(seq,i)+pend(i),...handlers
+  });
+}
+function stepClick(g,seq,i){
+  if(!seq.length){seq.push(i);return '';}
+  const last=seq[seq.length-1];
+  if(i===last)return `A path cannot stay at ${L(g,i)}: a simple graph has no loops. Click a neighbour of ${L(g,last)}.`;
+  if(!hasE(g,last,i))return `${L(g,i)} is not adjacent to ${L(g,last)}. Click a neighbour of ${L(g,last)}.`;
+  seq.push(i);return '';
+}
+function renderPaths(){
+  const P=st.path,seq=P.seq;
+  pathDraw($('#pathSvg'),G,seq,st.edit?editHandlers():{onVertex:i=>{P.msg=stepClick(G,seq,i);renderPaths();}});
+  $('#pathLegend').innerHTML=legend(['walk','rep','phantom','first','last']);
+  $('#pMsg').innerHTML=esc(P.msg||'');
+  const d=describe(G,seq);
+  let h='';
+  if(!d)h=`<p class="verdict neutral">Click any vertex to start, or type a sequence above.</p>`;
+  else{
+    h+=`<p class="seqline">${esc(seq.map(i=>L(G,i)).join(', '))}</p><dl class="checks">`;
+    const row=(q,a)=>`<div><dt>${q}</dt><dd>${a}</dd></div>`;
+    if(!d.ok){
+      h+=row('Is it a path?',`${PILL.no} ${d.bad.map(([u,v])=>u===v?`${L(G,u)} is followed by itself (no loops)`:`${L(G,u)} and ${L(G,v)} are not adjacent`).join('; ')}. A path can only follow edges (red dashes show the missing ones).`);
+    }else{
+      h+=row('Is it a path?',`${PILL.ok} Each consecutive pair is joined by an edge.`);
+      h+=row('Length',`${d.len} ${d.len===1?'edge':'edges'} <span class="small">(${seq.length} entries in the sequence)</span>`);
+      h+=row('Circuit?',d.len===0?`${PILL.no} A circuit needs length greater than 0.`:d.closed?`${PILL.ok} It starts and ends at ${esc(L(G,seq[0]))}.`:`${PILL.no} It starts at ${esc(L(G,seq[0]))} and ends at ${esc(L(G,seq[seq.length-1]))}.`);
+      h+=row('Simple?',d.simple?`${PILL.ok} No edge is used more than once.`:`${PILL.no} ${d.repE.map(k=>`${esc(eName(G,k))} is used ${d.ce.get(k)===2?'twice':d.ce.get(k)+' times'}`).join('; ')}.`);
+      h+=row('Repeated vertices',d.repV.length?d.repV.map(x=>`${esc(L(G,x.v))} (${x.c} visits)`).join(', ')+(d.closed?' <span class="small">(the closing return to the start is not counted)</span>':''):'None');
+      const nm=names(G,seq,d);
+      h+=row("Rosen's name",esc(nm.rosen));
+      h+=row('Walk/trail books',esc(nm.other));
+    }
+    h+='</dl>';
+  }
+  $('#pathOut').innerHTML=h;
+  const opts=G.V.map((v,i)=>`<option value="${i}">${esc(v.l)}</option>`).join('');
+  $('#pFrom').innerHTML=opts;$('#pTo').innerHTML=opts;
+  P.from=Math.min(P.from,G.V.length-1);P.to=Math.min(P.to,G.V.length-1);
+  $('#pFrom').value=P.from;$('#pTo').value=P.to;
+  const c=comps(G);
+  $('#pConn').innerHTML=c.count<=1?`<i>G</i> is connected: every pair of distinct vertices is joined by a path.`:
+    `<i>G</i> is disconnected. It has ${c.count} components: ${[...Array(c.count).keys()].map(k=>esc(setTxt(G.V.map((v,i)=>c.comp[i]===k?v.l:null).filter(Boolean)))).join(', ')}.`;
+}
+
+/* ---------------- Part 3: cut vertices / edges ---------------- */
+function renderCuts(){
+  const C=st.cut,rv=C.v!==null?new Set([C.v]):new Set(),re=C.e?new Set([C.e]):new Set();
+  const before=comps(G),after=comps(G,rv,re);
+  const CV=C.showV?new Set(cutVertices(G)):new Set(),CE=C.showE?new Set(cutEdges(G)):new Set();
+  drawG($('#cutSvg'),G,{
+    edgeClass:(u,v,k)=>{if(re.has(k)||rv.has(u)||rv.has(v))return 'gone'+(CE.has(k)?' cut':'');if(CE.has(k))return 'cut';return after.count>=2?compClass(after,u):'';},
+    vClass:i=>{if(rv.has(i))return 'gone'+(CV.has(i)?' cutv':'');return [compClass(after,i),CV.has(i)?'cutv':''].join(' ')+pend(i);},
+    ...(st.edit?editHandlers():{
+      onVertex:i=>{C.v=C.v===i?null:i;C.e=null;renderCuts();},
+      onEdge:k=>{C.e=C.e===k?null:k;C.v=null;renderCuts();}
+    })
+  });
+  $('#cutLegend').innerHTML=legend(['comps','gone','cutv','cut']);
+  let h='';
+  const cc=n=>plural(n,'component');
+  if(C.v===null&&!C.e){
+    h=`<p class="verdict neutral">Nothing is removed. <i>G</i> has ${cc(before.count)}.</p>`;
+  }else if(C.v!==null){
+    const nm=esc(L(G,C.v)),dg=deg(G,C.v);
+    h=`<p class="setline">Removed vertex ${nm} and its ${plural(dg,'edge')}.</p><p>Components: ${before.count} before, ${after.count} after.</p>`;
+    h+=after.count>before.count?`<p class="verdict bad"><b>${nm} is a cut vertex.</b> Removing it raises the number of components from ${before.count} to ${after.count}.</p>`:
+      dg===0?`<p class="verdict ok"><b>${nm} is not a cut vertex.</b> It is isolated, so removing it deletes a whole component.</p>`:
+      `<p class="verdict ok"><b>${nm} is not a cut vertex.</b> <i>G</i> − ${nm} still has ${cc(after.count)}.</p>`;
+  }else{
+    const nm=esc(eName(G,C.e));
+    h=`<p class="setline">Removed edge ${nm}. Its endpoints stay.</p><p>Components: ${before.count} before, ${after.count} after.</p>`;
+    h+=after.count>before.count?`<p class="verdict bad"><b>${nm} is a cut edge (bridge).</b> Removing it raises the number of components from ${before.count} to ${after.count}. It lies on no simple circuit.</p>`:
+      `<p class="verdict ok"><b>${nm} is not a cut edge.</b> Its endpoints are still joined by another path, so it lies on a simple circuit.</p>`;
+  }
+  $('#cutOut').innerHTML=h;
+  $('#cShowV').setAttribute('aria-pressed',C.showV);$('#cShowE').setAttribute('aria-pressed',C.showE);
+  let a='';
+  if(C.showV){const cv=cutVertices(G);a+=`<p><b>Cut vertices:</b> ${esc(setTxt(cv.map(i=>L(G,i))))}</p>`;
+    if(before.count===1&&G.V.length>=2)a+=cv.length?'':`<p class="small"><i>G</i> is connected and has no cut vertex, so it is <b>nonseparable</b>.</p>`;}
+  if(C.showE){const ce=cutEdges(G);a+=`<p><b>Cut edges:</b> ${esc(setTxt(ce.map(k=>eName(G,k))))}</p>`;}
+  $('#cutAll').innerHTML=a;
+}
+
+/* ---------------- Part 4: connectivity ---------------- */
+function renderConn(){
+  const C=st.conn,vm=C.mode==='v',rv=vm?C.V:new Set(),re=vm?new Set():C.E;
+  const after=comps(G,rv,re),n=G.V.length;
+  drawG($('#connSvg'),G,{
+    edgeClass:(u,v,k)=>(re.has(k)||rv.has(u)||rv.has(v))?'gone':compClass(after,u),
+    vClass:i=>rv.has(i)?'gone':compClass(after,i)+pend(i),
+    ...(st.edit?editHandlers():vm?{onVertex:i=>{C.V.has(i)?C.V.delete(i):C.V.add(i);renderConn();}}:{onEdge:k=>{C.E.has(k)?C.E.delete(k):C.E.add(k);renderConn();}})
+  });
+  $('#connLegend').innerHTML=legend(['comps','gone']);
+  $$('#connMode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===C.mode));
+  $('#connHow').innerHTML=vm?`Click vertices to put them into ${mth('<i>V</i>′')}. They are removed together with their edges.`:`Click edges to put them into ${mth('<i>E</i>′')}. Their endpoints stay.`;
+  const K=kappa(G),Lm=lambda(G),D=minDeg(G);
+  let h='';
+  if(vm){
+    const S=[...C.V].sort((a,b)=>a-b),left=n-S.length;
+    h+=`<p class="setline">${mth('<i>V</i>′')} = ${esc(setTxt(S.map(i=>L(G,i))))}, ${mth('|<i>V</i>′|')} = ${S.length}</p>`;
+    if(!S.length)h+=K.why==='disc'?`<p class="verdict bad"><i>G</i> is already disconnected, so even ${mth('<i>V</i>′ = ∅')} is a vertex cut.</p>`:`<p class="verdict neutral">Click vertices to build ${mth('<i>V</i>′')}.</p>`;
+    else if(left<=1)h+=`<p class="verdict neutral">${left===1?'Only one vertex is left':'No vertex is left'}. A graph with fewer than two vertices is not disconnected, so ${mth('<i>V</i>′')} is not a vertex cut.</p>`;
+    else if(after.count>=2){
+      let extra='';if(C.rk)extra=S.length===K.k?' It is a <b>minimum</b> vertex cut.':` It is not minimum: ${KAP} = ${K.k}.`;
+      h+=`<p class="verdict bad">${mth('<i>G</i> − <i>V</i>′')} has ${after.count} components, so ${mth('<i>V</i>′')} <b>is a vertex cut</b>.${extra}</p>`;
+    }else h+=`<p class="verdict ok">${mth('<i>G</i> − <i>V</i>′')} is still connected, so ${mth('<i>V</i>′')} is not a vertex cut.${K.why==='complete'?' <i>G</i> is complete, so no vertex cut exists at all.':''}</p>`;
+  }else{
+    const S=[...C.E].sort();
+    h+=`<p class="setline">${mth('<i>E</i>′')} = ${esc(setTxt(S.map(k=>eName(G,k))))}, ${mth('|<i>E</i>′|')} = ${S.length}</p>`;
+    if(!S.length)h+=Lm.why==='disc'?`<p class="verdict bad"><i>G</i> is already disconnected, so even ${mth('<i>E</i>′ = ∅')} is an edge cut.</p>`:`<p class="verdict neutral">Click edges to build ${mth('<i>E</i>′')}.</p>`;
+    else if(after.count>=2){
+      let extra='';if(C.rl)extra=S.length===Lm.l?' It is a <b>minimum</b> edge cut.':` It is not minimum: ${LAM} = ${Lm.l}.`;
+      h+=`<p class="verdict bad">${mth('<i>G</i> − <i>E</i>′')} has ${after.count} components, so ${mth('<i>E</i>′')} <b>is an edge cut</b>.${extra}</p>`;
+    }else h+=`<p class="verdict ok">${mth('<i>G</i> − <i>E</i>′')} is still connected, so ${mth('<i>E</i>′')} is not an edge cut.</p>`;
+  }
+  $('#connOut').innerHTML=h;
+  const kv=C.rk?K.k:'<span class="q">?</span>',lv=C.rl?Lm.l:'<span class="q">?</span>';
+  $('#chain').innerHTML=`<i>κ</i>(<i>G</i>) = ${kv}  ≤  <i>λ</i>(<i>G</i>) = ${lv}  ≤  <i>δ</i>(<i>G</i>) = ${D.d}`;
+  let note=`${DEL} = ${D.d}, the degree of ${esc(D.at.map(i=>L(G,i)).join(', '))}.`;
+  if(C.rk){
+    if(K.why==='complete')note+=` <i>G</i> is complete (${mth('<i>K</i><sub>'+n+'</sub>')}), so by convention ${KAP} = ${n} − 1 = ${K.k}.`;
+    else if(K.why==='disc')note+=` ${KAP} = 0 because <i>G</i> is disconnected.`;
+    else if(K.why==='single')note+=` ${KAP} = 0 for a single vertex.`;
+    note+=K.k>0?` <i>G</i> is ${K.k}-connected but not ${K.k+1}-connected.`:'';
+  }
+  if(C.rl&&Lm.l>0)note+=` <i>G</i> is ${Lm.l}-edge-connected but not ${Lm.l+1}-edge-connected.`;
+  if(!C.rk||!C.rl)note+=' Predict the hidden values, then use the buttons below.';
+  $('#chainNote').innerHTML=note;
+}
+
+/* ---------------- tabs ---------------- */
+const TABS=['concepts','paths','cuts','conn','ex'];
+function setTab(t){
+  st.tab=t;st.pending=null;
+  $$('.tabs [role=tab]').forEach(b=>{const on=b.dataset.tab===t;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;});
+  TABS.forEach(x=>{$('#tab-'+x).hidden=x!==t;});
+  $('#toolbar').hidden=!['paths','cuts','conn'].includes(t);
+  updateToolbar();renderCurrent();
+}
+function renderCurrent(){if(st.tab==='paths')renderPaths();else if(st.tab==='cuts')renderCuts();else if(st.tab==='conn')renderConn();}
+
+/* ---------------- Part 1 figures ---------------- */
+function renderConcepts(){
+  const ix=(g,s)=>s.split('').map(l=>g.V.findIndex(v=>v.l===l));
+  pathDraw($('#fPath'),EXA,ix(EXA,'acdef'),{fit:true});
+  pathDraw($('#fCirc'),EXA,ix(EXA,'abcdeca'),{fit:true});
+  pathDraw($('#fNotSimple'),EXA,ix(EXA,'abcab'),{fit:true});
+  const B=cloneG(PRESETS[0]);B.E=B.E.filter(([u,v])=>!['4-5','8-9'].includes(ek(u,v)));
+  const bc=comps(B);
+  drawG($('#fComp'),B,{fit:true,edgeClass:u=>compClass(bc,u),vClass:i=>compClass(bc,i)});
+  const P0=PRESETS[0],cv=new Set(cutVertices(P0)),ce=new Set(cutEdges(P0));
+  drawG($('#fCut'),P0,{fit:true,edgeClass:(u,v,k)=>ce.has(k)?'cut':'',vClass:i=>cv.has(i)?'cutv':''});
+  const rv=new Set(ix(EXC,'cd')),c1=comps(EXC,rv);
+  drawG($('#fVcut'),EXC,{fit:true,edgeClass:(u,v)=>rv.has(u)||rv.has(v)?'gone':compClass(c1,u),vClass:i=>rv.has(i)?'gone':compClass(c1,i)});
+  const re=new Set(['0-1','0-2','0-3']),c2=comps(EXC,new Set(),re);
+  drawG($('#fEcut'),EXC,{fit:true,edgeClass:(u,v,k)=>re.has(k)?'gone':compClass(c2,u),vClass:i=>compClass(c2,i)});
+  const Gp=PRESETS.find(p=>p.id==='gap'),d=Gp.V.findIndex(v=>v.l==='d'),gc=new Set(lambda(Gp).cut);
+  drawG($('#fGap'),Gp,{fit:true,edgeClass:(u,v,k)=>gc.has(k)?'cut':'',vClass:i=>i===d?'cutv':''});
+  drawG($('#fEx5'),EXA,{fit:true});
+}
+
+/* ---------------- Part 5: exercises ---------------- */
+const QUIZ=[
+  {q:'In a simple graph, all consecutive vertices of the sequence a, b, c, b, d are adjacent. What is it?',
+   o:['A simple path of length 4','A path of length 4 that is not simple','A circuit of length 4','A path of length 5'],a:1,
+   why:'The edge {b, c} is used twice (b to c, then c to b), so the path is not simple. Its length is the number of edges, 4. It is not a circuit because it starts at a and ends at d.'},
+  {q:'What is the smallest possible length of a simple circuit in a simple graph?',o:['1','2','3','4'],a:2,
+   why:'Length 1 would need a loop. A circuit u, v, u of length 2 uses the edge {u, v} twice, so it is not simple. A triangle gives length 3.'},
+  {q:"In Rosen's terminology, the sequence a, b, c, d, e, c, a in a bowtie graph (two triangles sharing c) is",
+   o:['a simple circuit','a circuit that is not simple','not a circuit, because c repeats'],a:0,
+   why:'No edge repeats, and a simple circuit may repeat vertices. Books that use walk/trail/cycle would call it a circuit (closed trail) but not a cycle.'},
+  {q:'Removing one cut edge from a graph increases the number of components by',o:['exactly 1','at least 1, possibly more','at least 2'],a:0,
+   why:'Deleting the edge {u, v} can only split the component containing u and v, and it splits into at most two pieces: the part reachable from u and the part reachable from v.'},
+  {q:'Removing one cut vertex from a graph increases the number of components by',o:['exactly 1','at least 1, possibly more'],a:1,
+   why:'The centre of the star K₁,₅ is a cut vertex, and removing it leaves 5 components, an increase of 4.'},
+  {q:`What is ${mth('<i>κ</i>(<i>K</i>₆)')}?`,o:['3','5','6','It is undefined'],a:1,
+   why:'K₆ has no vertex cut, since every graph left after deleting vertices is still complete. By convention κ(Kₙ) = n − 1 = 5.'},
+  {q:'A connected graph G has a vertex of degree 2. Which statement must be true?',o:['λ(G) ≤ 2','λ(G) = 2','κ(G) = 2'],a:0,
+   why:'Deleting the two edges at that vertex isolates it, so λ(G) ≤ δ(G) ≤ 2. It can be smaller: a path graph has λ = 1.'},
+  {q:'Every edge of a tree is a cut edge.',o:['True','False'],a:0,
+   why:'A tree has no simple circuits, and an edge is a cut edge exactly when it lies on no simple circuit.'},
+  {q:`${mth('<i>κ</i>(<i>G</i>) = 0')} exactly when`,o:['G is disconnected or G = K₁','G has a vertex of degree 0','G is a tree'],a:0,
+   why:'If G is disconnected, the empty set is already a vertex cut; K₁ gets 0 by the convention κ(Kₙ) = n − 1. A tree with 2 or more vertices has κ = 1.'},
+  {q:'Which chain of inequalities always holds?',o:['λ(G) ≤ κ(G) ≤ δ(G)','κ(G) ≤ λ(G) ≤ δ(G)','δ(G) ≤ κ(G) ≤ λ(G)'],a:1,
+   why:'This is Whitney\'s theorem. In the Whitney gap graph, κ = 1, λ = 2 and δ = 3, so both inequalities can be strict.'}
+];
+const quizState=QUIZ.map(()=>({tried:false,first:false,done:false}));
+function renderQuiz(){
+  $('#quiz').innerHTML=QUIZ.map((x,qi)=>`<li><p>${x.q}</p><div class="opts">${x.o.map((o,oi)=>`<button class="opt" data-q="${qi}" data-o="${oi}">${o}</button>`).join('')}</div><p class="fb" id="fb${qi}" aria-live="polite"></p></li>`).join('');
+  $('#quiz').onclick=e=>{
+    const b=e.target.closest('.opt');if(!b)return;
+    const qi=+b.dataset.q,oi=+b.dataset.o,s=quizState[qi];if(s.done)return;
+    const right=oi===QUIZ[qi].a;
+    if(!s.tried){s.tried=true;s.first=right;}
+    if(right){s.done=true;b.classList.add('right');$('#fb'+qi).innerHTML=`<b>Correct.</b> ${QUIZ[qi].why}`;}
+    else{b.classList.add('wrong');b.disabled=true;$('#fb'+qi).innerHTML='<b>Not quite.</b> Try another option.';}
+    const done=quizState.filter(x=>x.done).length,first=quizState.filter(x=>x.first).length;
+    $('#quizScore').textContent=`${done} of ${QUIZ.length} solved, ${first} on the first try.`;
+  };
+}
+
+/* Exercise 2 */
+const A_=EXA.V.findIndex(v=>v.l==='a'),G_=EXA.V.findIndex(v=>v.l==='g');
+const EX2T=[
+  {id:'a',text:'(a) A path from a to g of length 6 that is <b>not</b> simple.',check:(s,d)=>
+    s[0]!==A_?'It must start at a.':s[s.length-1]!==G_?'It must end at g.':d.len!==6?`Its length is ${d.len}; it must be 6.`:d.simple?'It is simple. Make it reuse some edge.':null,
+    ok:d=>`A path of length 6 from a to g in which ${d.repE.map(k=>eName(EXA,k)).join(' and ')} ${d.repE.length>1?'are':'is'} used twice.`},
+  {id:'b',text:'(b) A <b>simple circuit</b> of length 6 that starts and ends at a.',check:(s,d)=>
+    s[0]!==A_?'It must start at a.':!d.closed?'It must end where it starts.':d.len!==6?`Its length is ${d.len}; it must be 6.`:!d.simple?'An edge is used twice, so it is not simple.':null,
+    ok:d=>`It visits ${d.repV.map(x=>L(EXA,x.v)).join(', ')} twice, which a simple circuit is allowed to do. Books that use walk/trail/cycle would call it a circuit, but not a cycle.`},
+  {id:'c',text:'(c) A <b>circuit</b> of length 4 that is <b>not</b> simple.',check:(s,d)=>
+    !d.closed?'It must end where it starts.':d.len!==4?`Its length is ${d.len}; it must be 4.`:d.simple?'No edge repeats, so it is simple. Make it reuse an edge.':null,
+    ok:()=>'A closed path of length 4 that reuses an edge.'},
+  {id:'d',text:'(d) A <b>simple</b> path from a to g that is as <b>long</b> as possible.',check:(s,d)=>{
+    const mx=maxTrail(EXA,A_,G_);
+    return s[0]!==A_?'It must start at a.':s[s.length-1]!==G_?'It must end at g.':!d.simple?'An edge repeats, so it is not simple.':d.len<mx?`This simple path has length ${d.len}, but a longer simple path from a to g exists.`:null;},
+    ok:d=>`Length ${d.len} is the maximum. No simple path from a to g can use all 8 edges.`}
+];
+const ex2={t:0,seq:[],msg:''};
+function renderEx2(){
+  $('#ex2Tasks').innerHTML=EX2T.map((t,i)=>`<button data-t="${i}" aria-pressed="${i===ex2.t}">(${t.id})</button>`).join('');
+  $('#ex2Target').innerHTML=EX2T[ex2.t].text;
+  pathDraw($('#ex2Svg'),EXA,ex2.seq,{onVertex:i=>{ex2.msg=esc(stepClick(EXA,ex2.seq,i));renderEx2();}});
+  $('#ex2Seq').textContent=ex2.seq.length?ex2.seq.map(i=>L(EXA,i)).join(', '):'Click a vertex to start.';
+  $('#ex2Msg').innerHTML=ex2.msg;
+}
+function checkEx2(){
+  const s=ex2.seq,d=describe(EXA,s),T=EX2T[ex2.t];
+  if(!d||s.length<2){ex2.msg='Build a sequence of at least two vertices first.';renderEx2();return;}
+  const err=T.check(s,d);
+  ex2.msg=err?esc(err):`<b>Correct.</b> ${esc(T.ok(d))}`;
+  renderEx2();
+}
+
+/* Exercise 3 */
+const ex3={V:new Set(),E:new Set(),msg:''};
+function renderEx3(){
+  drawG($('#ex3Svg'),EXB,{
+    edgeClass:(u,v,k)=>ex3.E.has(k)?'mark':'',vClass:i=>ex3.V.has(i)?'mark':'',
+    onVertex:i=>{ex3.V.has(i)?ex3.V.delete(i):ex3.V.add(i);renderEx3();},
+    onEdge:k=>{ex3.E.has(k)?ex3.E.delete(k):ex3.E.add(k);renderEx3();}
+  });
+  $('#ex3Live').innerHTML=`Marked vertices ${esc(setTxt([...ex3.V].sort((a,b)=>a-b).map(i=>L(EXB,i))))}<br>Marked edges ${esc(setTxt([...ex3.E].sort().map(k=>eName(EXB,k))))}`;
+  $('#ex3Msg').innerHTML=ex3.msg;
+}
+function checkEx3(){
+  const cv=new Set(cutVertices(EXB)),ce=new Set(cutEdges(EXB));
+  const okV=[...ex3.V].filter(i=>cv.has(i)).length,okE=[...ex3.E].filter(k=>ce.has(k)).length;
+  const wrongV=[...ex3.V].filter(i=>!cv.has(i)),wrongE=[...ex3.E].filter(k=>!ce.has(k));
+  let m=`You found ${okV} of ${cv.size} cut vertices and ${okE} of ${ce.size} cut edges.`;
+  if(wrongV.length)m+=` Not cut vertices: ${wrongV.map(i=>L(EXB,i)).join(', ')} (the graph stays connected without ${wrongV.length>1?'each of them':'it'}).`;
+  if(wrongE.length)m+=` Not cut edges: ${wrongE.map(k=>eName(EXB,k)).join(', ')} (${wrongE.length>1?'each lies':'it lies'} on a simple circuit).`;
+  ex3.msg=(okV===cv.size&&okE===ce.size&&!wrongV.length&&!wrongE.length)?`<b>All correct.</b> ${esc(m)}`:esc(m);
+  renderEx3();
+}
+
+/* Exercise 4 */
+const ex4={mode:'v',V:new Set(),E:new Set(),msg:''};
+function renderEx4(){
+  const vm=ex4.mode==='v',rv=vm?ex4.V:new Set(),re=vm?new Set():ex4.E,c=comps(EXC,rv,re);
+  drawG($('#ex4Svg'),EXC,{
+    edgeClass:(u,v,k)=>(re.has(k)||rv.has(u)||rv.has(v))?'gone':compClass(c,u),
+    vClass:i=>rv.has(i)?'gone':compClass(c,i),
+    ...(vm?{onVertex:i=>{ex4.V.has(i)?ex4.V.delete(i):ex4.V.add(i);ex4.msg='';renderEx4();}}:{onEdge:k=>{ex4.E.has(k)?ex4.E.delete(k):ex4.E.add(k);ex4.msg='';renderEx4();}})
+  });
+  $$('#ex4Mode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===ex4.mode));
+  $('#ex4Live').innerHTML=vm?`${mth('<i>V</i>′')} = ${esc(setTxt([...ex4.V].sort((a,b)=>a-b).map(i=>L(EXC,i))))}`:`${mth('<i>E</i>′')} = ${esc(setTxt([...ex4.E].sort().map(k=>eName(EXC,k))))}`;
+  $('#ex4Msg').innerHTML=ex4.msg;
+}
+function checkEx4(){
+  const vm=ex4.mode==='v',S=vm?ex4.V:ex4.E;
+  if(!S.size){ex4.msg=`Select some ${vm?'vertices':'edges'} first.`;renderEx4();return;}
+  const c=vm?comps(EXC,ex4.V):comps(EXC,new Set(),ex4.E);
+  const best=vm?kappa(EXC).k:lambda(EXC).l,what=vm?'vertex cut':'edge cut',set=vm?'G − V′':'G − E′';
+  if(vm&&EXC.V.length-S.size<2)ex4.msg=`Fewer than two vertices are left, so this is not a vertex cut.`;
+  else if(c.count<2)ex4.msg=`${set} is still connected, so this is not a ${what}.`;
+  else if(S.size>best)ex4.msg=`This is a ${what} with ${S.size} ${vm?'vertices':'edges'}, but a smaller one exists.`;
+  else ex4.msg=`<b>Correct.</b> This is a minimum ${what}, with ${S.size} ${vm?(S.size===1?'vertex':'vertices'):(S.size===1?'edge':'edges')}.`;
+  renderEx4();
+}
+function checkEx4Nums(){
+  const k=kappa(EXC).k,l=lambda(EXC).l,d=minDeg(EXC).d;
+  const got=['ex4k','ex4l','ex4d'].map(id=>$('#'+id).value===''?null:+$('#'+id).value);
+  const parts=[['κ(G)',got[0],k],['λ(G)',got[1],l],['δ(G)',got[2],d]].map(([n,g,t])=>g===null?`${n}: enter a value.`:g===t?`${n} = ${t} is correct.`:`${n} is not ${g}.`);
+  const all=got[0]===k&&got[1]===l&&got[2]===d;
+  $('#ex4NumMsg').innerHTML=(all?`<b>All correct.</b> Here κ(G) = ${k} &lt; λ(G) = ${l} = δ(G) = ${d}: no single vertex separates the graph, but {c, d} does, while every edge cut needs at least 3 edges. `:'')+(all?'':esc(parts.join(' ')));
+}
+
+function initExercises(){
+  renderQuiz();
+  $('#ex2Tasks').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;ex2.t=+b.dataset.t;ex2.seq=[];ex2.msg='';renderEx2();};
+  $('#ex2Check').onclick=checkEx2;
+  $('#ex2Undo').onclick=()=>{ex2.seq.pop();ex2.msg='';renderEx2();};
+  $('#ex2Clear').onclick=()=>{ex2.seq=[];ex2.msg='';renderEx2();};
+  renderEx2();
+  $('#ex3Check').onclick=checkEx3;
+  $('#ex3Clear').onclick=()=>{ex3.V.clear();ex3.E.clear();ex3.msg='';renderEx3();};
+  const cv=cutVertices(EXB),ce=cutEdges(EXB);
+  $('#ex3Sol').innerHTML=`<p>Cut vertices: ${esc(setTxt(cv.map(i=>L(EXB,i))))}. Cut edges: ${esc(setTxt(ce.map(k=>eName(EXB,k))))}.</p><p>The triangles a, b, c and g, j, k and the square d, e, f, g contain no cut edge, because each of their edges lies on a simple circuit. The vertex e is not a cut vertex: d and f are still joined through g. Notice that every endpoint of a cut edge with degree at least 2 is a cut vertex (Exercise 8).</p>`;
+  renderEx3();
+  $('#ex4Mode').onclick=e=>{const b=e.target.closest('[data-mode]');if(!b)return;ex4.mode=b.dataset.mode;ex4.msg='';renderEx4();};
+  $('#ex4Check').onclick=checkEx4;
+  $('#ex4Clear').onclick=()=>{ex4.V.clear();ex4.E.clear();ex4.msg='';renderEx4();};
+  $('#ex4Nums').onclick=checkEx4Nums;
+  renderEx4();
+}
+
+/* ---------------- wiring ---------------- */
+function init(){
+  initToolbar();
+  $$('.tabs [role=tab]').forEach(b=>{b.onclick=()=>setTab(b.dataset.tab);});
+  $('.tabs').onkeydown=e=>{
+    if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')return;
+    const i=TABS.indexOf(st.tab),n=(i+(e.key==='ArrowRight'?1:TABS.length-1))%TABS.length;
+    setTab(TABS[n]);$('#t-'+TABS[n]).focus();
+  };
+  $('#pUndo').onclick=()=>{st.path.seq.pop();st.path.msg='';renderPaths();};
+  $('#pClear').onclick=()=>{st.path.seq=[];st.path.msg='';renderPaths();};
+  const typed=()=>{const r=parseSeq(G,$('#pType').value);if(r.err){st.path.msg=r.err;}else{st.path.seq=r.seq;st.path.msg='';}renderPaths();};
+  $('#pTypeBtn').onclick=typed;
+  $('#pType').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();typed();}};
+  $('#pFrom').onchange=e=>{st.path.from=+e.target.value;};
+  $('#pTo').onchange=e=>{st.path.to=+e.target.value;};
+  $('#pShort').onclick=()=>{
+    const s=st.path.from,t=st.path.to;
+    if(s===t){st.path.seq=[s];st.path.msg=`From ${L(G,s)} to itself the shortest path has length 0.`;renderPaths();return;}
+    const p=bfsPath(G,s,t);
+    if(!p){st.path.seq=[];st.path.msg=`There is no path from ${L(G,s)} to ${L(G,t)}: they lie in different components, so G is not connected.`;}
+    else{st.path.seq=p;st.path.msg=`The distance from ${L(G,s)} to ${L(G,t)} is ${p.length-1}: no path between them is shorter. A shortest path never repeats a vertex.`;}
+    renderPaths();
+  };
+  $('#cShowV').onclick=()=>{st.cut.showV=!st.cut.showV;renderCuts();};
+  $('#cShowE').onclick=()=>{st.cut.showE=!st.cut.showE;renderCuts();};
+  $('#connMode').onclick=e=>{const b=e.target.closest('[data-mode]');if(!b)return;st.conn.mode=b.dataset.mode;renderConn();};
+  $('#kFind').onclick=()=>{const K=kappa(G);st.conn.rk=true;st.conn.mode='v';if(K.cut)st.conn.V=new Set(K.cut);renderConn();};
+  $('#lFind').onclick=()=>{const Lm=lambda(G);st.conn.rl=true;st.conn.mode='e';st.conn.E=new Set(Lm.cut);renderConn();};
+  $('#connClear').onclick=()=>{st.conn.V=new Set();st.conn.E=new Set();renderConn();};
+  renderConcepts();initExercises();updateToolbar();
+}
+init();
+</script>
+</body>
+</html>

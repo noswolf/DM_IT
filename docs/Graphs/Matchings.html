@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Matchings in Bipartite Graphs: Interactive Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --paper:#EDF1F5; --surface:#FAFBFD; --ink:#15233A; --muted:#55657A; --rule:#C8D2DE; --grid:rgba(21,35,58,.055);
+  --edge:#97A5B7; --v1:#0B776F; --v1-soft:#D2ECE9; --v2:#4641AE; --v2-soft:#E1E0F5;
+  --match:#D8960A; --bad:#C2293A; --bad-soft:#F7DEE1; --ok:#1B7A3B; --ok-soft:#DCEFE2;
+  --path:#AE2C7A; --on-ink:#FFFFFF; --code-bg:#E3E9F0;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --paper:#0F1520; --surface:#151E2C; --ink:#E2E8F0; --muted:#97A6B8; --rule:#2A384B; --grid:rgba(226,232,240,.045);
+    --edge:#5B6B81; --v1:#37BFB2; --v1-soft:#123430; --v2:#9592F4; --v2-soft:#24234C;
+    --match:#F0B42E; --bad:#F2707D; --bad-soft:#3E1C22; --ok:#5BCB80; --ok-soft:#163222;
+    --path:#EE72BC; --on-ink:#0F1520; --code-bg:#1E293A;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --paper:#0F1520; --surface:#151E2C; --ink:#E2E8F0; --muted:#97A6B8; --rule:#2A384B; --grid:rgba(226,232,240,.045);
+  --edge:#5B6B81; --v1:#37BFB2; --v1-soft:#123430; --v2:#9592F4; --v2-soft:#24234C;
+  --match:#F0B42E; --bad:#F2707D; --bad-soft:#3E1C22; --ok:#5BCB80; --ok-soft:#163222;
+  --path:#EE72BC; --on-ink:#0F1520; --code-bg:#1E293A;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none !important}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,sans-serif;font-size:17px;line-height:1.55;-webkit-text-size-adjust:100%;}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));}
+.math,.formula,h1,h2{font-family:"STIX Two Text","Cambria Math","Times New Roman",serif;}
+.math{font-size:1.07em;white-space:nowrap}
+.math i,.formula i{font-style:italic}
+p{margin:0 0 .8em}
+a{color:var(--v2)}
+:focus-visible{outline:3px solid var(--path);outline-offset:2px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:32px;align-items:end;padding-top:40px;padding-bottom:26px}
+h1{font-weight:600;font-size:clamp(2.1rem,4.6vw,3.3rem);line-height:1.08;margin:0 0 14px;letter-spacing:-.01em}
+.lede{color:var(--muted);max-width:52ch;font-size:1.06rem;margin:0}
+.hall-mark{margin:0;border-left:3px solid var(--ink);padding:4px 0 4px 22px}
+.formula{font-size:clamp(2.6rem,7.5vw,4.6rem);line-height:1;letter-spacing:.01em;white-space:nowrap}
+.hall-mark figcaption{margin-top:12px;color:var(--muted);font-size:.95rem;max-width:44ch}
+
+/* tabs */
+.tabs{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--rule);scrollbar-width:thin}
+.tabs button{appearance:none;background:none;border:0;border-bottom:3px solid transparent;padding:12px 14px 10px;font:inherit;font-weight:700;color:var(--muted);white-space:nowrap;cursor:pointer;margin-bottom:-1px}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.tabs .n{font-family:"STIX Two Text",serif;font-weight:600;color:var(--v1);margin-right:6px}
+
+/* toolbar */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding-top:16px;padding-bottom:4px}
+.toolbar label{display:inline-flex;gap:8px;align-items:center;font-weight:700}
+.toolbar .grp{display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap}
+select{font:inherit;font-weight:400;color:var(--ink);background:var(--surface);border:1.5px solid var(--rule);border-radius:6px;padding:6px 8px;max-width:100%}
+.gnote{flex-basis:100%;margin:0;color:var(--muted);font-size:.95rem}
+.editbar{flex-basis:100%;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border:1.5px dashed var(--path);border-radius:8px}
+.editbar span{color:var(--muted);font-size:.93rem;flex-basis:100%}
+
+/* buttons */
+.btn{font:inherit;font-weight:700;font-size:.95rem;color:var(--ink);background:transparent;border:1.5px solid var(--ink);border-radius:6px;padding:7px 13px;cursor:pointer;line-height:1.25}
+.btn:hover{background:var(--code-bg)}
+.btn.primary{background:var(--ink);color:var(--paper)}
+.btn.primary:hover{opacity:.9}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.small{padding:3px 9px;font-size:.88rem}
+.btn[aria-pressed="true"]{background:var(--path);border-color:var(--path);color:var(--on-ink)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:6px;overflow:hidden;flex-wrap:wrap}
+.seg button{font:inherit;font-size:.92rem;font-weight:700;border:0;background:transparent;color:var(--ink);padding:6px 12px;cursor:pointer}
+.seg button+button{border-left:1.5px solid var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+
+/* layout */
+main{padding-bottom:60px}
+.tabpanel{padding-top:22px}
+.sim{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(290px,1fr);gap:28px;align-items:start}
+.board{background-color:var(--surface);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;border:1px solid var(--rule);border-radius:12px;padding:10px 10px 8px}
+.board svg{display:block;width:100%;height:auto;max-height:76vh}
+.side h2{margin-top:0}
+h2{font-weight:600;font-size:1.7rem;line-height:1.2;margin:0 0 12px}
+h3{font-size:1.06rem;margin:22px 0 8px}
+.how{color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.85rem;color:var(--muted);padding:8px 4px 2px;border-top:1px solid var(--rule);margin-top:6px}
+.lg{display:inline-flex;gap:6px;align-items:center}
+.lg svg{width:34px;height:16px;overflow:visible}
+
+/* svg graph */
+.edge{stroke:var(--edge);stroke-width:2.2;stroke-linecap:round;transition:stroke .2s,opacity .2s}
+.edge.hl{stroke:var(--v1);stroke-width:3.2}
+.edge.m{stroke:var(--match);stroke-width:7.5}
+.edge.bad{stroke:var(--bad);stroke-width:7.5}
+.edge.dim{opacity:.18}
+.ov{stroke:var(--path);stroke-width:3.2;stroke-dasharray:9 6;stroke-linecap:round;pointer-events:none}
+.hit{stroke:transparent;stroke-width:20;cursor:pointer}
+.hit:hover,.hit:focus-visible{stroke:var(--path);stroke-opacity:.16;outline:none}
+.vx circle{fill:var(--surface);stroke-width:2.6;transition:fill .2s,opacity .2s}
+.vL circle{stroke:var(--v1)} .vR circle{stroke:var(--v2)}
+.vx text{fill:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,sans-serif;font-size:12.5px;font-weight:700;pointer-events:none}
+.vL.on circle,.vL.inA circle{fill:var(--v1)} .vR.on circle,.vR.inN circle{fill:var(--v2)}
+.vx.on text,.vx.inA text,.vx.inN text{fill:var(--on-ink)}
+.vx.badv circle{stroke:var(--bad);stroke-width:5}
+.vx.pathv circle{stroke:var(--path);stroke-width:5}
+.vx.pending circle{stroke:var(--path);stroke-width:5;stroke-dasharray:5 4}
+.vx.fade{opacity:.3}
+.vx.act{cursor:pointer}
+.vx.act:hover circle{stroke-width:5}
+.vx:focus-visible{outline:none}
+.vx:focus-visible circle{stroke:var(--path);stroke-width:5}
+.colh{font-family:"STIX Two Text",serif;font-size:27px;font-style:italic}
+.colh.c1{fill:var(--v1)} .colh.c2{fill:var(--v2)}
+.colh tspan{font-style:normal;font-size:18px}
+.cols{font-size:13.5px;fill:var(--muted);font-family:"Atkinson Hyperlegible",system-ui,sans-serif}
+
+/* readouts */
+.setline{font-size:1.02rem;overflow-wrap:anywhere}
+.size{font-size:1.02rem}
+.checks{margin:14px 0;border-top:1px solid var(--rule)}
+.checks>div{display:grid;grid-template-columns:minmax(0,11.5em) minmax(0,1fr);gap:10px;padding:9px 0;border-bottom:1px solid var(--rule)}
+.checks dt{font-weight:700}
+.checks dd{margin:0}
+.pill{display:inline-block;font-weight:700;font-size:.82rem;padding:1px 9px;border-radius:999px;margin-right:6px;vertical-align:1px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.no{background:var(--bad-soft);color:var(--bad)}
+.pill.na{background:var(--code-bg);color:var(--muted)}
+.callout{border-left:3px solid var(--v2);background:var(--surface);padding:12px 14px;margin:12px 0;border-radius:0 8px 8px 0}
+.callout:empty{display:none}
+.verdict{padding:10px 14px;border-radius:8px;margin:12px 0}
+.verdict.ok{background:var(--ok-soft)}
+.verdict.bad{background:var(--bad-soft)}
+.verdict.neutral{background:var(--surface);border:1px solid var(--rule)}
+.compare{display:flex;gap:28px;font-size:1.25rem;margin:8px 0}
+.small{font-size:.92rem;color:var(--muted)}
+.pathtxt{font-weight:700;color:var(--path)}
+.log{padding-left:1.4em;margin:6px 0;font-size:.95rem;color:var(--muted)}
+.log li{margin:3px 0}
+.log li:last-child{color:var(--ink)}
+.try{border-top:1px solid var(--rule);margin-top:18px;padding-top:4px}
+.try ul{padding-left:1.2em;margin:6px 0}
+.try li{margin:6px 0}
+
+/* table */
+.tablewrap{overflow:auto;max-height:340px;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.93rem}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--rule);white-space:nowrap}
+th{position:sticky;top:0;background:var(--surface);z-index:1}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--code-bg)}
+tr.fail td{color:var(--bad);font-weight:700}
+.chk{display:inline-flex;gap:8px;align-items:center;margin:10px 0;font-size:.95rem}
+
+/* concepts */
+.concept{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:36px;padding:26px 0;border-bottom:1px solid var(--rule);align-items:start}
+.concept:first-child{padding-top:4px}
+.prose{max-width:66ch}
+.prose ul,.prose ol{padding-left:1.25em}
+.prose li{margin:5px 0}
+dfn{font-style:normal;font-weight:700}
+.fig{margin:0}
+.fig svg{display:block;width:100%;height:auto;background-color:var(--surface);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;border:1px solid var(--rule);border-radius:10px}
+.fig figcaption{font-size:.92rem;color:var(--muted);margin-top:8px}
+.figpair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.theorem{border:1.5px solid var(--ink);border-radius:10px;padding:16px 18px;margin:14px 0;background:var(--surface)}
+.theorem p:last-child{margin-bottom:0}
+.facts th,.facts td{white-space:normal;vertical-align:top}
+.facts tbody tr{cursor:default}
+.facts tbody tr:hover{background:none}
+
+/* exercises */
+.ex{padding:26px 0;border-bottom:1px solid var(--rule)}
+.ex h3{font-family:"STIX Two Text",serif;font-size:1.4rem;font-weight:600;margin:0 0 10px}
+.quiz{padding-left:1.4em;max-width:72ch}
+.quiz>li{margin:0 0 20px}
+.opts{display:flex;flex-direction:column;gap:6px;margin-top:6px;align-items:flex-start}
+.opt{font:inherit;text-align:left;background:var(--surface);color:var(--ink);border:1.5px solid var(--rule);border-radius:8px;padding:7px 12px;cursor:pointer;max-width:100%}
+.opt:hover{border-color:var(--ink)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.fb{margin:8px 0 0;font-size:.96rem}
+.fb:empty{display:none}
+.score{font-weight:700}
+details{border:1px solid var(--rule);border-radius:8px;background:var(--surface);margin-top:10px}
+summary{cursor:pointer;font-weight:700;padding:9px 14px}
+details>div{padding:4px 16px 12px;border-top:1px solid var(--rule)}
+.datatab{max-width:420px;margin:10px 0}
+.datatab tbody tr{cursor:default}
+.datatab tbody tr:hover{background:none}
+footer{color:var(--muted);font-size:.9rem;padding-top:20px;padding-bottom:30px;border-top:1px solid var(--rule)}
+
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr;gap:20px;padding-top:28px}
+  .sim,.concept{grid-template-columns:1fr}
+  .concept{gap:18px}
+  .checks>div{grid-template-columns:1fr;gap:2px}
+}
+@media (max-width:520px){
+  body{font-size:16px}
+  .figpair{grid-template-columns:1fr}
+  .compare{font-size:1.1rem}
+}
+@media (prefers-reduced-motion: reduce){
+  *{transition:none !important;animation:none !important}
+}
+</style>
+</head>
+<body>
+
+<header class="hero wrap">
+  <div>
+    <h1>Matchings in bipartite graphs</h1>
+    <p class="lede">Interactive notes for the graph theory unit of Discrete Mathematics. Build matchings by hand, grow them with augmenting paths, and test Hall's condition on graphs you design yourself.</p>
+  </div>
+  <figure class="hall-mark">
+    <div class="formula" aria-label="absolute value of N of A is greater than or equal to absolute value of A">|<i>N</i>(<i>A</i>)| ≥ |<i>A</i>|</div>
+    <figcaption>Hall's condition. It holds for every <span class="math"><i>A</i> ⊆ <i>V</i>₁</span> exactly when there is a complete matching from <span class="math"><i>V</i>₁</span> to <span class="math"><i>V</i>₂</span>.</figcaption>
+  </figure>
+</header>
+
+<nav class="tabs wrap" role="tablist" aria-label="Sections">
+  <button role="tab" id="t-concepts" data-tab="concepts" aria-selected="true" aria-controls="tab-concepts"><span class="n">1</span>Concepts</button>
+  <button role="tab" id="t-lab" data-tab="lab" aria-selected="false" aria-controls="tab-lab" tabindex="-1"><span class="n">2</span>Matching lab</button>
+  <button role="tab" id="t-aug" data-tab="aug" aria-selected="false" aria-controls="tab-aug" tabindex="-1"><span class="n">3</span>Augmenting paths</button>
+  <button role="tab" id="t-hall" data-tab="hall" aria-selected="false" aria-controls="tab-hall" tabindex="-1"><span class="n">4</span>Hall's theorem</button>
+  <button role="tab" id="t-ex" data-tab="ex" aria-selected="false" aria-controls="tab-ex" tabindex="-1"><span class="n">5</span>Exercises</button>
+</nav>
+
+<div id="toolbar" class="toolbar wrap" hidden>
+  <label>Graph <select id="preset"></select></label>
+  <span class="grp">
+    <label><span class="math">|<i>V</i>₁|</span> <select id="n1" aria-label="Size of V1 for a random graph"></select></label>
+    <label><span class="math">|<i>V</i>₂|</span> <select id="n2" aria-label="Size of V2 for a random graph"></select></label>
+    <button id="rand" class="btn">New random graph</button>
+  </span>
+  <button id="edit" class="btn" aria-pressed="false">Edit edges</button>
+  <p id="gnote" class="gnote"></p>
+  <div id="editbar" class="editbar" hidden>
+    <button class="btn small" data-ed="L+">Add vertex to V₁</button>
+    <button class="btn small" data-ed="L-">Remove last of V₁</button>
+    <button class="btn small" data-ed="R+">Add vertex to V₂</button>
+    <button class="btn small" data-ed="R-">Remove last of V₂</button>
+    <button class="btn small" data-ed="clear">Remove all edges</button>
+    <span>Click a vertex on one side, then a vertex on the other side, to add or remove the edge between them. Click an edge to remove it. The graph is shared by Parts 2, 3 and 4.</span>
+  </div>
+</div>
+
+<main class="wrap">
+
+<!-- ============ 1. CONCEPTS ============ -->
+<section id="tab-concepts" class="tabpanel" role="tabpanel" aria-labelledby="t-concepts">
+
+  <div class="concept">
+    <div class="prose">
+      <h2>Bipartite graphs</h2>
+      <p>A simple graph <span class="math"><i>G</i> = (<i>V</i>, <i>E</i>)</span> is <dfn>bipartite</dfn> if its vertex set can be split into two disjoint sets <span class="math"><i>V</i>₁</span> and <span class="math"><i>V</i>₂</span> so that every edge joins a vertex of <span class="math"><i>V</i>₁</span> to a vertex of <span class="math"><i>V</i>₂</span>. The pair <span class="math">(<i>V</i>₁, <i>V</i>₂)</span> is called a <dfn>bipartition</dfn> of <span class="math"><i>V</i></span>.</p>
+      <p>Bipartite graphs model pairing problems between two kinds of objects: students and projects, jobs and applicants, courses and teaching assistants. An edge means "this pair is acceptable". The question is always the same: how many pairs can we form at the same time, if nobody may be used twice?</p>
+    </div>
+    <figure class="fig"><svg id="fBip" role="img" aria-label="Bipartite graph of three courses and five teaching assistants"></svg>
+      <figcaption>Courses form <span class="math"><i>V</i>₁</span>, TAs form <span class="math"><i>V</i>₂</span>. Every edge goes across; no edge stays inside one side.</figcaption></figure>
+  </div>
+
+  <div class="concept">
+    <div class="prose">
+      <h2>Matchings</h2>
+      <p>A <dfn>matching</dfn> <span class="math"><i>M</i></span> in a graph <span class="math"><i>G</i></span> is a subset of <span class="math"><i>E</i></span> in which no two edges share an endpoint. Each vertex is used by at most one edge of <span class="math"><i>M</i></span>.</p>
+      <p>A vertex that is an endpoint of an edge of <span class="math"><i>M</i></span> is <dfn>matched</dfn> in <span class="math"><i>M</i></span>. Otherwise it is <dfn>unmatched</dfn> (also called free). In these notes, matching edges are thick and gold, and matched vertices are filled in.</p>
+      <p>The empty set is always a matching, and so is any single edge.</p>
+    </div>
+    <div class="figpair">
+      <figure class="fig"><svg id="fOk" role="img" aria-label="A valid matching"></svg>
+        <figcaption><span class="math"><i>M</i> = {a–x, c–y}</span> is a matching.</figcaption></figure>
+      <figure class="fig"><svg id="fBad" role="img" aria-label="A set of edges that is not a matching"></svg>
+        <figcaption><span class="math">{a–y, b–y}</span> is not a matching: both edges use <span class="math">y</span>.</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="concept">
+    <div class="prose">
+      <h2>Maximal versus maximum</h2>
+      <p>These two words sound alike but mean different things.</p>
+      <ul>
+        <li>A matching is <dfn>maximal</dfn> if no edge of <span class="math"><i>G</i></span> can be added to it. Every remaining edge touches a vertex that is already matched.</li>
+        <li>A matching is <dfn>maximum</dfn> if no matching of <span class="math"><i>G</i></span> has more edges. Its size is the <dfn>matching number</dfn> <span class="math"><i>ν</i>(<i>G</i>)</span>.</li>
+      </ul>
+      <p>Every maximum matching is maximal, but a maximal matching can be much smaller than a maximum one. Choosing edges greedily, one at a time, only guarantees a maximal matching.</p>
+    </div>
+    <div class="figpair">
+      <figure class="fig"><svg id="fMaximal" role="img" aria-label="A maximal matching of size 2"></svg>
+        <figcaption>Maximal, <span class="math">|<i>M</i>| = 2</span>. Every other edge touches Anan, Chai, Web or Game.</figcaption></figure>
+      <figure class="fig"><svg id="fMaximum" role="img" aria-label="A maximum matching of size 4"></svg>
+        <figcaption>Maximum, <span class="math">|<i>M</i>| = 4 = <i>ν</i>(<i>G</i>)</span>.</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="concept">
+    <div class="prose">
+      <h2>Complete and perfect matchings</h2>
+      <p>Let <span class="math"><i>G</i></span> be bipartite with bipartition <span class="math">(<i>V</i>₁, <i>V</i>₂)</span>. A matching <span class="math"><i>M</i></span> is a <dfn>complete matching from <span class="math"><i>V</i>₁</span> to <span class="math"><i>V</i>₂</span></dfn> if every vertex of <span class="math"><i>V</i>₁</span> is matched. Equivalently, <span class="math">|<i>M</i>| = |<i>V</i>₁|</span>.</p>
+      <p>Since the <span class="math">|<i>V</i>₁|</span> edges need different endpoints in <span class="math"><i>V</i>₂</span>, a complete matching from <span class="math"><i>V</i>₁</span> to <span class="math"><i>V</i>₂</span> can only exist when <span class="math">|<i>V</i>₁| ≤ |<i>V</i>₂|</span>.</p>
+      <p>A <dfn>perfect matching</dfn> matches every vertex of <span class="math"><i>G</i></span>. For a bipartite graph this means: complete from <span class="math"><i>V</i>₁</span> to <span class="math"><i>V</i>₂</span>, and <span class="math">|<i>V</i>₁| = |<i>V</i>₂|</span>.</p>
+    </div>
+    <figure class="fig"><svg id="fComplete" role="img" aria-label="A complete matching from courses to TAs"></svg>
+      <figcaption>Complete from <span class="math"><i>V</i>₁</span> to <span class="math"><i>V</i>₂</span>: every course gets its own TA. Not perfect: Ruj and Som stay unmatched.</figcaption></figure>
+  </div>
+
+  <div class="concept">
+    <div class="prose">
+      <h2>Hall's Marriage Theorem</h2>
+      <p>For <span class="math"><i>A</i> ⊆ <i>V</i>₁</span>, the <dfn>neighbourhood</dfn> <span class="math"><i>N</i>(<i>A</i>)</span> is the set of vertices of <span class="math"><i>V</i>₂</span> adjacent to at least one vertex of <span class="math"><i>A</i></span>.</p>
+      <div class="theorem">
+        <p><b>Theorem (Hall, 1935).</b> Let <span class="math"><i>G</i></span> be a bipartite graph with bipartition <span class="math">(<i>V</i>₁, <i>V</i>₂)</span>. Then <span class="math"><i>G</i></span> has a complete matching from <span class="math"><i>V</i>₁</span> to <span class="math"><i>V</i>₂</span> if and only if</p>
+        <p style="text-align:center;font-size:1.25rem"><span class="math">|<i>N</i>(<i>A</i>)| ≥ |<i>A</i>|  for every subset <i>A</i> ⊆ <i>V</i>₁.</span></p>
+      </div>
+      <p>The name comes from the original story. <span class="math"><i>V</i>₁</span> is a group of people, <span class="math"><i>V</i>₂</span> a group of possible partners, and an edge means the two are willing to marry. Everyone in <span class="math"><i>V</i>₁</span> can marry an acceptable partner exactly when every group of <span class="math"><i>k</i></span> people from <span class="math"><i>V</i>₁</span> has, together, at least <span class="math"><i>k</i></span> acceptable partners.</p>
+      <p><b>Why the condition is necessary (⇒).</b> If <span class="math"><i>M</i></span> is complete, the vertices of <span class="math"><i>A</i></span> are matched to <span class="math">|<i>A</i>|</span> different vertices, and all of them lie in <span class="math"><i>N</i>(<i>A</i>)</span>. So <span class="math">|<i>N</i>(<i>A</i>)| ≥ |<i>A</i>|</span>.</p>
+      <p><b>Why it is sufficient (⇐), proof idea.</b> Take a maximum matching <span class="math"><i>M</i></span> and suppose some <span class="math"><i>u</i> ∈ <i>V</i>₁</span> is unmatched. Let <span class="math"><i>A</i></span> be the vertices of <span class="math"><i>V</i>₁</span> that can be reached from <span class="math"><i>u</i></span> by alternating paths. Because <span class="math"><i>M</i></span> has no augmenting path (see below), every vertex of <span class="math"><i>N</i>(<i>A</i>)</span> is matched to a vertex of <span class="math"><i>A</i></span> other than <span class="math"><i>u</i></span>. Hence <span class="math">|<i>N</i>(<i>A</i>)| = |<i>A</i>| − 1</span>, which breaks Hall's condition. Part 3 shows you this set whenever the algorithm ends without a complete matching.</p>
+    </div>
+    <figure class="fig"><svg id="fHall" role="img" aria-label="A set of four students with only three acceptable rooms"></svg>
+      <figcaption><span class="math"><i>A</i> = {Ploy, Kai, Nok, Ton}</span> has <span class="math"><i>N</i>(<i>A</i>) = {101, 102, 103}</span>. Four students, three rooms: no complete matching exists. Every smaller group passes the test, so you must check all subsets.</figcaption></figure>
+  </div>
+
+  <div class="concept">
+    <div class="prose">
+      <h2>Augmenting paths</h2>
+      <p>Let <span class="math"><i>M</i></span> be a matching. An <dfn>alternating path</dfn> is a path whose edges are alternately not in <span class="math"><i>M</i></span> and in <span class="math"><i>M</i></span>. An <dfn>augmenting path</dfn> is an alternating path that starts and ends at unmatched vertices.</p>
+      <p>An augmenting path <span class="math"><i>P</i></span> with <span class="math">2<i>k</i> + 1</span> edges has <span class="math"><i>k</i> + 1</span> edges outside <span class="math"><i>M</i></span> and <span class="math"><i>k</i></span> edges in <span class="math"><i>M</i></span>. Swapping them gives the symmetric difference</p>
+      <p style="text-align:center"><span class="math"><i>M</i> ⊕ <i>P</i> = (<i>M</i> − <i>P</i>) ∪ (<i>P</i> − <i>M</i>),</span></p>
+      <p>which is again a matching, with one more edge.</p>
+      <div class="theorem"><p><b>Theorem (Berge, 1957).</b> A matching <span class="math"><i>M</i></span> is maximum if and only if there is no <span class="math"><i>M</i></span>-augmenting path.</p></div>
+      <p>So the algorithm "find an augmenting path, swap, repeat" always ends with a maximum matching. Part 3 runs it step by step.</p>
+    </div>
+    <figure class="fig"><svg id="fAug" role="img" aria-label="An augmenting path"></svg>
+      <figcaption>Greedy <span class="math"><i>M</i></span> (gold) and the augmenting path Bua – Web – Anan – AI – Chai – IoT (pink dashes). Swapping its edges matches all four students.</figcaption></figure>
+  </div>
+
+  <div class="concept" style="grid-template-columns:1fr;border-bottom:0">
+    <div>
+      <h2>At a glance</h2>
+      <div class="tablewrap" style="max-height:none">
+      <table class="facts">
+        <thead><tr><th>Term</th><th>Meaning for a matching <span class="math"><i>M</i></span></th><th>Quick test</th></tr></thead>
+        <tbody>
+          <tr><td>Matching</td><td>No two edges of <span class="math"><i>M</i></span> share a vertex.</td><td>Every vertex has at most one gold edge.</td></tr>
+          <tr><td>Maximal</td><td>No edge of <span class="math"><i>G</i></span> can be added.</td><td>Every edge has at least one matched endpoint.</td></tr>
+          <tr><td>Maximum</td><td>Largest possible size, <span class="math">|<i>M</i>| = <i>ν</i>(<i>G</i>)</span>.</td><td>No augmenting path exists (Berge).</td></tr>
+          <tr><td>Complete from <span class="math"><i>V</i>₁</span> to <span class="math"><i>V</i>₂</span></td><td>Every vertex of <span class="math"><i>V</i>₁</span> is matched, <span class="math">|<i>M</i>| = |<i>V</i>₁|</span>.</td><td>Exists if and only if Hall's condition holds.</td></tr>
+          <tr><td>Perfect</td><td>Every vertex of <span class="math"><i>G</i></span> is matched.</td><td>Complete and <span class="math">|<i>V</i>₁| = |<i>V</i>₂|</span>.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. LAB ============ -->
+<section id="tab-lab" class="tabpanel" role="tabpanel" aria-labelledby="t-lab" hidden>
+  <div class="sim">
+    <div class="board">
+      <svg id="labSvg" role="group" aria-label="Bipartite graph for the matching lab"></svg>
+      <div class="legend" id="labLegend"></div>
+    </div>
+    <div class="side">
+      <h2>Matching lab</h2>
+      <p class="how">Click an edge to put it into <span class="math"><i>M</i></span> or take it out. The panel below checks your choice.</p>
+      <div id="labOut" aria-live="polite"></div>
+      <div class="btns">
+        <button class="btn" id="labClear">Clear M</button>
+        <button class="btn" id="labGreedy">Greedy matching</button>
+        <button class="btn" id="labMax">Show a maximum matching</button>
+      </div>
+      <div class="try">
+        <h3>Things to try</h3>
+        <ul>
+          <li>On <b>Students and projects</b>, choose Anan–Web and Chai–Game only. Is <span class="math"><i>M</i></span> maximal? Is it maximum?</li>
+          <li>On <b>Dorm rooms</b>, try to give all five students a room. When you get stuck, go to Part 4 to see why.</li>
+          <li>On <b>Chain</b>, press Greedy matching, then continue in Part 3 with the start set to "From Part 2".</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. AUGMENTING PATHS ============ -->
+<section id="tab-aug" class="tabpanel" role="tabpanel" aria-labelledby="t-aug" hidden>
+  <div class="sim">
+    <div class="board">
+      <svg id="augSvg" role="group" aria-label="Bipartite graph for the augmenting path algorithm"></svg>
+      <div class="legend" id="augLegend"></div>
+    </div>
+    <div class="side">
+      <h2>Augmenting path algorithm</h2>
+      <p class="how">Each round searches for an augmenting path (breadth-first, from all unmatched vertices of <span class="math"><i>V</i>₁</span> at once) and then swaps its edges.</p>
+      <p style="margin-bottom:6px;font-weight:700">Starting matching</p>
+      <div class="seg" id="augStart">
+        <button data-start="empty" aria-pressed="true">Empty</button>
+        <button data-start="greedy" aria-pressed="false">Greedy</button>
+        <button data-start="lab" aria-pressed="false">From Part 2</button>
+      </div>
+      <div class="btns">
+        <button class="btn primary" id="aStep">Search for an augmenting path</button>
+        <button class="btn" id="aRun">Run to the end</button>
+        <button class="btn" id="aReset">Start over</button>
+      </div>
+      <div id="aMsg" class="callout" aria-live="polite"></div>
+      <p class="setline" id="aM"></p>
+      <h3>Steps so far</h3>
+      <ol class="log" id="aLog"></ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. HALL ============ -->
+<section id="tab-hall" class="tabpanel" role="tabpanel" aria-labelledby="t-hall" hidden>
+  <div class="sim">
+    <div class="board">
+      <svg id="hallSvg" role="group" aria-label="Bipartite graph for testing Hall's condition"></svg>
+      <div class="legend" id="hallLegend"></div>
+    </div>
+    <div class="side">
+      <h2>Testing Hall's condition</h2>
+      <p class="how">Click vertices of <span class="math"><i>V</i>₁</span> to build a set <span class="math"><i>A</i></span>. Its neighbourhood <span class="math"><i>N</i>(<i>A</i>)</span> lights up in <span class="math"><i>V</i>₂</span>.</p>
+      <div id="hallOut" aria-live="polite"></div>
+      <div class="btns">
+        <button class="btn" id="hAll">Select all of V₁</button>
+        <button class="btn" id="hClear">Clear A</button>
+        <button class="btn primary" id="hCheck">Check every subset</button>
+        <button class="btn" id="hShowM">Show a maximum matching</button>
+      </div>
+      <div id="hallTable"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. EXERCISES ============ -->
+<section id="tab-ex" class="tabpanel" role="tabpanel" aria-labelledby="t-ex" hidden>
+  <div class="prose">
+    <h2>Exercises for self-practice</h2>
+    <p>Exercises 1 to 4 check your answers automatically. For Exercises 5 to 13, work on paper first, then open the solution to compare.</p>
+  </div>
+
+  <article class="ex">
+    <h3>Exercise 1. Quick checks</h3>
+    <p class="score" id="quizScore"></p>
+    <ol class="quiz" id="quiz"></ol>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 2. Find a maximum matching</h3>
+    <div class="sim">
+      <div class="board"><svg id="ex2Svg" role="group" aria-label="Graph for exercise 2"></svg></div>
+      <div class="side">
+        <p>Click edges to build a matching with as many edges as possible. Press <b>Check my matching</b> when you think it is maximum.</p>
+        <div class="btns">
+          <button class="btn primary" id="ex2Check">Check my matching</button>
+          <button class="btn" id="ex2Clear">Clear</button>
+        </div>
+        <div id="ex2Msg" class="callout" aria-live="polite"></div>
+        <details><summary>Show solution</summary><div id="ex2Sol"></div></details>
+      </div>
+    </div>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 3. Find a set that breaks Hall's condition</h3>
+    <div class="sim">
+      <div class="board"><svg id="ex3Svg" role="group" aria-label="Graph for exercise 3"></svg></div>
+      <div class="side">
+        <p>This graph has no complete matching from <span class="math"><i>V</i>₁</span> to <span class="math"><i>V</i>₂</span>. Prove it: click vertices of <span class="math"><i>V</i>₁</span> to choose a set <span class="math"><i>A</i></span> with <span class="math">|<i>N</i>(<i>A</i>)| &lt; |<i>A</i>|</span>.</p>
+        <p class="setline" id="ex3Live"></p>
+        <div class="btns">
+          <button class="btn primary" id="ex3Check">Check my set</button>
+          <button class="btn" id="ex3Clear">Clear</button>
+        </div>
+        <div id="ex3Msg" class="callout" aria-live="polite"></div>
+        <details><summary>Show solution</summary><div id="ex3Sol"></div></details>
+      </div>
+    </div>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 4. Grow the matching with augmenting paths</h3>
+    <div class="sim">
+      <div class="board"><svg id="ex4Svg" role="group" aria-label="Graph for exercise 4"></svg></div>
+      <div class="side">
+        <p>The gold edges form a matching <span class="math"><i>M</i></span>. Click edges (gold or grey) to select an <span class="math"><i>M</i></span>-augmenting path, then check it and apply <span class="math"><i>M</i> ⊕ <i>P</i></span>. Repeat until <span class="math"><i>M</i></span> is perfect.</p>
+        <p class="setline" id="ex4Live"></p>
+        <div class="btns">
+          <button class="btn primary" id="ex4Check">Check my path</button>
+          <button class="btn" id="ex4Apply" disabled>Apply M ⊕ P</button>
+          <button class="btn" id="ex4Reset">Start over</button>
+        </div>
+        <div id="ex4Msg" class="callout" aria-live="polite"></div>
+        <details><summary>Hint</summary><div><p>Start at an unmatched vertex of <span class="math"><i>V</i>₁</span> (u4 or u5). Leave it along a grey edge, come back along a gold edge, and continue until you reach an unmatched vertex of <span class="math"><i>V</i>₂</span> (w1 or w5).</p></div></details>
+      </div>
+    </div>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 5. Filling jobs</h3>
+    <div class="prose">
+      <p>A company has four jobs. The table shows which applicants are qualified for each job.</p>
+      <div class="tablewrap datatab"><table><thead><tr><th>Job</th><th>Qualified applicants</th></tr></thead><tbody>
+        <tr><td>J1</td><td>Kan, Lek</td></tr><tr><td>J2</td><td>Lek</td></tr><tr><td>J3</td><td>Kan, Lek</td></tr><tr><td>J4</td><td>May, Nut, Oat</td></tr></tbody></table></div>
+      <ol type="a"><li>Draw the bipartite graph with <span class="math"><i>V</i>₁</span> = jobs and <span class="math"><i>V</i>₂</span> = applicants.</li><li>Can every job be filled by a different qualified applicant? Justify with Hall's theorem.</li><li>What is the largest number of jobs that can be filled at the same time? Give an assignment.</li></ol>
+    </div>
+    <details><summary>Show solution</summary><div class="prose">
+      <p>(b) No. Take <span class="math"><i>A</i> = {J1, J2, J3}</span>. Then <span class="math"><i>N</i>(<i>A</i>) = {Kan, Lek}</span>, so <span class="math">|<i>N</i>(<i>A</i>)| = 2 &lt; 3 = |<i>A</i>|</span>. Hall's condition fails, so there is no complete matching from jobs to applicants.</p>
+      <p>(c) Three jobs, for example J1–Kan, J2–Lek, J4–May. Four is impossible, because J1, J2 and J3 together can use only Kan and Lek, so at most two of them are filled.</p>
+    </div></details>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 6. Why every subset matters</h3>
+    <div class="prose"><p>Construct a bipartite graph with <span class="math">|<i>V</i>₁| = |<i>V</i>₂| = 3</span> in which <span class="math">|<i>N</i>(<i>A</i>)| ≥ |<i>A</i>|</span> holds for every <span class="math"><i>A</i> ⊆ <i>V</i>₁</span> with <span class="math">|<i>A</i>| ≤ 2</span>, but there is still no complete matching from <span class="math"><i>V</i>₁</span> to <span class="math"><i>V</i>₂</span>. Build it in Part 2 with Edit edges and confirm with Part 4.</p></div>
+    <details><summary>Show solution</summary><div class="prose">
+      <p>Let <span class="math"><i>V</i>₁ = {a, b, c}</span>, <span class="math"><i>V</i>₂ = {x, y, z}</span>, and join each of a, b, c to both x and y. Leave z isolated.</p>
+      <p>Every set of one or two vertices of <span class="math"><i>V</i>₁</span> has neighbourhood <span class="math">{x, y}</span> of size 2, so the condition holds for <span class="math">|<i>A</i>| ≤ 2</span>. But <span class="math"><i>N</i>({a, b, c}) = {x, y}</span> has size 2 &lt; 3. So no complete matching exists.</p>
+    </div></details>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 7. The easy direction of Hall's theorem</h3>
+    <div class="prose"><p>Prove: if a bipartite graph has a complete matching from <span class="math"><i>V</i>₁</span> to <span class="math"><i>V</i>₂</span>, then <span class="math">|<i>N</i>(<i>A</i>)| ≥ |<i>A</i>|</span> for every <span class="math"><i>A</i> ⊆ <i>V</i>₁</span>.</p></div>
+    <details><summary>Show solution</summary><div class="prose">
+      <p>Let <span class="math"><i>M</i></span> be a complete matching. For each <span class="math"><i>a</i> ∈ <i>A</i></span>, let <span class="math"><i>m</i>(<i>a</i>)</span> be the vertex of <span class="math"><i>V</i>₂</span> matched to <span class="math"><i>a</i></span>. Since <span class="math"><i>a</i></span> and <span class="math"><i>m</i>(<i>a</i>)</span> are adjacent, <span class="math"><i>m</i>(<i>a</i>) ∈ <i>N</i>(<i>A</i>)</span>.</p>
+      <p>No two edges of <span class="math"><i>M</i></span> share an endpoint, so <span class="math"><i>m</i></span> is one-to-one. Therefore <span class="math">|<i>N</i>(<i>A</i>)| ≥ |<i>m</i>(<i>A</i>)| = |<i>A</i>|</span>. ∎</p>
+    </div></details>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 8. A degree condition</h3>
+    <div class="prose"><p>Let <span class="math"><i>G</i></span> be bipartite with bipartition <span class="math">(<i>V</i>₁, <i>V</i>₂)</span> and let <span class="math"><i>k</i> ≥ 1</span>. Suppose every vertex of <span class="math"><i>V</i>₁</span> has degree at least <span class="math"><i>k</i></span> and every vertex of <span class="math"><i>V</i>₂</span> has degree at most <span class="math"><i>k</i></span>. Prove that <span class="math"><i>G</i></span> has a complete matching from <span class="math"><i>V</i>₁</span> to <span class="math"><i>V</i>₂</span>.</p></div>
+    <details><summary>Show solution</summary><div class="prose">
+      <p>Let <span class="math"><i>A</i> ⊆ <i>V</i>₁</span> and count the edges with an endpoint in <span class="math"><i>A</i></span>; call this number <span class="math"><i>e</i></span>.</p>
+      <p>Each vertex of <span class="math"><i>A</i></span> has at least <span class="math"><i>k</i></span> edges, so <span class="math"><i>e</i> ≥ <i>k</i>|<i>A</i>|</span>. Each of these edges ends in <span class="math"><i>N</i>(<i>A</i>)</span>, and each vertex of <span class="math"><i>N</i>(<i>A</i>)</span> has at most <span class="math"><i>k</i></span> edges, so <span class="math"><i>e</i> ≤ <i>k</i>|<i>N</i>(<i>A</i>)|</span>.</p>
+      <p>Hence <span class="math"><i>k</i>|<i>A</i>| ≤ <i>k</i>|<i>N</i>(<i>A</i>)|</span>, and dividing by <span class="math"><i>k</i> &gt; 0</span> gives <span class="math">|<i>N</i>(<i>A</i>)| ≥ |<i>A</i>|</span>. By Hall's theorem, a complete matching exists. ∎</p>
+    </div></details>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 9. Regular bipartite graphs</h3>
+    <div class="prose"><p>A graph is <span class="math"><i>k</i></span>-regular if every vertex has degree <span class="math"><i>k</i></span>. Prove that every <span class="math"><i>k</i></span>-regular bipartite graph with <span class="math"><i>k</i> ≥ 1</span> has a perfect matching.</p></div>
+    <details><summary>Show solution</summary><div class="prose">
+      <p>Every edge has exactly one endpoint in <span class="math"><i>V</i>₁</span>, so <span class="math">|<i>E</i>| = <i>k</i>|<i>V</i>₁|</span>. In the same way <span class="math">|<i>E</i>| = <i>k</i>|<i>V</i>₂|</span>. Hence <span class="math">|<i>V</i>₁| = |<i>V</i>₂|</span>.</p>
+      <p>The degree condition of Exercise 8 holds with equality, so there is a complete matching from <span class="math"><i>V</i>₁</span> to <span class="math"><i>V</i>₂</span>. It has <span class="math">|<i>V</i>₁| = |<i>V</i>₂|</span> edges, so it matches every vertex: it is perfect. ∎</p>
+    </div></details>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 10. Counting matchings</h3>
+    <div class="prose"><ol type="a">
+      <li>How many perfect matchings does <span class="math"><i>K</i><sub>3,3</sub></span> have?</li>
+      <li>How many perfect matchings does <span class="math"><i>K</i><sub><i>n</i>,<i>n</i></sub></span> have?</li>
+      <li>How many complete matchings from <span class="math"><i>V</i>₁</span> to <span class="math"><i>V</i>₂</span> does <span class="math"><i>K</i><sub><i>m</i>,<i>n</i></sub></span> have when <span class="math"><i>m</i> ≤ <i>n</i></span>? What if <span class="math"><i>m</i> &gt; <i>n</i></span>?</li>
+    </ol></div>
+    <details><summary>Show solution</summary><div class="prose">
+      <p>(a) 6. The first vertex of <span class="math"><i>V</i>₁</span> has 3 choices, the second 2, the third 1.</p>
+      <p>(b) <span class="math"><i>n</i>!</span>. A perfect matching of <span class="math"><i>K</i><sub><i>n</i>,<i>n</i></sub></span> is the same thing as a permutation of <span class="math"><i>n</i></span> objects.</p>
+      <p>(c) <span class="math"><i>n</i>(<i>n</i> − 1)⋯(<i>n</i> − <i>m</i> + 1) = <i>n</i>! / (<i>n</i> − <i>m</i>)!</span>, the number of one-to-one functions from <span class="math"><i>V</i>₁</span> to <span class="math"><i>V</i>₂</span>. If <span class="math"><i>m</i> &gt; <i>n</i></span> there are none, since Hall's condition fails for <span class="math"><i>A</i> = <i>V</i>₁</span>.</p>
+    </div></details>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 11. How bad can a maximal matching be?</h3>
+    <div class="prose"><p>Let <span class="math"><i>M</i></span> be a maximal matching and <span class="math"><i>M</i>*</span> a maximum matching of a graph <span class="math"><i>G</i></span>. Prove that <span class="math">|<i>M</i>*| ≤ 2|<i>M</i>|</span>. Then give a bipartite graph where equality holds.</p></div>
+    <details><summary>Show solution</summary><div class="prose">
+      <p>Let <span class="math"><i>S</i></span> be the set of vertices matched in <span class="math"><i>M</i></span>, so <span class="math">|<i>S</i>| = 2|<i>M</i>|</span>. Because <span class="math"><i>M</i></span> is maximal, every edge of <span class="math"><i>G</i></span> has at least one endpoint in <span class="math"><i>S</i></span>; otherwise it could be added to <span class="math"><i>M</i></span>.</p>
+      <p>In particular, each edge of <span class="math"><i>M</i>*</span> has an endpoint in <span class="math"><i>S</i></span>. The edges of <span class="math"><i>M</i>*</span> share no endpoints, so different edges of <span class="math"><i>M</i>*</span> use different vertices of <span class="math"><i>S</i></span>. Therefore <span class="math">|<i>M</i>*| ≤ |<i>S</i>| = 2|<i>M</i>|</span>. ∎</p>
+      <p>Equality: take <span class="math"><i>V</i>₁ = {a1, a2}</span>, <span class="math"><i>V</i>₂ = {b1, b2}</span> and edges a1–b1, a2–b1, a2–b2. Then <span class="math"><i>M</i> = {a2–b1}</span> is maximal with 1 edge, and <span class="math"><i>M</i>* = {a1–b1, a2–b2}</span> has 2 edges.</p>
+    </div></details>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 12. An augmenting path by hand</h3>
+    <div class="prose"><p>Choose the <b>Chain</b> graph. Before using Part 3, work on paper.</p><ol type="a">
+      <li>Apply the greedy rule (go through a1, …, a6 in order; give each one its first free neighbour in the order b2 before b1, b3 before b2, and so on). Write down <span class="math"><i>M</i></span>. Is it maximal?</li>
+      <li>Find an <span class="math"><i>M</i></span>-augmenting path <span class="math"><i>P</i></span>. How long is it?</li>
+      <li>How many edges enter and how many leave when you form <span class="math"><i>M</i> ⊕ <i>P</i></span>? Write down the new matching.</li>
+    </ol><p>Then check your answers in Part 3 with the start set to Greedy.</p></div>
+    <details><summary>Show solution</summary><div class="prose">
+      <p>(a) <span class="math"><i>M</i> = {a1–b2, a2–b3, a3–b4, a4–b5, a5–b6}</span>, size 5. It is maximal: the only unmatched vertices are a6 and b1, and they are not adjacent.</p>
+      <p>(b) <span class="math"><i>P</i> = a6–b6–a5–b5–a4–b4–a3–b3–a2–b2–a1–b1</span>, of length 11.</p>
+      <p>(c) The 6 edges of <span class="math"><i>P</i></span> outside <span class="math"><i>M</i></span> enter and the 5 edges in <span class="math"><i>M</i></span> leave. The new matching is <span class="math">{a1–b1, a2–b2, …, a6–b6}</span>, which is perfect.</p>
+    </div></details>
+  </article>
+
+  <article class="ex">
+    <h3>Exercise 13. Challenge: a card trick</h3>
+    <div class="prose"><p>A standard deck of 52 cards (13 ranks A, 2, …, K, with 4 cards of each rank) is dealt into 13 piles of 4 cards each. Prove that you can choose one card from each pile so that the 13 chosen cards have 13 different ranks.</p></div>
+    <details><summary>Show solution</summary><div class="prose">
+      <p>Let <span class="math"><i>V</i>₁</span> be the 13 piles and <span class="math"><i>V</i>₂</span> the 13 ranks. Join pile <span class="math"><i>p</i></span> to rank <span class="math"><i>r</i></span> if <span class="math"><i>p</i></span> contains a card of rank <span class="math"><i>r</i></span>.</p>
+      <p>Take any set <span class="math"><i>A</i></span> of <span class="math"><i>k</i></span> piles. They contain <span class="math">4<i>k</i></span> cards. Each rank has only 4 cards in the whole deck, so these <span class="math">4<i>k</i></span> cards need at least <span class="math">4<i>k</i> / 4 = <i>k</i></span> different ranks. So <span class="math">|<i>N</i>(<i>A</i>)| ≥ <i>k</i> = |<i>A</i>|</span>.</p>
+      <p>By Hall's theorem there is a complete matching from piles to ranks: each pile gets a different rank that it contains. Pick that card from each pile. Since there are 13 piles and 13 ranks, every rank appears exactly once. ∎</p>
+    </div></details>
+  </article>
+</section>
+
+<footer>
+  <p>Notation follows the bipartite graphs and matchings section of Rosen, <i>Discrete Mathematics and Its Applications</i>: matching <span class="math"><i>M</i></span>, complete matching from <span class="math"><i>V</i>₁</span> to <span class="math"><i>V</i>₂</span>, and neighbourhood <span class="math"><i>N</i>(<i>A</i>)</span>.</p>
+</footer>
+</main>
+
+<script>
+"use strict";
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ek=(i,j)=>i+'-'+j;
+const pk=k=>k.split('-').map(Number);
+const mth=s=>`<span class="math">${s}</span>`;
+const V1=mth('<i>V</i>₁'), V2=mth('<i>V</i>₂'), MI=mth('<i>M</i>'), NU=mth('<i>ν</i>(<i>G</i>)');
+const PILL={ok:'<span class="pill ok">Yes</span>',no:'<span class="pill no">No</span>',na:'<span class="pill na">n/a</span>'};
+const MAXV=8;
+
+/* ---------------- graph data ---------------- */
+const PRESETS=[
+  {id:'projects',title:'Students and projects',h1:'Students',h2:'Projects',L:['Anan','Bua','Chai','Dao'],R:['Web','AI','Game','IoT'],
+   E:[[0,0],[0,1],[1,0],[2,1],[2,2],[2,3],[3,2]],note:'Four students choose capstone projects. A perfect matching exists, but a careless first choice can get stuck.'},
+  {id:'dorm',title:'Dorm rooms',h1:'Students',h2:'Rooms',L:['Ploy','Kai','Nok','Ton','Fah'],R:['101','102','103','104','105'],
+   E:[[0,0],[0,1],[1,1],[1,2],[2,0],[2,2],[3,0],[3,1],[3,2],[4,2],[4,3],[4,4]],note:'Five students and five rooms, yet not every student can get a room they accept. Which group causes the trouble?'},
+  {id:'tas',title:'Courses and TAs',h1:'Courses',h2:'TAs',L:['Calc','Prog','Disc'],R:['Mali','Nam','Pim','Ruj','Som'],
+   E:[[0,0],[0,1],[1,1],[1,2],[1,3],[2,0],[2,4]],note:'Here |V₁| < |V₂|. A complete matching from V₁ to V₂ exists, but a perfect matching cannot.'},
+  {id:'chain',title:'Chain',h1:'',h2:'',L:['a1','a2','a3','a4','a5','a6'],R:['b1','b2','b3','b4','b5','b6'],
+   E:[[0,1],[0,0],[1,2],[1,1],[2,3],[2,2],[3,4],[3,3],[4,5],[4,4],[5,5]],note:'Start Part 3 from the greedy matching to see one augmenting path of length 11.'}
+];
+const cloneG=p=>({id:p.id,title:p.title,h1:p.h1||'',h2:p.h2||'',L:[...p.L],R:[...p.R],E:p.E.map(e=>[...e]),note:p.note||''});
+
+/* ---------------- algorithms ---------------- */
+function adjOf(g){const a=g.L.map(()=>[]);for(const [i,j] of g.E)a[i].push(j);return a;}
+function hasE(g,i,j){return g.E.some(([a,b])=>a===i&&b===j);}
+function kuhn(g){
+  const adj=adjOf(g),mL=g.L.map(()=>-1),mR=g.R.map(()=>-1);
+  const tryK=(u,seen)=>{for(const v of adj[u]){if(seen[v])continue;seen[v]=1;if(mR[v]<0||tryK(mR[v],seen)){mL[u]=v;mR[v]=u;return true;}}return false;};
+  for(let u=0;u<g.L.length;u++)tryK(u,g.R.map(()=>0));
+  return {mL,mR,size:mL.filter(x=>x>=0).length};
+}
+function greedyM(g){
+  const adj=adjOf(g),mL=g.L.map(()=>-1),mR=g.R.map(()=>-1);
+  g.L.forEach((_,u)=>{for(const v of adj[u])if(mR[v]<0){mL[u]=v;mR[v]=u;break;}});
+  return {mL,mR};
+}
+function setFromArr(mL){const s=new Set();mL.forEach((v,u)=>{if(v>=0)s.add(ek(u,v));});return s;}
+function arrFromSet(g,S){const mL=g.L.map(()=>-1),mR=g.R.map(()=>-1);for(const k of S){const[i,j]=pk(k);mL[i]=j;mR[j]=i;}return {mL,mR};}
+/* BFS for a shortest augmenting path from the given (or all) unmatched left vertices */
+function augPath(g,mL,mR,sources){
+  const adj=adjOf(g),n1=g.L.length,n2=g.R.length;
+  const visL=Array(n1).fill(false),visR=Array(n2).fill(false),prevR=Array(n2).fill(-1);
+  const q=[];const src=sources||[...Array(n1).keys()].filter(u=>mL[u]<0);
+  for(const u of src){visL[u]=true;q.push(u);}
+  while(q.length){
+    const u=q.shift();
+    for(const v of adj[u]){
+      if(mL[u]===v||visR[v])continue;
+      visR[v]=true;prevR[v]=u;
+      if(mR[v]<0){
+        const path=[];let cv=v;
+        for(;;){const cu=prevR[cv];path.unshift({s:'R',i:cv});path.unshift({s:'L',i:cu});if(mL[cu]<0)break;cv=mL[cu];}
+        return {path,visL,visR};
+      }
+      const w=mR[v];if(!visL[w]){visL[w]=true;q.push(w);}
+    }
+  }
+  return {path:null,visL,visR};
+}
+function pathKeys(path){const ks=[];for(let t=0;t+1<path.length;t++){const a=path[t],b=path[t+1];const i=a.s==='L'?a.i:b.i,j=a.s==='L'?b.i:a.i;ks.push(ek(i,j));}return ks;}
+const vName=(g,v)=>v.s==='L'?g.L[v.i]:g.R[v.i];
+const pathStr=(g,p)=>p.map(v=>vName(g,v)).join(' – ');
+function nbrs(g,A){const s=new Set();for(const [i,j] of g.E)if(A.has(i))s.add(j);return [...s].sort((a,b)=>a-b);}
+const setTxt=a=>a.length?'{'+a.join(', ')+'}':'∅';
+const edgeName=(g,k)=>{const[i,j]=pk(k);return g.L[i]+'–'+g.R[j];};
+const sortKeys=ks=>[...ks].sort((a,b)=>{const[x1,y1]=pk(a),[x2,y2]=pk(b);return x1-x2||y1-y2;});
+const mTxt=(g,S)=>setTxt(sortKeys(S).map(k=>edgeName(g,k)));
+const vLabel=(g,v)=>v[0]==='L'?g.L[+v.slice(1)]:g.R[+v.slice(1)];
+const plural=(n,w)=>n+' '+w+(n===1?'':'s');
+
+function analyse(g,S){
+  const cnt=new Map();
+  for(const k of S){const[i,j]=pk(k);for(const v of ['L'+i,'R'+j])cnt.set(v,(cnt.get(v)||0)+1);}
+  const badV=new Set([...cnt].filter(([,c])=>c>1).map(([v])=>v));
+  const badE=new Set([...S].filter(k=>{const[i,j]=pk(k);return badV.has('L'+i)||badV.has('R'+j);}));
+  const valid=badV.size===0;
+  let addable=null;
+  if(valid)for(const [i,j] of g.E){if(!cnt.has('L'+i)&&!cnt.has('R'+j)){addable=[i,j];break;}}
+  const matchedL=g.L.filter((_,i)=>cnt.has('L'+i)).length;
+  const complete=valid&&matchedL===g.L.length;
+  return {cnt,badV,badE,valid,size:S.size,maximal:valid&&!addable,addable,matchedL,complete,perfect:complete&&g.L.length===g.R.length};
+}
+function hallRows(g){
+  const n=g.L.length,mask=g.L.map(()=>0),rows=[];
+  for(const [i,j] of g.E)mask[i]|=(1<<j);
+  for(let m=1;m<(1<<n);m++){
+    let nm=0;const A=[];
+    for(let i=0;i<n;i++)if(m>>i&1){A.push(i);nm|=mask[i];}
+    const N=[];for(let j=0;j<g.R.length;j++)if(nm>>j&1)N.push(j);
+    rows.push({m,A,N,ok:N.length>=A.length});
+  }
+  rows.sort((x,y)=>{if(x.A.length!==y.A.length)return x.A.length-y.A.length;for(let t=0;t<x.A.length;t++)if(x.A[t]!==y.A[t])return x.A[t]-y.A[t];return 0;});
+  return rows;
+}
+
+/* ---------------- drawing ---------------- */
+function drawGraph(svg,g,o={}){
+  const n1=g.L.length,n2=g.R.length,n=Math.max(n1,n2,1);
+  const gap=o.gap||64,heads=o.headers!==false,top=heads?(g.h1||g.h2?92:70):34,W=520,xL=150,xR=370;
+  const H=top+(n-1)*gap+36;
+  const yL=i=>top+((n-n1)/2+i)*gap,yR=j=>top+((n-n2)/2+j)*gap;
+  const ec=o.edgeClass||(()=>''),vc=o.vClass||(()=>'');
+  let hd='',base='',ov='',hit='',vs='';
+  if(heads){
+    hd+=`<text class="colh c1" x="${xL}" y="34" text-anchor="middle">V<tspan>₁</tspan></text><text class="colh c2" x="${xR}" y="34" text-anchor="middle">V<tspan>₂</tspan></text>`;
+    if(g.h1)hd+=`<text class="cols" x="${xL}" y="56" text-anchor="middle">${esc(g.h1)}</text>`;
+    if(g.h2)hd+=`<text class="cols" x="${xR}" y="56" text-anchor="middle">${esc(g.h2)}</text>`;
+  }
+  for(const [i,j] of g.E){
+    const c=ec(i,j)||'',p=`x1="${xL}" y1="${yL(i)}" x2="${xR}" y2="${yR(j)}"`;
+    base+=`<line class="edge ${c}" ${p}/>`;
+    if(/\b(path|sel)\b/.test(c))ov+=`<line class="ov" ${p}/>`;
+    if(o.onEdge)hit+=`<line class="hit" ${p} data-e="${i}-${j}" tabindex="0" role="button" aria-label="Edge ${esc(g.L[i])} to ${esc(g.R[j])}"/>`;
+  }
+  const vert=(s,i,x,y,lab)=>{
+    const c=vc(s,i)||'';const act=!!o.onVertex&&(!o.vClickable||o.vClickable(s,i));
+    return `<g class="vx v${s} ${c}${act?' act':''}" data-v="${s}${i}" transform="translate(${x} ${y})"${act?` tabindex="0" role="button" aria-label="Vertex ${esc(lab)}"`:''}><circle r="23"/><text text-anchor="middle" dy="0.36em">${esc(lab)}</text></g>`;
+  };
+  g.L.forEach((l,i)=>vs+=vert('L',i,xL,yL(i),l));
+  g.R.forEach((r,j)=>vs+=vert('R',j,xR,yR(j),r));
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.innerHTML=hd+base+ov+hit+vs;
+  const fire=t=>{
+    if(t.dataset.e!==undefined&&o.onEdge){const[i,j]=pk(t.dataset.e);o.onEdge(i,j);}
+    else if(t.dataset.v!==undefined&&o.onVertex&&t.classList.contains('act')){o.onVertex(t.dataset.v[0],+t.dataset.v.slice(1));}
+  };
+  svg.onclick=e=>{const t=e.target.closest('[data-e],[data-v]');if(t)fire(t);};
+  svg.onkeydown=e=>{
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    const t=e.target.closest('[data-e],[data-v]');if(!t)return;
+    e.preventDefault();
+    const sel=t.dataset.e!==undefined?`[data-e="${t.dataset.e}"]`:`[data-v="${t.dataset.v}"]`;
+    fire(t);
+    const again=svg.querySelector(sel);if(again&&again.getAttribute('tabindex'))again.focus();
+  };
+}
+const SW={
+  m:'<line class="edge m" x1="2" y1="8" x2="32" y2="8"/>',
+  e:'<line class="edge" x1="2" y1="8" x2="32" y2="8"/>',
+  bad:'<line class="edge bad" x1="2" y1="8" x2="32" y2="8"/>',
+  path:'<line class="edge" x1="2" y1="8" x2="32" y2="8"/><line class="ov" x1="2" y1="8" x2="32" y2="8"/>',
+  free:'<g class="vx vL" transform="translate(17 8)"><circle r="6.5" style="stroke-width:2"/></g>',
+  on:'<g class="vx vL on" transform="translate(10 8)"><circle r="6.5"/></g><g class="vx vR on" transform="translate(26 8)"><circle r="6.5"/></g>',
+  A:'<g class="vx vL inA" transform="translate(17 8)"><circle r="6.5"/></g>',
+  N:'<g class="vx vR inN" transform="translate(17 8)"><circle r="6.5"/></g>',
+  hl:'<line class="edge hl" x1="2" y1="8" x2="32" y2="8"/>'
+};
+const LG={m:'edge in M',e:'edge not in M',bad:'conflict',path:'augmenting path',free:'unmatched vertex',on:'matched vertices',A:'vertex in A',N:'vertex in N(A)',hl:'edge leaving A'};
+const legend=items=>items.map(k=>`<span class="lg"><svg viewBox="0 0 34 16" aria-hidden="true">${SW[k]}</svg>${LG[k]}</span>`).join('');
+
+/* ---------------- state ---------------- */
+let G=cloneG(PRESETS[0]);
+const st={tab:'concepts',edit:false,pending:null,
+  lab:{sel:new Set(),reveal:false},
+  augStart:'empty',algo:null,
+  hall:{A:new Set(),table:false,onlyBad:false,showM:false}};
+let runT=null;
+
+/* ---------------- toolbar ---------------- */
+function initToolbar(){
+  const ps=$('#preset');
+  ps.innerHTML=PRESETS.map(p=>`<option value="${p.id}">${esc(p.title)}</option>`).join('')+'<option value="custom">Custom graph</option>';
+  for(const id of ['n1','n2']){const s=$('#'+id);s.innerHTML=[2,3,4,5,6,7,8].map(k=>`<option ${k===5?'selected':''}>${k}</option>`).join('');}
+  ps.onchange=()=>{const p=PRESETS.find(x=>x.id===ps.value);if(!p){ps.value=G.id;return;}G=cloneG(p);st.lab.sel=new Set();fullReset();};
+  $('#rand').onclick=()=>{
+    const n1=+$('#n1').value,n2=+$('#n2').value,E=[];
+    while(!E.length){for(let i=0;i<n1;i++)for(let j=0;j<n2;j++)if(Math.random()<0.38)E.push([i,j]);}
+    G={id:'custom',title:'Random graph',h1:'',h2:'',L:Array.from({length:n1},(_,i)=>'a'+(i+1)),R:Array.from({length:n2},(_,j)=>'b'+(j+1)),E,note:`A random graph with ${n1} + ${n2} vertices. Is there a complete matching from V₁ to V₂? Guess first, then check.`};
+    st.lab.sel=new Set();fullReset();
+  };
+  $('#edit').onclick=()=>{st.edit=!st.edit;st.pending=null;updateToolbar();renderCurrent();};
+  $('#editbar').onclick=e=>{
+    const b=e.target.closest('[data-ed]');if(!b)return;const a=b.dataset.ed;
+    if(a==='L+'&&G.L.length<MAXV)G.L.push(nextName(G.L,'a'));
+    if(a==='R+'&&G.R.length<MAXV)G.R.push(nextName(G.R,'b'));
+    if(a==='L-'&&G.L.length>1){G.L.pop();G.E=G.E.filter(([i])=>i<G.L.length);}
+    if(a==='R-'&&G.R.length>1){G.R.pop();G.E=G.E.filter(([,j])=>j<G.R.length);}
+    if(a==='clear')G.E=[];
+    st.pending=null;graphEdited();
+  };
+}
+function nextName(arr,p){let k=arr.length+1;while(arr.includes(p+k))k++;return p+k;}
+function updateToolbar(){
+  $('#preset').value=G.id==='custom'?'custom':G.id;
+  $('#gnote').textContent=G.note||'';
+  $('#edit').setAttribute('aria-pressed',st.edit);
+  $('#edit').textContent=st.edit?'Done editing':'Edit edges';
+  $('#editbar').hidden=!st.edit;
+  $$('#editbar [data-ed]').forEach(b=>{const a=b.dataset.ed;b.disabled=(a==='L+'&&G.L.length>=MAXV)||(a==='R+'&&G.R.length>=MAXV)||(a==='L-'&&G.L.length<=1)||(a==='R-'&&G.R.length<=1)||(a==='clear'&&!G.E.length);});
+}
+function graphEdited(){
+  if(G.id!=='custom'){G.id='custom';G.title='Custom graph';G.note='Your own graph. Keep editing, or switch to Parts 2 to 4 to explore it.';}
+  st.lab.sel=new Set([...st.lab.sel].filter(k=>{const[i,j]=pk(k);return hasE(G,i,j);}));
+  fullReset(true);
+}
+function fullReset(keepSel){
+  stopRun();
+  if(!keepSel)st.lab.sel=new Set();
+  st.lab.reveal=false;
+  st.hall.A=new Set([...st.hall.A].filter(i=>i<G.L.length));
+  if(!keepSel)st.hall.A=new Set();
+  st.hall.table=false;st.hall.showM=false;
+  algoInit();updateToolbar();renderCurrent();
+}
+function editHandlers(){
+  return {
+    onEdge:(i,j)=>{G.E=G.E.filter(([a,b])=>!(a===i&&b===j));graphEdited();},
+    onVertex:(s,i)=>{
+      const v=s+i;
+      if(!st.pending||st.pending===v||st.pending[0]===s){st.pending=st.pending===v?null:v;renderCurrent();return;}
+      const li=s==='L'?i:+st.pending.slice(1),rj=s==='R'?i:+st.pending.slice(1);
+      if(hasE(G,li,rj))G.E=G.E.filter(([a,b])=>!(a===li&&b===rj));
+      else{G.E.push([li,rj]);G.E.sort((x,y)=>x[0]-y[0]||x[1]-y[1]);}
+      st.pending=null;graphEdited();
+    }
+  };
+}
+const pend=(s,i)=>st.edit&&st.pending===s+i?' pending':'';
+
+/* ---------------- Part 2: lab ---------------- */
+function renderLab(){
+  const S=st.lab.sel,a=analyse(G,S),nu=kuhn(G).size,n1=G.L.length,n2=G.R.length;
+  drawGraph($('#labSvg'),G,{
+    edgeClass:(i,j)=>{const k=ek(i,j);return a.badE.has(k)?'bad':S.has(k)?'m':'';},
+    vClass:(s,i)=>{const v=s+i;return (a.badV.has(v)?'badv':a.cnt.has(v)?'on':'')+pend(s,i);},
+    ...(st.edit?editHandlers():{onEdge:(i,j)=>{const k=ek(i,j);S.has(k)?S.delete(k):S.add(k);renderLab();}})
+  });
+  $('#labLegend').innerHTML=legend(['m','e','bad','free','on']);
+  const row=(q,ans)=>`<div><dt>${q}</dt><dd>${ans}</dd></div>`;
+  let h=`<p class="setline">${MI} = ${esc(mTxt(G,S))}</p><p class="size">${mth('|<i>M</i>|')} = ${S.size}</p><dl class="checks">`;
+  if(!a.valid){
+    const names=[...a.badV].map(v=>esc(vLabel(G,v)));
+    h+=row(`Is ${MI} a matching?`,`${PILL.no} ${names.join(', ')} ${names.length>1?'are endpoints':'is an endpoint'} of more than one chosen edge (shown in red). Remove edges until each vertex has at most one.`);
+    const na=`${PILL.na} Make ${MI} a matching first.`;
+    h+=row('Maximal?',na)+row('Maximum?',na)+row(`Complete from ${V1} to ${V2}?`,na)+row('Perfect?',na);
+  }else{
+    h+=row(`Is ${MI} a matching?`,`${PILL.ok} No two edges of ${MI} share a vertex.`);
+    h+=row('Maximal?',a.maximal?`${PILL.ok} ${G.E.length?'Every edge of <i>G</i> already touches a matched vertex, so none can be added.':'<i>G</i> has no edges at all.'}`:`${PILL.no} You can still add ${esc(G.L[a.addable[0]]+'–'+G.R[a.addable[1]])}: both of its endpoints are unmatched.`);
+    h+=row('Maximum?',!st.lab.reveal?`<button class="btn small" id="labReveal">Reveal</button> <span class="small">Decide for yourself first.</span>`:
+      (S.size===nu?`${PILL.ok} ${NU} = ${nu} and ${mth('|<i>M</i>|')} = ${nu}.`:`${PILL.no} ${NU} = ${nu}, so a matching with ${plural(nu-S.size,'more edge')} exists.`));
+    h+=row(`Complete from ${V1} to ${V2}?`,n1>n2?`${PILL.no} ${mth('|<i>V</i>₁|')} = ${n1} &gt; ${mth('|<i>V</i>₂|')} = ${n2}, so no complete matching from ${V1} to ${V2} can exist.`:
+      a.complete?`${PILL.ok} Every vertex of ${V1} is matched: ${mth('|<i>M</i>| = |<i>V</i>₁|')} = ${n1}.`:`${PILL.no} Only ${a.matchedL} of the ${n1} vertices of ${V1} are matched.`);
+    const unm=n1+n2-2*S.size;
+    h+=row('Perfect?',a.perfect?`${PILL.ok} Every vertex of <i>G</i> is matched.`:`${PILL.no} ${n1!==n2?`${mth('|<i>V</i>₁| ≠ |<i>V</i>₂|')}, so some vertex must stay unmatched.`:`${plural(unm,'vertex')} ${unm===1?'is':'are'} still unmatched.`.replace('vertexs','vertices')}`);
+  }
+  h+='</dl>';
+  $('#labOut').innerHTML=h;
+  const rv=$('#labReveal');if(rv)rv.onclick=()=>{st.lab.reveal=true;renderLab();};
+}
+
+/* ---------------- Part 3: augmenting paths ---------------- */
+function algoInit(){
+  let mL,mR,desc;
+  if(st.augStart==='greedy'){({mL,mR}=greedyM(G));desc='Start from the greedy matching';}
+  else if(st.augStart==='lab'){
+    const a=analyse(G,st.lab.sel);
+    if(a.valid){({mL,mR}=arrFromSet(G,st.lab.sel));desc='Start from your matching in Part 2';}
+    else{mL=G.L.map(()=>-1);mR=G.R.map(()=>-1);desc='Your edges in Part 2 do not form a matching, so start from M = ∅';}
+  }else{mL=G.L.map(()=>-1);mR=G.R.map(()=>-1);desc='Start from the empty matching M = ∅';}
+  const size=mL.filter(x=>x>=0).length;
+  st.algo={mL,mR,phase:'search',path:null,lastPath:null,witness:null,
+    log:[`${desc}: |M| = ${size}.`],msg:`${esc(desc)}. Press <b>Search for an augmenting path</b>.`};
+}
+function algoStep(){
+  const a=st.algo,size=()=>a.mL.filter(x=>x>=0).length;
+  if(a.phase==='done')return;
+  if(a.phase==='search'){
+    a.lastPath=null;
+    const r=augPath(G,a.mL,a.mR);
+    if(r.path){
+      a.phase='found';a.path=r.path;const len=r.path.length-1,ps=esc(pathStr(G,r.path));
+      a.msg=`Found an augmenting path <i>P</i> of length ${len}:<br><span class="pathtxt">${ps}</span><br>It starts at the unmatched vertex ${esc(vName(G,r.path[0]))} in ${V1}, ends at the unmatched vertex ${esc(vName(G,r.path[len]))} in ${V2}, and alternates: ${plural((len+1)/2,'edge')} not in ${MI}, ${plural((len-1)/2,'edge')} in ${MI}.`;
+      a.log.push(`Found P = ${pathStr(G,r.path)} (length ${len}).`);
+    }else{
+      a.phase='done';const k=size(),n1=G.L.length;
+      if(k===n1){
+        a.witness=null;
+        a.msg=`No augmenting path exists, so by Berge's theorem ${MI} is a maximum matching: ${NU} = ${k}. Every vertex of ${V1} is matched, so ${MI} is a complete matching from ${V1} to ${V2}${n1===G.R.length?'. It is even perfect.':'.'}`;
+      }else{
+        const u=a.mL.findIndex(x=>x<0),w=augPath(G,a.mL,a.mR,[u]);
+        const A=w.visL.map((b,i)=>b?i:-1).filter(i=>i>=0),N=w.visR.map((b,j)=>b?j:-1).filter(j=>j>=0);
+        a.witness={u,A,N};
+        a.msg=`No augmenting path exists, so ${MI} is maximum: ${NU} = ${k} &lt; ${mth('|<i>V</i>₁|')} = ${n1}. There is <b>no</b> complete matching from ${V1} to ${V2}.<br><br>Hall's theorem explains why. Follow alternating paths from the unmatched vertex ${esc(G.L[u])}. They reach ${mth('<i>A</i>')} = ${esc(setTxt(A.map(i=>G.L[i])))} in ${V1} and ${mth('<i>N</i>(<i>A</i>)')} = ${esc(setTxt(N.map(j=>G.R[j])))} in ${V2}. Each vertex of ${mth('<i>N</i>(<i>A</i>)')} is matched back into ${mth('<i>A</i>')}, so ${mth('|<i>N</i>(<i>A</i>)|')} = ${N.length} &lt; ${A.length} = ${mth('|<i>A</i>|')}.<br><button class="btn small" id="toHall" style="margin-top:8px">Open this A in Part 4</button>`;
+      }
+      a.log.push(`No augmenting path: M is maximum, |M| = ${k}.`);
+    }
+  }else if(a.phase==='found'){
+    const before=size(),len=a.path.length-1;
+    for(let t=0;t<a.path.length;t+=2){const u=a.path[t].i,v=a.path[t+1].i;a.mL[u]=v;a.mR[v]=u;}
+    a.msg=`Swap along <i>P</i>: replace ${MI} by ${mth('<i>M</i> ⊕ <i>P</i>')}. The ${plural((len+1)/2,'path edge')} outside ${MI} enter and the ${plural((len-1)/2,'path edge')} in ${MI} leave, so ${mth('|<i>M</i>|')} grows from ${before} to ${before+1}.`;
+    a.log.push(`Swapped along P: |M| = ${before+1}.`);
+    a.lastPath=a.path;a.path=null;a.phase='search';
+  }
+}
+function renderAug(){
+  const a=st.algo,M=setFromArr(a.mL),P=a.path?new Set(pathKeys(a.path)):null;
+  const pv=new Set((a.path||a.lastPath||[]).map(v=>v.s+v.i));
+  const W=a.witness,WA=W?new Set(W.A):null,WN=W?new Set(W.N):null;
+  drawGraph($('#augSvg'),G,{
+    edgeClass:(i,j)=>{const k=ek(i,j),c=[];if(M.has(k))c.push('m');
+      if(P)c.push(P.has(k)?'path':'dim');else if(W)c.push(WA.has(i)&&WN.has(j)?'hl':'dim');return c.join(' ');},
+    vClass:(s,i)=>{const c=[];const matched=s==='L'?a.mL[i]>=0:a.mR[i]>=0;if(matched)c.push('on');if(pv.has(s+i))c.push('pathv');
+      if(W){const inn=s==='L'?WA.has(i):WN.has(i);if(!inn)c.push('fade');if(s==='L'&&i===W.u)c.push('pathv');}
+      return c.join(' ')+pend(s,i);},
+    ...(st.edit?editHandlers():{})
+  });
+  $('#augLegend').innerHTML=legend(['m','e','path','free','on']);
+  $('#aMsg').innerHTML=a.msg;
+  $('#aM').innerHTML=`${MI} = ${esc(mTxt(G,M))}, ${mth('|<i>M</i>|')} = ${M.size}`;
+  $('#aLog').innerHTML=a.log.map(x=>`<li>${esc(x)}</li>`).join('');
+  const sb=$('#aStep');
+  sb.textContent=a.phase==='found'?'Swap along P':a.phase==='done'?'Finished':'Search for an augmenting path';
+  sb.disabled=a.phase==='done';
+  $('#aRun').disabled=a.phase==='done';
+  $('#aRun').textContent=runT?'Pause':'Run to the end';
+  $$('#augStart button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.start===st.augStart));
+  const th=$('#toHall');
+  if(th)th.onclick=()=>{st.hall.A=new Set(W.A);st.hall.table=false;setTab('hall');};
+}
+function stopRun(){if(runT){clearInterval(runT);runT=null;}const b=$('#aRun');if(b)b.textContent='Run to the end';}
+
+/* ---------------- Part 4: Hall ---------------- */
+function renderHall(){
+  const A=st.hall.A,Narr=nbrs(G,A),N=new Set(Narr);
+  const M=st.hall.showM?setFromArr(kuhn(G).mL):new Set();
+  const mv=new Set();for(const k of M){const[i,j]=pk(k);mv.add('L'+i);mv.add('R'+j);}
+  drawGraph($('#hallSvg'),G,{
+    edgeClass:(i,j)=>{const c=[];if(M.has(ek(i,j)))c.push('m');if(A.size)c.push(A.has(i)?'hl':'dim');return c.join(' ');},
+    vClass:(s,i)=>{const c=[];if(mv.has(s+i))c.push('on');
+      if(s==='L'){if(A.has(i))c.push('inA');else if(A.size)c.push('fade');}
+      else{if(N.has(i))c.push('inN');else if(A.size)c.push('fade');}
+      return c.join(' ')+pend(s,i);},
+    ...(st.edit?editHandlers():{onVertex:(s,i)=>{A.has(i)?A.delete(i):A.add(i);renderHall();},vClickable:s=>s==='L'})
+  });
+  $('#hallLegend').innerHTML=legend(st.hall.showM?['A','N','hl','m']:['A','N','hl','free']);
+  const An=[...A].sort((x,y)=>x-y).map(i=>G.L[i]),Nn=Narr.map(j=>G.R[j]);
+  let h=`<p class="setline">${mth('<i>A</i>')} = ${esc(setTxt(An))}</p><p class="setline">${mth('<i>N</i>(<i>A</i>)')} = ${esc(setTxt(Nn))}</p>
+    <div class="compare"><span>${mth('|<i>A</i>|')} = ${A.size}</span><span>${mth('|<i>N</i>(<i>A</i>)|')} = ${N.size}</span></div>`;
+  if(!A.size)h+=`<p class="verdict neutral">Choose at least one vertex of ${V1}. The empty set satisfies Hall's condition trivially.</p>`;
+  else if(N.size>=A.size)h+=`<p class="verdict ok"><b>${mth('|<i>N</i>(<i>A</i>)| ≥ |<i>A</i>|')}</b>. This set passes. One set is not enough, though: the condition must hold for every ${mth('<i>A</i> ⊆ <i>V</i>₁')}.</p>`;
+  else h+=`<p class="verdict bad"><b>${mth('|<i>N</i>(<i>A</i>)| &lt; |<i>A</i>|')}</b>. The ${A.size} vertices of ${mth('<i>A</i>')} have only ${N.size} possible partners, so they cannot all be matched. There is no complete matching from ${V1} to ${V2}.</p>`;
+  $('#hallOut').innerHTML=h;
+  $('#hShowM').textContent=st.hall.showM?'Hide the matching':'Show a maximum matching';
+  renderHallTable();
+}
+function renderHallTable(){
+  const box=$('#hallTable');
+  if(!st.hall.table){box.innerHTML='';return;}
+  const rows=hallRows(G),bad=rows.filter(r=>!r.ok),n=G.L.length;
+  let h='';
+  if(!bad.length){
+    h+=`<p class="verdict ok">All ${rows.length} nonempty subsets ${mth('<i>A</i> ⊆ <i>V</i>₁')} satisfy ${mth('|<i>N</i>(<i>A</i>)| ≥ |<i>A</i>|')}. By Hall's theorem, <i>G</i> has a complete matching from ${V1} to ${V2}. Press <b>Show a maximum matching</b> to see one.</p>`;
+  }else{
+    const sm=bad[0],d=Math.max(...bad.map(r=>r.A.length-r.N.length));
+    h+=`<p class="verdict bad">${bad.length} of the ${rows.length} nonempty subsets ${bad.length===1?'breaks':'break'} Hall's condition, so there is no complete matching from ${V1} to ${V2}. A smallest one is ${mth('<i>A</i>')} = ${esc(setTxt(sm.A.map(i=>G.L[i])))}.</p>
+      <p class="small">Going further: the largest shortfall is ${mth('<i>δ</i> = max(|<i>A</i>| − |<i>N</i>(<i>A</i>)|)')} = ${d}. The deficiency version of Hall's theorem (König and Ore) says ${NU} = ${mth('|<i>V</i>₁| − <i>δ</i>')} = ${n} − ${d} = ${n-d}. Compare with Part 3.</p>`;
+  }
+  h+=`<label class="chk"><input type="checkbox" id="onlyBad" ${st.hall.onlyBad?'checked':''}> Only show sets that fail</label>`;
+  const shown=st.hall.onlyBad?bad:rows;
+  h+=`<div class="tablewrap"><table><thead><tr><th><i>A</i></th><th><i>N</i>(<i>A</i>)</th><th>|<i>A</i>|</th><th>|<i>N</i>(<i>A</i>)|</th><th>Hall</th></tr></thead><tbody>`+
+    shown.map(r=>`<tr data-m="${r.m}" class="${r.ok?'':'fail'}" tabindex="0"><td>${esc(setTxt(r.A.map(i=>G.L[i])))}</td><td>${esc(setTxt(r.N.map(j=>G.R[j])))}</td><td>${r.A.length}</td><td>${r.N.length}</td><td>${r.ok?'holds':'fails'}</td></tr>`).join('')+
+    `</tbody></table></div><p class="small">${shown.length?'Click a row to show that set on the graph.':'No set fails.'}</p>`;
+  box.innerHTML=h;
+  $('#onlyBad').onchange=e=>{st.hall.onlyBad=e.target.checked;renderHallTable();};
+  const pick=tr=>{const m=+tr.dataset.m;st.hall.A=new Set(G.L.map((_,i)=>i).filter(i=>m>>i&1));renderHall();};
+  box.querySelector('tbody').onclick=e=>{const tr=e.target.closest('tr');if(tr)pick(tr);};
+  box.querySelector('tbody').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){const tr=e.target.closest('tr');if(tr){e.preventDefault();pick(tr);}}};
+}
+
+/* ---------------- tabs ---------------- */
+const TABS=['concepts','lab','aug','hall','ex'];
+function setTab(t){
+  st.tab=t;stopRun();st.pending=null;
+  $$('.tabs [role=tab]').forEach(b=>{const on=b.dataset.tab===t;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;});
+  TABS.forEach(x=>$('#tab-'+x).hidden=x!==t);
+  $('#toolbar').hidden=!['lab','aug','hall'].includes(t);
+  if(t==='aug'&&st.augStart==='lab'&&st.algo.log.length===1)algoInit();
+  updateToolbar();renderCurrent();
+}
+function renderCurrent(){if(st.tab==='lab')renderLab();else if(st.tab==='aug')renderAug();else if(st.tab==='hall')renderHall();}
+
+/* ---------------- Part 1 figures ---------------- */
+function renderConcepts(){
+  const g0={L:['a','b','c'],R:['x','y','z'],E:[[0,0],[0,1],[1,1],[2,1],[2,2]],h1:'',h2:''};
+  const P=cloneG(PRESETS[0]),D=cloneG(PRESETS[1]),T=cloneG(PRESETS[2]);
+  const mOf=keys=>{const s=new Set(keys);const v=new Set();for(const k of keys){const[i,j]=pk(k);v.add('L'+i);v.add('R'+j);}return {ec:(i,j)=>s.has(ek(i,j))?'m':'',vc:(s2,i)=>v.has(s2+i)?'on':''};};
+  drawGraph($('#fBip'),T,{gap:58});
+  let m=mOf(['0-0','2-1']);drawGraph($('#fOk'),g0,{gap:58,edgeClass:m.ec,vClass:m.vc});
+  drawGraph($('#fBad'),g0,{gap:58,edgeClass:(i,j)=>(ek(i,j)==='0-1'||ek(i,j)==='1-1')?'bad':'',vClass:(s,i)=>s==='R'&&i===1?'badv':''});
+  m=mOf(['0-0','2-2']);drawGraph($('#fMaximal'),P,{gap:58,edgeClass:m.ec,vClass:m.vc});
+  m=mOf(['0-1','1-0','2-3','3-2']);drawGraph($('#fMaximum'),P,{gap:58,edgeClass:m.ec,vClass:m.vc});
+  m=mOf(['0-1','1-2','2-0']);drawGraph($('#fComplete'),T,{gap:58,edgeClass:m.ec,vClass:m.vc});
+  const A=new Set([0,1,2,3]),N=new Set(nbrs(D,A));
+  drawGraph($('#fHall'),D,{gap:58,edgeClass:i=>A.has(i)?'hl':'dim',vClass:(s,i)=>s==='L'?(A.has(i)?'inA':'fade'):(N.has(i)?'inN':'fade')});
+  const gm=greedyM(P),M=setFromArr(gm.mL),path=augPath(P,gm.mL,gm.mR).path,PK=new Set(pathKeys(path)),pv=new Set(path.map(v=>v.s+v.i));
+  drawGraph($('#fAug'),P,{gap:58,edgeClass:(i,j)=>(M.has(ek(i,j))?'m ':'')+(PK.has(ek(i,j))?'path':''),vClass:(s,i)=>((s==='L'?gm.mL[i]>=0:gm.mR[i]>=0)?'on ':'')+(pv.has(s+i)?'pathv':'')});
+}
+
+/* ---------------- Part 5: exercises ---------------- */
+const QUIZ=[
+  {q:`In a bipartite graph with ${mth('|<i>V</i>₁| = 5')} and ${mth('|<i>V</i>₂| = 3')}, can there be a complete matching from ${V1} to ${V2}?`,
+   o:[`Yes, if every vertex of ${V1} has degree at least 1`,`Yes, if <i>G</i> is the complete bipartite graph ${mth('<i>K</i><sub>5,3</sub>')}`,'No, never'],a:2,
+   why:`A complete matching from ${V1} to ${V2} has 5 edges, which need 5 different endpoints in ${V2}. Hall's condition fails for ${mth('<i>A</i> = <i>V</i>₁')}: ${mth('|<i>N</i>(<i>V</i>₁)| ≤ 3 &lt; 5')}.`},
+  {q:'Which statement is always true?',o:['Every maximal matching is maximum','Every maximum matching is maximal','A graph has exactly one maximum matching'],a:1,
+   why:'If an edge could be added to a maximum matching, the result would be larger, which is impossible. The other two fail: see the Students and projects graph, which has a maximal matching of size 2 and several maximum matchings of size 4.'},
+  {q:`An ${MI}-augmenting path <i>P</i> has 7 edges. How many of them belong to ${MI}?`,o:['3','4','7'],a:0,
+   why:`The edges alternate and both end edges are outside ${MI}: out, in, out, in, out, in, out. So 3 are in ${MI} and 4 are not. ${mth('<i>M</i> ⊕ <i>P</i>')} has one more edge than ${MI}.`},
+  {q:`Every vertex of ${V1} has at least one neighbour in ${V2}. Must a complete matching from ${V1} to ${V2} exist?`,
+   o:[`Yes, that is exactly Hall's condition`,`No, the condition must hold for every subset ${mth('<i>A</i> ⊆ <i>V</i>₁')}, not only for single vertices`],a:1,
+   why:`Degree at least 1 only checks sets with ${mth('|<i>A</i>| = 1')}. In the Dorm rooms graph every student has neighbours, yet ${mth('<i>A</i> = {Ploy, Kai, Nok, Ton}')} has only 3 neighbours.`},
+  {q:`How many perfect matchings does ${mth('<i>K</i><sub>3,3</sub>')} have?`,o:['3','6','9','27'],a:1,
+   why:'The first vertex of V₁ has 3 choices of partner, the second has 2, the third has 1: 3! = 6.'},
+  {q:`A matching ${MI} has no ${MI}-augmenting path. What can you conclude?`,o:[`${MI} is a maximum matching`,`${MI} is a complete matching from ${V1} to ${V2}`,`<i>G</i> has a perfect matching`],a:0,
+   why:`This is Berge's theorem. ${MI} may still be incomplete: in the Dorm rooms graph the maximum matching has size 4 &lt; 5.`},
+  {q:`In a bipartite graph, a matching ${MI} satisfies ${mth('|<i>M</i>| = |<i>V</i>₁|')}. Then ${MI} is`,o:[`a complete matching from ${V1} to ${V2}`,'always a perfect matching','impossible unless |V₁| = |V₂|'],a:0,
+   why:`Each edge of ${MI} uses a different vertex of ${V1}, so all ${mth('|<i>V</i>₁|')} vertices are matched. It is perfect only if also ${mth('|<i>V</i>₁| = |<i>V</i>₂|')}, as in the Courses and TAs example where it is not.`}
+];
+const quizState=QUIZ.map(()=>({tried:false,firstRight:null,done:false}));
+function renderQuiz(){
+  $('#quiz').innerHTML=QUIZ.map((x,qi)=>`<li><p>${x.q}</p><div class="opts">${x.o.map((o,oi)=>`<button class="opt" data-q="${qi}" data-o="${oi}">${o}</button>`).join('')}</div><p class="fb" id="fb${qi}" aria-live="polite"></p></li>`).join('');
+  $('#quiz').onclick=e=>{
+    const b=e.target.closest('.opt');if(!b)return;
+    const qi=+b.dataset.q,oi=+b.dataset.o,s=quizState[qi];if(s.done)return;
+    const right=oi===QUIZ[qi].a;
+    if(!s.tried){s.tried=true;s.firstRight=right;}
+    if(right){s.done=true;b.classList.add('right');$('#fb'+qi).innerHTML=`<b>Correct.</b> ${QUIZ[qi].why}`;}
+    else{b.classList.add('wrong');b.disabled=true;$('#fb'+qi).innerHTML='<b>Not quite.</b> Try another option.';}
+    updateScore();
+  };
+  updateScore();
+}
+function updateScore(){
+  const done=quizState.filter(s=>s.done).length,first=quizState.filter(s=>s.firstRight).length;
+  $('#quizScore').textContent=done?`${done} of ${QUIZ.length} solved, ${first} on the first try.`:'';
+}
+
+const EX2={h1:'',h2:'',L:['a1','a2','a3','a4','a5','a6'],R:['b1','b2','b3','b4','b5','b6'],
+  E:[[0,0],[0,1],[0,2],[1,2],[1,4],[2,1],[2,3],[2,5],[3,2],[4,3],[4,4],[4,5],[5,2],[5,4]]};
+const EX3={h1:'',h2:'',L:['x1','x2','x3','x4','x5'],R:['y1','y2','y3','y4','y5'],
+  E:[[0,1],[0,3],[1,0],[1,1],[1,2],[2,3],[3,2],[3,4],[4,1],[4,3]]};
+const EX4={h1:'',h2:'',L:['u1','u2','u3','u4','u5'],R:['w1','w2','w3','w4','w5'],
+  E:[[0,0],[0,1],[1,1],[1,2],[1,4],[2,2],[2,3],[3,3],[4,1]]};
+const EX4M0=['0-1','1-2','2-3'];
+const ex2={sel:new Set()},ex3={A:new Set()},ex4={M:new Set(EX4M0),sel:new Set(),valid:false};
+
+function renderEx2(){
+  const a=analyse(EX2,ex2.sel);
+  drawGraph($('#ex2Svg'),EX2,{
+    edgeClass:(i,j)=>{const k=ek(i,j);return a.badE.has(k)?'bad':ex2.sel.has(k)?'m':'';},
+    vClass:(s,i)=>{const v=s+i;return a.badV.has(v)?'badv':a.cnt.has(v)?'on':'';},
+    onEdge:(i,j)=>{const k=ek(i,j);ex2.sel.has(k)?ex2.sel.delete(k):ex2.sel.add(k);$('#ex2Msg').innerHTML='';renderEx2();}
+  });
+}
+function checkEx2(){
+  const a=analyse(EX2,ex2.sel),nu=kuhn(EX2).size;let m;
+  if(!ex2.sel.size)m='Select some edges first.';
+  else if(!a.valid)m=`Not a matching yet: ${[...a.badV].map(v=>vLabel(EX2,v)).join(', ')} ${a.badV.size>1?'are':'is'} used by more than one edge.`;
+  else if(a.size<nu&&!a.maximal)m=`Your ${MI} is a matching with ${plural(a.size,'edge')}, but some edge still has two unmatched endpoints, so you can simply add it.`;
+  else if(a.size<nu)m=`Your ${MI} is maximal with ${plural(a.size,'edge')}, but not maximum: a larger matching exists. Look for an augmenting path that starts at an unmatched vertex of ${V1}.`;
+  else m=`<b>Correct.</b> ${mth('|<i>M</i>|')} = ${a.size} = ${NU}. Notice that ${V1} has 6 vertices. Can you prove that no matching has 6 edges? Find a set ${mth('<i>A</i> ⊆ <i>V</i>₁')} with ${mth('|<i>N</i>(<i>A</i>)| &lt; |<i>A</i>|')}.`;
+  $('#ex2Msg').innerHTML=m;
+}
+function renderEx3(){
+  const A=ex3.A,N=new Set(nbrs(EX3,A));
+  drawGraph($('#ex3Svg'),EX3,{
+    edgeClass:i=>A.size?(A.has(i)?'hl':'dim'):'',
+    vClass:(s,i)=>s==='L'?(A.has(i)?'inA':A.size?'fade':''):(N.has(i)?'inN':A.size?'fade':''),
+    onVertex:(s,i)=>{A.has(i)?A.delete(i):A.add(i);$('#ex3Msg').innerHTML='';renderEx3();},vClickable:s=>s==='L'
+  });
+  const An=[...A].sort((x,y)=>x-y).map(i=>EX3.L[i]),Nn=[...N].sort((x,y)=>x-y).map(j=>EX3.R[j]);
+  $('#ex3Live').innerHTML=`${mth('<i>A</i>')} = ${esc(setTxt(An))}, ${mth('<i>N</i>(<i>A</i>)')} = ${esc(setTxt(Nn))}`;
+}
+function checkEx3(){
+  const A=ex3.A,N=nbrs(EX3,A);let m;
+  if(!A.size)m=`Click at least one vertex of ${V1}.`;
+  else if(N.length<A.size)m=`<b>Correct.</b> ${mth('|<i>N</i>(<i>A</i>)|')} = ${N.length} &lt; ${A.size} = ${mth('|<i>A</i>|')}. These ${A.size} vertices compete for only ${N.length} partners, so by Hall's theorem no complete matching exists.`;
+  else m=`Here ${mth('|<i>N</i>(<i>A</i>)|')} = ${N.length} ≥ ${A.size} = ${mth('|<i>A</i>|')}, so this set satisfies Hall's condition. Try another set. Vertices with few neighbours are good candidates.`;
+  $('#ex3Msg').innerHTML=m;
+}
+function checkAug(g,M,sel){
+  if(!sel.size)return {ok:false,msg:'Select the edges of a path first.'};
+  const deg=new Map(),inM=new Map(),adj=new Map();
+  const add=(m,v)=>m.set(v,(m.get(v)||0)+1);
+  for(const k of sel){
+    const[i,j]=pk(k),a='L'+i,b='R'+j;
+    for(const v of [a,b]){add(deg,v);if(M.has(k))add(inM,v);if(!adj.has(v))adj.set(v,[]);}
+    adj.get(a).push(b);adj.get(b).push(a);
+  }
+  const V=[...deg.keys()],nm=v=>vLabel(g,v);
+  const over=V.find(v=>deg.get(v)>2);
+  if(over)return {ok:false,msg:`${nm(over)} has ${deg.get(over)} selected edges. A path enters and leaves each vertex at most once.`};
+  const seen=new Set([V[0]]),q=[V[0]];
+  while(q.length){const v=q.shift();for(const w of adj.get(v))if(!seen.has(w)){seen.add(w);q.push(w);}}
+  if(seen.size!==V.length)return {ok:false,msg:'The selected edges fall into separate pieces. A path must be one connected piece.'};
+  if(V.length!==sel.size+1)return {ok:false,msg:'The selected edges form a cycle. A path with k edges has exactly k + 1 vertices.'};
+  const matched=new Set();for(const k of M){const[i,j]=pk(k);matched.add('L'+i);matched.add('R'+j);}
+  const ends=V.filter(v=>deg.get(v)===1);
+  const busy=ends.find(v=>matched.has(v));
+  if(busy)return {ok:false,msg:`The path ends at ${nm(busy)}, which is already matched. An augmenting path must start and end at unmatched vertices.`};
+  const bad=V.find(v=>deg.get(v)===2&&(inM.get(v)||0)!==1);
+  if(bad)return {ok:false,msg:`At ${nm(bad)} the path uses ${(inM.get(bad)||0)===2?'two edges of M':'two edges outside M'}. The edges must alternate: not in M, in M, not in M, …`};
+  const order=[ends[0]];let prev=null,cur=ends[0];
+  while(order.length<V.length){const nx=adj.get(cur).find(w=>w!==prev);prev=cur;cur=nx;order.push(cur);}
+  if(order[0][0]==='R')order.reverse();
+  return {ok:true,msg:`<b>Valid augmenting path</b> of length ${sel.size}: <span class="pathtxt">${esc(order.map(nm).join(' – '))}</span>. Press <b>Apply M ⊕ P</b>.`};
+}
+function renderEx4(){
+  const M=ex4.M,S=ex4.sel,mv=new Set();for(const k of M){const[i,j]=pk(k);mv.add('L'+i);mv.add('R'+j);}
+  drawGraph($('#ex4Svg'),EX4,{
+    edgeClass:(i,j)=>{const k=ek(i,j);return (M.has(k)?'m ':'')+(S.has(k)?'sel':'');},
+    vClass:(s,i)=>mv.has(s+i)?'on':'',
+    onEdge:(i,j)=>{if(M.size===EX4.L.length)return;const k=ek(i,j);S.has(k)?S.delete(k):S.add(k);ex4.valid=false;$('#ex4Msg').innerHTML='';renderEx4();}
+  });
+  $('#ex4Live').innerHTML=`${MI} = ${esc(mTxt(EX4,M))}, ${mth('|<i>M</i>|')} = ${M.size}`;
+  $('#ex4Apply').disabled=!ex4.valid;
+}
+
+function initExercises(){
+  renderQuiz();renderEx2();renderEx3();renderEx4();
+  $('#ex2Check').onclick=checkEx2;
+  $('#ex2Clear').onclick=()=>{ex2.sel.clear();$('#ex2Msg').innerHTML='';renderEx2();};
+  const k2=kuhn(EX2);
+  $('#ex2Sol').innerHTML=`<p>${NU} = ${k2.size}, for example ${MI} = ${esc(mTxt(EX2,setFromArr(k2.mL)))}.</p><p>No matching has 6 edges: ${mth('<i>A</i> = {a2, a4, a6}')} has ${mth('<i>N</i>(<i>A</i>) = {b3, b5}')}, so at most two of a2, a4, a6 can be matched.</p>`;
+  $('#ex3Check').onclick=checkEx3;
+  $('#ex3Clear').onclick=()=>{ex3.A.clear();$('#ex3Msg').innerHTML='';renderEx3();};
+  const viol=hallRows(EX3).filter(r=>!r.ok)[0];
+  $('#ex3Sol').innerHTML=`<p>${mth('<i>A</i>')} = ${esc(setTxt(viol.A.map(i=>EX3.L[i])))} has ${mth('<i>N</i>(<i>A</i>)')} = ${esc(setTxt(viol.N.map(j=>EX3.R[j])))}: three vertices, two neighbours. It is the only failing set. Notice that every pair inside it passes, so you have to look at all three together.</p>`;
+  $('#ex4Check').onclick=()=>{const r=checkAug(EX4,ex4.M,ex4.sel);ex4.valid=r.ok;$('#ex4Msg').innerHTML=r.msg;renderEx4();};
+  $('#ex4Apply').onclick=()=>{
+    if(!ex4.valid)return;
+    for(const k of ex4.sel){ex4.M.has(k)?ex4.M.delete(k):ex4.M.add(k);}
+    ex4.sel.clear();ex4.valid=false;
+    $('#ex4Msg').innerHTML=ex4.M.size===EX4.L.length?`<b>Done.</b> ${MI} now has ${ex4.M.size} edges and matches every vertex, so it is perfect and no augmenting path is left.`:`${MI} grew to ${ex4.M.size} edges. Unmatched vertices remain, so look for another augmenting path.`;
+    renderEx4();
+  };
+  $('#ex4Reset').onclick=()=>{ex4.M=new Set(EX4M0);ex4.sel.clear();ex4.valid=false;$('#ex4Msg').innerHTML='';renderEx4();};
+}
+
+/* ---------------- wiring ---------------- */
+function init(){
+  initToolbar();
+  $$('.tabs [role=tab]').forEach(b=>{b.onclick=()=>setTab(b.dataset.tab);});
+  $('.tabs').onkeydown=e=>{
+    if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')return;
+    const i=TABS.indexOf(st.tab),n=(i+(e.key==='ArrowRight'?1:TABS.length-1))%TABS.length;
+    setTab(TABS[n]);$('#t-'+TABS[n]).focus();
+  };
+  $('#labClear').onclick=()=>{st.lab.sel=new Set();renderLab();};
+  $('#labGreedy').onclick=()=>{st.lab.sel=setFromArr(greedyM(G).mL);renderLab();};
+  $('#labMax').onclick=()=>{st.lab.sel=setFromArr(kuhn(G).mL);st.lab.reveal=true;renderLab();};
+  $('#augStart').onclick=e=>{const b=e.target.closest('[data-start]');if(!b)return;st.augStart=b.dataset.start;stopRun();algoInit();renderAug();};
+  $('#aStep').onclick=()=>{stopRun();algoStep();renderAug();};
+  $('#aReset').onclick=()=>{stopRun();algoInit();renderAug();};
+  $('#aRun').onclick=()=>{
+    if(runT){stopRun();renderAug();return;}
+    if(st.algo.phase==='done')return;
+    runT=setInterval(()=>{algoStep();if(st.algo.phase==='done')stopRun();renderAug();},900);
+    renderAug();
+  };
+  $('#hAll').onclick=()=>{st.hall.A=new Set(G.L.map((_,i)=>i));renderHall();};
+  $('#hClear').onclick=()=>{st.hall.A=new Set();renderHall();};
+  $('#hCheck').onclick=()=>{st.hall.table=true;renderHall();};
+  $('#hShowM').onclick=()=>{st.hall.showM=!st.hall.showM;renderHall();};
+  renderConcepts();initExercises();algoInit();updateToolbar();
+}
+init();
+</script>
+</body>
+</html>
