@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Roadblocks and connectivity: Barcelona vs Bangkok</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --paper: #E7EBE6; --surface: #F6F7F4; --ink: #17201B; --muted: #55615A; --rule: #C5CDC6;
+  --map: #DCE2DB; --block: #C9D1C9; --road: #FBFCFA; --road-edge: #A6B0A8; --node: #4B564F;
+  --go: #14804B; --slow: #C98700; --stop: #CF2A21; --weak: #7B3FE4;
+  --accent: #0C6B46; --accent-ink: #FFFFFF; --btn: #E9EDE8;
+  --sans: "Barlow", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --cond: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #1B2125; --surface: #232A2F; --ink: #E5EAE6; --muted: #A0ABA4; --rule: #39434A;
+    --map: #263036; --block: #2F3A41; --road: #56626A; --road-edge: #1D2429; --node: #B8C2BC;
+    --go: #3CCB7F; --slow: #F2B42A; --stop: #FF5A4E; --weak: #B794FF;
+    --accent: #36B37A; --accent-ink: #07130D; --btn: #2C353B;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #1B2125; --surface: #232A2F; --ink: #E5EAE6; --muted: #A0ABA4; --rule: #39434A;
+  --map: #263036; --block: #2F3A41; --road: #56626A; --road-edge: #1D2429; --node: #B8C2BC;
+  --go: #3CCB7F; --slow: #F2B42A; --stop: #FF5A4E; --weak: #B794FF;
+  --accent: #36B37A; --accent-ink: #07130D; --btn: #2C353B;
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: var(--sans); font-size: 17px; line-height: 1.5;
+}
+.wrap { max-width: 1360px; margin: 0 auto; padding: 0 clamp(14px, 3vw, 40px) 64px; }
+.wrap > * { min-width: 0; }
+
+/* masthead */
+.masthead { padding: clamp(22px, 4vw, 44px) 0 20px; display: grid; gap: 12px; }
+h1 {
+  font-family: var(--cond); font-weight: 700; font-size: clamp(2.3rem, 5.2vw, 4.1rem);
+  line-height: 0.95; letter-spacing: -0.01em; margin: 0; max-width: 26ch;
+}
+.lede { margin: 0; max-width: 68ch; font-size: 1.08rem; color: var(--muted); }
+.lede var, .notes var, .city var, .hint var { font-family: var(--sans); }
+var { font-style: italic; }
+
+/* controls */
+.controls {
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 14px;
+  padding: 14px 16px; display: grid; gap: 10px;
+}
+.row { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; justify-content: space-between; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; flex-wrap: wrap; }
+.seg button {
+  font: 600 0.98rem var(--sans); color: var(--ink); background: transparent; border: 0;
+  padding: 9px 14px; cursor: pointer; border-right: 1px solid var(--rule);
+}
+.seg button:last-child { border-right: 0; }
+@media (max-width: 560px) {
+  .seg { display: grid; grid-template-columns: minmax(0, 1fr); width: 100%; }
+  .seg button { border-right: 0; border-bottom: 1px solid var(--rule); text-align: left; }
+  .seg button:last-child { border-bottom: 0; }
+}
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn {
+  font: 600 0.95rem var(--sans); color: var(--ink); background: var(--btn);
+  border: 1px solid var(--rule); border-radius: 8px; padding: 8px 13px; cursor: pointer;
+}
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--stop); border-color: var(--stop); color: #fff; }
+.btn.primary:hover { filter: brightness(1.06); }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.hint { margin: 0; color: var(--muted); font-size: 0.98rem; max-width: 90ch; }
+.settings { justify-content: flex-start; gap: 10px 26px; padding-top: 10px; border-top: 1px solid var(--rule); }
+.slider { display: grid; grid-template-columns: auto auto; gap: 2px 8px; font-size: 0.92rem; color: var(--muted); align-items: baseline; }
+.slider output { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.slider input { grid-column: 1 / -1; width: 190px; accent-color: var(--accent); }
+.check { display: inline-flex; gap: 8px; align-items: center; font-size: 0.95rem; cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--weak); }
+.status { margin: 0; min-height: 1.5em; font-weight: 500; }
+.status:empty { display: none; }
+
+/* cities */
+.cities { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 18px; }
+@media (max-width: 920px) { .cities { grid-template-columns: minmax(0, 1fr); } }
+.city {
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 14px;
+  padding: 14px 14px 16px; display: grid; gap: 10px; align-content: start;
+}
+.city > header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.city h2 { font-family: var(--cond); font-weight: 700; font-size: 2rem; line-height: 1; margin: 0; }
+.city > header p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+.map { position: relative; border-radius: 8px; overflow: hidden; background: var(--map); }
+.map canvas { display: block; width: 100%; aspect-ratio: 1000 / 720; cursor: crosshair; touch-action: manipulation; }
+.tip {
+  position: absolute; pointer-events: none; z-index: 2; max-width: 260px;
+  background: var(--ink); color: var(--paper); border-radius: 6px; padding: 6px 9px;
+  font-size: 0.85rem; line-height: 1.35;
+}
+.tip b { display: block; font-weight: 600; }
+
+.whitney {
+  font-family: var(--cond); font-weight: 600; font-size: clamp(1.15rem, 2.1vw, 1.45rem);
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; line-height: 1.1;
+}
+.whitney .term { display: inline-flex; align-items: baseline; gap: 6px; }
+.whitney b { font-weight: 700; font-size: clamp(2.6rem, 4.6vw, 3.4rem); font-variant-numeric: tabular-nums; min-width: 0.6em; text-align: center; }
+.whitney .le { color: var(--muted); font-size: 1.5em; }
+.whitney.broken b { color: var(--stop); }
+.conn { margin: -4px 0 0; color: var(--muted); font-size: 0.95rem; }
+.conn.bad { color: var(--stop); font-weight: 600; }
+.menger { margin: 0; padding: 8px 11px; border-left: 4px solid #3B82F6; background: var(--paper); border-radius: 0 6px 6px 0; font-size: 0.97rem; }
+
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 22px; margin: 0; }
+.stats h3 { grid-column: span 1; font: 600 0.95rem var(--sans); margin: 4px 0 2px; color: var(--ink); }
+.stats .col { display: grid; align-content: start; }
+.stats dl { margin: 0; }
+.stats .item { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; border-bottom: 1px solid var(--rule); font-size: 0.93rem; }
+.stats dt { color: var(--muted); }
+.stats dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 460px) { .stats { grid-template-columns: minmax(0, 1fr); } }
+
+/* legend */
+.legend { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 16px 2px 0; font-size: 0.9rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.sw { width: 11px; height: 11px; border-radius: 50%; display: inline-block; flex: none; }
+.ln { width: 24px; height: 5px; border-radius: 3px; display: inline-block; flex: none; }
+.ring { width: 13px; height: 13px; border-radius: 50%; border: 2.5px solid var(--weak); display: inline-block; flex: none; }
+.noentry { width: 15px; height: 15px; border-radius: 50%; background: var(--stop); position: relative; flex: none; }
+.noentry::after { content: ""; position: absolute; left: 3px; right: 3px; top: 6px; height: 3px; background: #fff; border-radius: 1px; }
+.dash { width: 24px; height: 0; border-top: 3px dashed var(--weak); flex: none; }
+.dash.red { border-top-color: var(--stop); }
+
+/* notes */
+.notes { margin-top: 44px; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px 56px; }
+@media (max-width: 920px) { .notes { grid-template-columns: minmax(0, 1fr); } }
+.notes h2 { font-family: var(--cond); font-weight: 700; font-size: 1.9rem; line-height: 1.05; margin: 0 0 10px; }
+.notes h3 { font: 600 1.08rem var(--sans); margin: 22px 0 6px; }
+.notes p, .notes li { max-width: 68ch; }
+.notes p { margin: 0 0 10px; }
+.notes ol { padding-left: 1.3em; margin: 0; display: grid; gap: 8px; }
+.formula {
+  font-family: var(--cond); font-weight: 600; font-size: 1.5rem; margin: 8px 0 12px;
+  padding: 8px 14px; border-left: 4px solid var(--accent); background: var(--surface); border-radius: 0 8px 8px 0; display: inline-block;
+}
+details { border-top: 1px solid var(--rule); padding: 10px 0; }
+details:last-of-type { border-bottom: 1px solid var(--rule); }
+summary { cursor: pointer; font-weight: 600; }
+summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+details > div { padding: 8px 0 2px 2px; color: var(--ink); }
+details > div p { margin: 0 0 8px; }
+.small { font-size: 0.92rem; color: var(--muted); }
+.fact { font-weight: 600; font-variant-numeric: tabular-nums; }
+footer { margin-top: 40px; padding-top: 14px; border-top: 1px solid var(--rule); font-size: 0.88rem; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <h1>Roadblocks and connectivity: Barcelona vs Bangkok</h1>
+  <p class="lede">Every intersection is a vertex and every stretch of road between two intersections is an edge. Close intersections or block roads in both cities and watch how the vertex connectivity <var>κ</var>(<var>G</var>) and edge connectivity <var>λ</var>(<var>G</var>) predict which drivers get stuck.</p>
+</header>
+
+<section class="controls" aria-label="Simulation controls">
+  <div class="row">
+    <div class="seg" role="group" aria-label="What a click on the map does">
+      <button type="button" data-mode="vertex" aria-pressed="true">Close an intersection</button>
+      <button type="button" data-mode="edge" aria-pressed="false">Block a road</button>
+      <button type="button" data-mode="routes" aria-pressed="false">Trace disjoint routes</button>
+    </div>
+    <div class="actions">
+      <button type="button" id="strike" class="btn primary">Worst-case strike</button>
+      <button type="button" id="random" class="btn">Add 3 random roadblocks</button>
+      <button type="button" id="clear" class="btn">Clear all roadblocks</button>
+    </div>
+  </div>
+  <p id="hint" class="hint"></p>
+  <div class="row settings">
+    <label class="slider" for="cars">Cars per city <output id="carsOut" for="cars">80</output><input type="range" id="cars" min="20" max="200" step="10" value="80"></label>
+    <label class="slider" for="speed">Simulation speed <output id="speedOut" for="speed">1×</output><input type="range" id="speed" min="0.25" max="3" step="0.25" value="1"></label>
+    <label class="check"><input type="checkbox" id="weak"> Highlight cut vertices and bridges</label>
+    <button type="button" id="pause" class="btn">Pause traffic</button>
+  </div>
+  <p id="status" class="status" aria-live="polite"></p>
+</section>
+
+<section class="cities">
+  <article class="city" data-city="bcn">
+    <header><h2>Barcelona</h2><p>Cerdà's Eixample grid with Avinguda Diagonal, stylised</p></header>
+    <div class="map"><canvas role="img" aria-label="Map of a grid of streets in Barcelona's Eixample, cut by Avinguda Diagonal, with moving cars"></canvas><div class="tip" hidden></div></div>
+    <div class="whitney" data-s="whitney">
+      <span class="term"><span><var>κ</var>(<var>G</var>)</span><b data-s="kappa">–</b></span><span class="le">≤</span>
+      <span class="term"><span><var>λ</var>(<var>G</var>)</span><b data-s="lambda">–</b></span><span class="le">≤</span>
+      <span class="term"><span><var>δ</var>(<var>G</var>)</span><b data-s="delta">–</b></span>
+    </div>
+    <p class="conn" data-s="conn"></p>
+    <p class="menger" data-s="menger" hidden></p>
+    <div class="stats">
+      <div class="col">
+        <h3>Graph</h3><dl>
+        <div class="item"><dt>Intersections |<var>V</var>|</dt><dd data-s="V"></dd></div>
+        <div class="item"><dt>Road segments |<var>E</var>|</dt><dd data-s="E"></dd></div>
+        <div class="item"><dt>Independent loops</dt><dd data-s="loops"></dd></div>
+        <div class="item"><dt>Cut vertices</dt><dd data-s="cutv"></dd></div>
+        <div class="item"><dt>Bridges</dt><dd data-s="bridges"></dd></div>
+        <div class="item"><dt>Pairs that can reach each other</dt><dd data-s="reach"></dd></div>
+      </dl></div>
+      <div class="col">
+        <h3>Traffic</h3><dl>
+        <div class="item"><dt>Average speed</dt><dd data-s="speed"></dd></div>
+        <div class="item"><dt>Cars crawling</dt><dd data-s="crawl"></dd></div>
+        <div class="item"><dt>Drivers stranded</dt><dd data-s="stranded"></dd></div>
+        <div class="item"><dt>Jammed road segments</dt><dd data-s="jammed"></dd></div>
+        <div class="item"><dt>Trips finished, last 25 s</dt><dd data-s="trips"></dd></div>
+      </dl></div>
+    </div>
+  </article>
+
+  <article class="city" data-city="bkk">
+    <header><h2>Bangkok</h2><p>Sukhumvit and its sois between Phetchaburi and Rama IV, stylised</p></header>
+    <div class="map"><canvas role="img" aria-label="Map of Bangkok main roads with many dead-end sois branching off Sukhumvit Road, with moving cars"></canvas><div class="tip" hidden></div></div>
+    <div class="whitney" data-s="whitney">
+      <span class="term"><span><var>κ</var>(<var>G</var>)</span><b data-s="kappa">–</b></span><span class="le">≤</span>
+      <span class="term"><span><var>λ</var>(<var>G</var>)</span><b data-s="lambda">–</b></span><span class="le">≤</span>
+      <span class="term"><span><var>δ</var>(<var>G</var>)</span><b data-s="delta">–</b></span>
+    </div>
+    <p class="conn" data-s="conn"></p>
+    <p class="menger" data-s="menger" hidden></p>
+    <div class="stats">
+      <div class="col">
+        <h3>Graph</h3><dl>
+        <div class="item"><dt>Intersections |<var>V</var>|</dt><dd data-s="V"></dd></div>
+        <div class="item"><dt>Road segments |<var>E</var>|</dt><dd data-s="E"></dd></div>
+        <div class="item"><dt>Independent loops</dt><dd data-s="loops"></dd></div>
+        <div class="item"><dt>Cut vertices</dt><dd data-s="cutv"></dd></div>
+        <div class="item"><dt>Bridges</dt><dd data-s="bridges"></dd></div>
+        <div class="item"><dt>Pairs that can reach each other</dt><dd data-s="reach"></dd></div>
+      </dl></div>
+      <div class="col">
+        <h3>Traffic</h3><dl>
+        <div class="item"><dt>Average speed</dt><dd data-s="speed"></dd></div>
+        <div class="item"><dt>Cars crawling</dt><dd data-s="crawl"></dd></div>
+        <div class="item"><dt>Drivers stranded</dt><dd data-s="stranded"></dd></div>
+        <div class="item"><dt>Jammed road segments</dt><dd data-s="jammed"></dd></div>
+        <div class="item"><dt>Trips finished, last 25 s</dt><dd data-s="trips"></dd></div>
+      </dl></div>
+    </div>
+  </article>
+</section>
+
+<div class="legend" aria-label="Map legend">
+  <span><i class="sw" style="background:var(--go)"></i>Car moving</span>
+  <span><i class="sw" style="background:var(--slow)"></i>Car crawling, below 40% of free-flow speed</span>
+  <span><i class="sw" style="background:var(--stop)"></i>Driver stranded, no route to destination</span>
+  <span><i class="ln" style="background:var(--slow)"></i>Busy road</span>
+  <span><i class="ln" style="background:var(--stop)"></i>Jammed road</span>
+  <span><i class="noentry"></i>Closed intersection</span>
+  <span><i class="dash red"></i>Blocked road</span>
+  <span><i class="ring"></i>Cut vertex</span>
+  <span><i class="dash"></i>Bridge</span>
+</div>
+<p class="small" style="margin:8px 2px 0">Cars keep right in Barcelona and keep left in Bangkok, as they do in real life. Hover over the map to see each intersection's degree and each road's name.</p>
+
+<section class="notes">
+  <div>
+    <h2>The ideas behind the simulation</h2>
+
+    <h3>Definitions</h3>
+    <p>Let <var>G</var> be a connected graph. The <strong>vertex connectivity</strong> <var>κ</var>(<var>G</var>) is the smallest number of vertices whose removal leaves a disconnected graph or a single vertex. The <strong>edge connectivity</strong> <var>λ</var>(<var>G</var>) is the smallest number of edges whose removal leaves a disconnected graph. By convention both are 0 for a disconnected graph, and <var>κ</var>(<var>K<sub>n</sub></var>) = <var>n</var> − 1.</p>
+    <p>A <strong>cut vertex</strong> is a single vertex whose removal increases the number of components, and a <strong>bridge</strong> is a single edge with the same property. A connected graph with at least three vertices has <var>κ</var>(<var>G</var>) = 1 exactly when it has a cut vertex, and <var>λ</var>(<var>G</var>) = 1 exactly when it has a bridge. In road terms, one accident at a cut vertex or one fallen tree on a bridge is enough to split the city.</p>
+
+    <h3>Whitney's inequality</h3>
+    <div class="formula"><var>κ</var>(<var>G</var>) ≤ <var>λ</var>(<var>G</var>) ≤ <var>δ</var>(<var>G</var>)</div>
+    <p>The right-hand inequality is easy to see on the map: take the intersection with the fewest roads, <var>δ</var>(<var>G</var>) of them, and block them all. That intersection is now cut off, so <var>λ</var>(<var>G</var>) can be no larger than <var>δ</var>(<var>G</var>). The left-hand inequality says that closing intersections is at least as powerful as blocking roads: given a smallest set of blocked roads that splits the city, closing a well-chosen end of each one does the same job with no more closures.</p>
+
+    <h3>Menger's theorem</h3>
+    <p>For two non-adjacent vertices <var>u</var> and <var>v</var>, the largest number of <var>u</var>–<var>v</var> paths that share no vertex except <var>u</var> and <var>v</var> equals the smallest number of vertices whose removal separates <var>u</var> from <var>v</var>. The edge version swaps "vertex" for "edge" in both places. As a consequence, <var>G</var> is <var>k</var>-connected exactly when every pair of vertices is joined by <var>k</var> internally disjoint paths. For a driver, <var>κ</var> is the number of guaranteed independent detours.</p>
+
+    <h3>Reading the two cities</h3>
+    <p><strong>Barcelona.</strong> The Eixample is close to a grid graph. Interior intersections have degree 4 (6 where the Diagonal crosses), but the four corners have degree 2, so <var>κ</var> = <var>λ</var> = <var>δ</var> = 2. There are no cut vertices and no bridges, and <span class="fact" data-fact="bcn-loops"></span> independent loops give drivers many alternatives. Between two interior intersections there are 4 internally disjoint routes.</p>
+    <p><strong>Bangkok.</strong> Many sois are dead ends that branch off a main road like small trees. Every dead-end tip has degree 1, so <var>δ</var> = <var>κ</var> = <var>λ</var> = 1. Of <span class="fact" data-fact="bkk-V"></span> intersections, <span class="fact" data-fact="bkk-cutv"></span> are cut vertices, and <span class="fact" data-fact="bkk-bridges"></span> of the <span class="fact" data-fact="bkk-E"></span> road segments are bridges. Only <span class="fact" data-fact="bkk-loops"></span> independent loops exist, all formed by the main roads and the through-sois Asok, Thong Lo and Ekkamai. Every trip that starts deep in a soi must pass through the soi mouth, which is why the main roads jam even before any roadblock appears: low connectivity concentrates the flow.</p>
+    <p class="small">"Independent loops" is the cycle rank |<var>E</var>| − |<var>V</var>| + <var>c</var>, where <var>c</var> is the number of components. It counts how many edges you could delete before the graph becomes a forest.</p>
+  </div>
+
+  <div>
+    <h2>Try this in class</h2>
+    <ol>
+      <li>Before blocking anything, compare the average speed and the colour of the main roads in both cities. Ask why Sukhumvit Road and Thong Lo turn amber and red while Barcelona's streets stay clear.</li>
+      <li>Choose <em>Close an intersection</em> and close one Sukhumvit junction at the mouth of a soi. Watch what happens to the cars inside the soi, then switch on <em>Highlight cut vertices and bridges</em>.</li>
+      <li>In Barcelona, find the smallest number of closures that disconnects the grid. Students should discover that it is 2 and that the only way to do it is to trap a corner.</li>
+      <li>Choose <em>Trace disjoint routes</em> and pick two interior intersections in Barcelona, then a dead-end tip in Bangkok and a point on Sukhumvit Road. Compare the counts with Menger's theorem.</li>
+      <li>Press <em>Worst-case strike</em> in both the intersection mode and the road mode. It blocks a minimum cut, choosing the one that strands the most intersections, and reports the damage.</li>
+    </ol>
+
+    <h2 style="margin-top:34px">Discussion questions</h2>
+    <details>
+      <summary>Prove that the <var>m</var> × <var>n</var> grid graph (<var>m</var>, <var>n</var> ≥ 2) has <var>κ</var> = <var>λ</var> = 2.</summary>
+      <div>
+        <p>The corners have degree 2, so <var>λ</var> ≤ <var>δ</var> = 2. For <var>κ</var> ≥ 2, remove any vertex <var>x</var> and pick a row and a column that both avoid <var>x</var>. Together they form a connected cross. Any other vertex <var>u</var> lies either in a row that avoids <var>x</var> or in a column that avoids <var>x</var> (it cannot share both with <var>x</var>), so <var>u</var> can travel straight along that line until it meets the cross. Hence no single vertex disconnects the grid, and Whitney gives 2 ≤ <var>κ</var> ≤ <var>λ</var> ≤ 2.</p>
+      </div>
+    </details>
+    <details>
+      <summary>Why is every edge of a tree a bridge, and every non-leaf vertex a cut vertex?</summary>
+      <div>
+        <p>A tree has exactly one path between any two vertices. Deleting an edge <var>uv</var> destroys the only <var>u</var>–<var>v</var> path, so <var>u</var> and <var>v</var> end up in different components. A non-leaf vertex <var>w</var> has two neighbours whose only connecting path goes through <var>w</var>. A dead-end soi network is a tree hanging from one junction, which is why Bangkok's map is full of violet when you turn on the highlight.</p>
+      </div>
+    </details>
+    <details>
+      <summary>Find a graph with <var>κ</var>(<var>G</var>) &lt; <var>λ</var>(<var>G</var>) and describe it as a city.</summary>
+      <div>
+        <p>Two triangles sharing one vertex (the "bowtie") have <var>κ</var> = 1 but <var>λ</var> = 2. As a city, two well-connected neighbourhoods meet at a single roundabout: one accident at the roundabout splits the city, yet you must block two roads to do the same with roadblocks.</p>
+      </div>
+    </details>
+    <details>
+      <summary>How many new road links would make the Bangkok model 2-edge-connected?</summary>
+      <div>
+        <p>Shrink every 2-edge-connected piece to a single point. The bridges then form a tree, and Eswaran and Tarjan (1976) showed that ⌈<var>p</var>/2⌉ new edges are necessary and sufficient, where <var>p</var> is the number of leaves of that tree. In this model <var>p</var> = <span class="fact" data-fact="bkk-leaves"></span>, so <span class="fact" data-fact="bkk-links"></span> new links are needed, each joining two dead-end tips. This is the graph-theoretic version of the idea of linking neighbouring sois.</p>
+      </div>
+    </details>
+    <details>
+      <summary>Most Eixample streets are actually one-way. Can every street in each model be made one-way while every driver can still reach every destination?</summary>
+      <div>
+        <p>The question asks for a strongly connected orientation, meaning the reachability relation of the resulting digraph is total. Robbins' theorem (1939) says a connected graph has one exactly when it has no bridges. Barcelona's grid qualifies, so a one-way system can keep every intersection reachable. Any bridge in Bangkok's model, such as a dead-end soi, needs two-way traffic or drivers get trapped at one end.</p>
+      </div>
+    </details>
+    <details>
+      <summary>Barcelona's superilla (superblock) programme closes some interior streets to through traffic. Why can a grid afford this?</summary>
+      <div>
+        <p>Block a few interior road segments in the simulation and watch <var>κ</var> and <var>λ</var>. Because interior vertices have degree 4 and the grid has many independent loops, you can delete several interior edges without creating a bridge, so the minimum of 2 set by the corners does not drop. In the soi network almost every segment is already a bridge, so there is no spare capacity to give away.</p>
+      </div>
+    </details>
+
+    <h3>Model notes</h3>
+    <p class="small">Both maps are stylised, not to scale, and soi numbers are approximate. Every road is treated as two-way. Each driver picks a random destination and, at every intersection, takes the currently fastest route. A road segment slows down as it fills beyond its capacity, following a curve similar to the BPR function used in transport planning, and main roads carry more cars than sois. A driver with no route waits about 3.5 seconds, then picks a new destination. <var>κ</var>(<var>G</var>) and <var>λ</var>(<var>G</var>) are recomputed after every change using maximum flow, so the numbers are exact for the current graph.</p>
+  </div>
+</section>
+
+<footer>Discrete Mathematics, graph theory unit: vertex and edge connectivity.</footer>
+</div>
+
+<script>
+// ===== Core: road graphs, connectivity algorithms, traffic simulation =====
+const INF = 1e9;
+const KIND = {
+  avenue:    { cap: 5,   w: 8 },
+  street:    { cap: 3.5, w: 5 },
+  main:      { cap: 5,   w: 8 },
+  connector: { cap: 3.5, w: 5.5 },
+  soi:       { cap: 2,   w: 3 }
+};
+
+class RoadGraph {
+  constructor(key) { this.key = key; this.nodes = []; this.edges = []; this.adj = []; this.decor = []; }
+  node(x, y) { const id = this.nodes.length; this.nodes.push({ id, x, y }); this.adj.push([]); return id; }
+  edge(u, v, road, kind) {
+    if (u === v) return -1;
+    for (const a of this.adj[u]) if (a.v === v) return a.e;
+    const A = this.nodes[u], B = this.nodes[v];
+    const id = this.edges.length;
+    this.edges.push({ id, u, v, len: Math.hypot(A.x - B.x, A.y - B.y), road, kind, w: KIND[kind].w });
+    const E = this.edges[id]; E.capCars = Math.max(1.6, KIND[kind].cap * E.len / 100);
+    this.adj[u].push({ v, e: id }); this.adj[v].push({ v: u, e: id });
+    return id;
+  }
+  path(ids, road, kind) { for (let i = 0; i + 1 < ids.length; i++) this.edge(ids[i], ids[i + 1], road, kind); }
+  finish() {
+    // derive a readable name for every intersection from the roads that meet there
+    for (const n of this.nodes) {
+      const names = [];
+      for (const a of this.adj[n.id]) { const r = this.edges[a.e].road.replace(' (sub-soi)', ''); if (!names.includes(r)) names.push(r); }
+      n.label = names.length > 1 ? names.join(' × ') : (names[0] || 'Intersection') + (this.adj[n.id].length === 1 ? ' (dead end)' : '');
+    }
+    return this;
+  }
+}
+
+function buildBarcelona() {
+  const g = new RoadGraph('bcn');
+  const C = 9, R = 6, x0 = 60, x1 = 940, y0 = 70, y1 = 650;
+  const dx = (x1 - x0) / (C - 1), dy = (y1 - y0) / (R - 1);
+  const id = [];
+  for (let r = 0; r < R; r++) { id.push([]); for (let c = 0; c < C; c++) id[r].push(g.node(x0 + c * dx, y0 + r * dy)); }
+  const rows = ['Carrer de Mallorca', 'Carrer de València', "Carrer d'Aragó", 'Carrer del Consell de Cent', 'Carrer de la Diputació', 'Gran Via de les Corts Catalanes'];
+  const cols = ['Carrer de Casanova', 'Carrer de Muntaner', "Carrer d'Aribau", "Carrer d'Enric Granados", 'Carrer de Balmes', 'Rambla de Catalunya', 'Passeig de Gràcia', 'Carrer de Pau Claris', 'Carrer de Roger de Llúria'];
+  for (let r = 0; r < R; r++) for (let c = 0; c + 1 < C; c++) g.edge(id[r][c], id[r][c + 1], rows[r], r === R - 1 ? 'avenue' : 'street');
+  for (let c = 0; c < C; c++) for (let r = 0; r + 1 < R; r++) g.edge(id[r][c], id[r + 1][c], cols[c], c === 6 ? 'avenue' : 'street');
+  for (let r = 0; r + 1 < R; r++) g.edge(id[r][2 + r], id[r + 1][3 + r], 'Avinguda Diagonal', 'avenue');
+  // chamfered Cerdà blocks (decoration only)
+  for (let r = 0; r + 1 < R; r++) for (let c = 0; c + 1 < C; c++)
+    g.decor.push({ type: 'octagon', x: x0 + c * dx, y: y0 + r * dy, w: dx, h: dy });
+  g.labels = [
+    { text: 'Gran Via', x: x0 + 0.5 * dx, y: y1 + 34 },
+    { text: 'Passeig de Gràcia', x: x0 + 6 * dx + 8, y: y0 - 38, align: 'left' },
+    { text: 'Av. Diagonal', x: x0 + 2 * dx - 8, y: y0 - 38, align: 'right' }
+  ];
+  return g.finish();
+}
+
+function buildBangkok() {
+  const g = new RoadGraph('bkk');
+  const yP = 70, yS = 360, yR = 650;
+  const sukX = [40, 100, 160, 220, 300, 380, 460, 540, 620, 700, 760, 820, 900, 960];
+  const S = {}; sukX.forEach(x => S[x] = g.node(x, yS));
+  g.path(sukX.map(x => S[x]), 'Sukhumvit Rd', 'main');
+  const P = {}; [40, 220, 620, 820].forEach(x => P[x] = g.node(x, yP));
+  g.path([40, 220, 620, 820].map(x => P[x]), 'New Phetchaburi Rd', 'main');
+  const R4 = {}; [40, 220, 500, 760, 960].forEach(x => R4[x] = g.node(x, yR));
+  g.path([40, 220, 500, 760, 960].map(x => R4[x]), 'Rama IV Rd', 'main');
+  g.edge(R4[960], S[960], 'Rama IV Rd', 'main');
+  g.path([P[40], S[40], R4[40]], 'Witthayu (Wireless) Rd', 'connector');
+  g.edge(P[220], S[220], 'Asok Montri Rd (Soi 21)', 'connector');
+  const r1 = g.node(220, 505); g.path([S[220], r1, R4[220]], 'Ratchadaphisek Rd', 'connector');
+  const t1 = g.node(620, 290), t2 = g.node(620, 215), t3 = g.node(620, 140);
+  g.path([S[620], t1, t2, t3, P[620]], 'Thong Lo (Soi 55)', 'connector');
+  g.edge(t1, g.node(650, 290), 'Thong Lo (sub-soi)', 'soi');
+  g.edge(t2, g.node(585, 215), 'Thong Lo (sub-soi)', 'soi');
+  const k1 = g.node(820, 260), k2 = g.node(820, 160);
+  g.path([S[820], k1, k2, P[820]], 'Ekkamai (Soi 63)', 'connector');
+  g.edge(k1, g.node(850, 260), 'Ekkamai (sub-soi)', 'soi');
+
+  function soi(x, dir, num, depth, branches) {
+    const name = 'Sukhumvit Soi ' + num;
+    let prev = S[x]; const ids = [];
+    for (let i = 1; i <= depth; i++) { const n = g.node(x, yS + dir * 70 * i); g.edge(prev, n, name, 'soi'); ids.push(n); prev = n; }
+    for (const [i, dx] of branches) { const h = g.nodes[ids[i - 1]]; g.edge(ids[i - 1], g.node(h.x + dx, h.y), name + ' (sub-soi)', 'soi'); }
+  }
+  // odd-numbered sois to the north, even-numbered to the south (numbers approximate)
+  soi(100, -1, 11, 3, [[2, 28]]);
+  soi(160, -1, 15, 2, []);
+  soi(300, -1, 23, 3, [[1, 30], [3, -30]]);
+  soi(380, -1, 31, 2, [[2, 30]]);
+  soi(460, -1, 39, 3, [[3, -30]]);
+  soi(540, -1, 49, 3, [[1, 30], [3, 30]]);
+  soi(700, -1, 59, 3, [[2, -28]]);
+  soi(760, -1, 61, 2, []);
+  soi(900, -1, 65, 3, [[2, 30], [3, -30]]);
+  soi(100, 1, 10, 2, []);
+  soi(160, 1, 12, 3, [[3, -28]]);
+  soi(300, 1, 22, 3, [[2, -30]]);
+  soi(380, 1, 24, 2, []);
+  soi(460, 1, 26, 3, [[1, 30], [3, -30]]);
+  soi(540, 1, 34, 2, [[2, 30]]);
+  soi(620, 1, 38, 3, [[2, 30]]);
+  soi(700, 1, 40, 3, [[3, -30]]);
+  soi(900, 1, 50, 3, [[1, -30], [2, 30]]);
+  g.decor.push({ type: 'superblock', x: 40, y: yP, w: 780, h: yS - yP });
+  g.decor.push({ type: 'superblock', x: 40, y: yS, w: 920, h: yR - yS });
+  g.labels = [
+    { text: 'New Phetchaburi Rd', x: 430, y: yP - 26 },
+    { text: 'Sukhumvit Rd', x: 795, y: yS + 26 },
+    { text: 'Rama IV Rd', x: 600, y: yR + 34 },
+    { text: 'Asok', x: 230, y: 118, align: 'left' },
+    { text: 'Thong Lo', x: 612, y: 100, align: 'right' },
+    { text: 'Ekkamai', x: 812, y: 120, align: 'right' }
+  ];
+  return g.finish();
+}
+
+// ---------- max flow (BFS augmenting paths; graphs here are tiny) ----------
+class Flow {
+  constructor(N) { this.N = N; this.head = new Int32Array(N).fill(-1); this.to = []; this.cap = []; this.orig = []; this.nxt = []; }
+  add(u, v, c) {
+    this.to.push(v); this.cap.push(c); this.orig.push(c); this.nxt.push(this.head[u]); this.head[u] = this.to.length - 1;
+    this.to.push(u); this.cap.push(0); this.orig.push(0); this.nxt.push(this.head[v]); this.head[v] = this.to.length - 1;
+  }
+  maxflow(s, t, limit = INF) {
+    let f = 0; const prev = new Int32Array(this.N);
+    while (f < limit) {
+      prev.fill(-1); prev[s] = -2; const q = [s]; let qi = 0;
+      while (qi < q.length && prev[t] === -1) {
+        const u = q[qi++];
+        for (let a = this.head[u]; a !== -1; a = this.nxt[a]) {
+          const v = this.to[a];
+          if (this.cap[a] > 0 && prev[v] === -1) { prev[v] = a; q.push(v); }
+        }
+      }
+      if (prev[t] === -1) break;
+      let b = INF;
+      for (let v = t; v !== s; v = this.to[prev[v] ^ 1]) b = Math.min(b, this.cap[prev[v]]);
+      for (let v = t; v !== s; v = this.to[prev[v] ^ 1]) { this.cap[prev[v]] -= b; this.cap[prev[v] ^ 1] += b; }
+      f += b;
+    }
+    return f;
+  }
+  reach(s) {
+    const R = new Uint8Array(this.N); R[s] = 1; const q = [s];
+    for (let i = 0; i < q.length; i++) for (let a = this.head[q[i]]; a !== -1; a = this.nxt[a]) if (this.cap[a] > 0 && !R[this.to[a]]) { R[this.to[a]] = 1; q.push(this.to[a]); }
+    return R;
+  }
+}
+
+// split every vertex v into v_in = 2v and v_out = 2v+1 joined by an arc of capacity 1
+function vertexNet(n, act, bN, s, t, skipEdge) {
+  const F = new Flow(2 * n);
+  for (let v = 0; v < n; v++) if (!bN[v]) F.add(2 * v, 2 * v + 1, (v === s || v === t) ? INF : 1);
+  for (let u = 0; u < n; u++) for (const { v, e } of act[u]) if (e !== skipEdge) F.add(2 * u + 1, 2 * v, INF);
+  return F;
+}
+function edgeNet(n, act) {
+  const F = new Flow(n);
+  for (let u = 0; u < n; u++) for (const { v } of act[u]) F.add(u, v, 1);
+  return F;
+}
+
+function vertexConnectivity(n, act, bN, list, delta, minV) {
+  if (list.length <= 1) return { k: 0, cut: [] };
+  if (list.every(u => act[u].length === list.length - 1)) return { k: list.length - 1, cut: [] };
+  let best = delta, cut = act[minV].map(a => a.v);
+  for (let i = 0; i < list.length && i <= best; i++) {
+    const s = list[i]; const nb = new Set(act[s].map(a => a.v));
+    for (let j = i + 1; j < list.length; j++) {
+      const t = list[j]; if (nb.has(t)) continue;
+      const F = vertexNet(n, act, bN, s, t, -1);
+      const f = F.maxflow(2 * s + 1, 2 * t, best);
+      if (f < best) {
+        best = f; const R = F.reach(2 * s + 1); cut = [];
+        for (const v of list) if (R[2 * v] && !R[2 * v + 1]) cut.push(v);
+      }
+    }
+  }
+  return { k: best, cut };
+}
+
+function edgeConnectivity(n, act, list, delta, minV, edges) {
+  if (list.length <= 1) return { k: 0, cut: [] };
+  let best = delta, cut = act[minV].map(a => a.e);
+  const s = list[0];
+  for (const t of list) {
+    if (t === s) continue;
+    const F = edgeNet(n, act); const f = F.maxflow(s, t, best);
+    if (f < best) {
+      best = f; const R = F.reach(s); cut = [];
+      for (let u = 0; u < n; u++) for (const { v, e } of act[u]) if (u < v && R[u] !== R[v]) cut.push(e);
+    }
+  }
+  return { k: best, cut };
+}
+
+function tarjan(n, act, bN) {
+  const disc = new Int32Array(n).fill(-1), low = new Int32Array(n); let time = 0;
+  const cutV = new Set(), bridges = new Set();
+  function dfs(u, pe) {
+    disc[u] = low[u] = time++; let kids = 0;
+    for (const { v, e } of act[u]) {
+      if (e === pe) continue;
+      if (disc[v] === -1) {
+        kids++; dfs(v, e); low[u] = Math.min(low[u], low[v]);
+        if (pe !== -1 && low[v] >= disc[u]) cutV.add(u);
+        if (low[v] > disc[u]) bridges.add(e);
+      } else low[u] = Math.min(low[u], disc[v]);
+    }
+    if (pe === -1 && kids > 1) cutV.add(u);
+  }
+  for (let u = 0; u < n; u++) if (!bN[u] && disc[u] === -1) dfs(u, -1);
+  return { cutV, bridges };
+}
+
+function components(n, act, bN) {
+  const comp = new Int32Array(n).fill(-1); const sizes = [];
+  for (let s = 0; s < n; s++) {
+    if (bN[s] || comp[s] !== -1) continue;
+    const c = sizes.length; comp[s] = c; const q = [s];
+    for (let i = 0; i < q.length; i++) for (const { v } of act[q[i]]) if (comp[v] === -1) { comp[v] = c; q.push(v); }
+    sizes.push(q.length);
+  }
+  return { comp, sizes };
+}
+
+// ---------- city = graph + roadblocks + traffic ----------
+const MOVING = 0, STRANDED = 1;
+const BASE_SPEED = 62;     // map units per second at free flow
+const GIVE_UP = 3.5;       // seconds a stranded driver waits before choosing another destination
+const WINDOW = 25;         // seconds of trip history used for the success rate
+
+class City {
+  constructor(g, seed) {
+    this.g = g; const n = g.nodes.length, m = g.edges.length;
+    this.bN = new Uint8Array(n); this.bE = new Uint8Array(m);
+    this.load = new Float32Array(m); this.speedF = new Float32Array(m).fill(1);
+    this.cars = []; this.trips = []; this.time = 0; this.sel = []; this.menger = null;
+    this.rng = mulberry32(seed || 1);
+    this.recompute();
+  }
+  edgeActive(e) { const E = this.g.edges[e]; return !this.bE[e] && !this.bN[E.u] && !this.bN[E.v]; }
+  recompute() {
+    const g = this.g, n = g.nodes.length;
+    this.act = g.adj.map((l, u) => this.bN[u] ? [] : l.filter(a => !this.bE[a.e] && !this.bN[a.v]));
+    this.list = []; for (let v = 0; v < n; v++) if (!this.bN[v]) this.list.push(v);
+    this.A = this.analyze();
+  }
+  analyze() {
+    const n = this.g.nodes.length, act = this.act, list = this.list;
+    if (!list.length) return { N: 0, M: 0, delta: 0, kappa: 0, lambda: 0, cutV: new Set(), bridges: new Set(), C: 0, reach: 0, comp: new Int32Array(n).fill(-1), sizes: [] };
+    let delta = INF, minV = list[0], deg2 = 0;
+    for (const v of list) { const d = act[v].length; deg2 += d; if (d < delta) { delta = d; minV = v; } }
+    const { comp, sizes } = components(n, act, this.bN);
+    const N = list.length;
+    let pairs = 0; for (const s of sizes) pairs += s * (s - 1);
+    const reach = N > 1 ? pairs / (N * (N - 1)) : 1;
+    const { cutV, bridges } = tarjan(n, act, this.bN);
+    let kappa = 0, lambda = 0, vcut = [], ecut = [];
+    if (sizes.length === 1) {
+      const K = vertexConnectivity(n, act, this.bN, list, delta, minV); kappa = K.k; vcut = K.cut;
+      const L = edgeConnectivity(n, act, list, delta, minV, this.g.edges); lambda = L.k; ecut = L.cut;
+    }
+    return { N, M: deg2 / 2, delta, kappa, lambda, vcut, ecut, cutV, bridges, C: sizes.length, sizes, reach, comp };
+  }
+  clearBlocks() { this.bN.fill(0); this.bE.fill(0); }
+  toggleNode(v) { this.bN[v] ^= 1; this.afterTopology(); }
+  toggleEdge(e) { this.bE[e] ^= 1; this.afterTopology(); }
+  afterTopology() {
+    this.recompute();
+    for (const c of this.cars) this.repairCar(c);
+    if (this.sel.some(v => this.bN[v])) { this.sel = []; this.menger = null; }
+    else if (this.sel.length === 2) this.menger = mengerPaths(this, this.sel[0], this.sel[1]);
+  }
+  // ----- traffic -----
+  randomNode() { return this.list[Math.floor(this.rng() * this.list.length)]; }
+  randomDest(from) {
+    for (let i = 0; i < 12; i++) { const d = this.randomNode(); if (d !== from) return d; }
+    return from;
+  }
+  spawnCar() {
+    if (!this.list.length) return;
+    const at = this.randomNode();
+    this.cars.push({ at, e: -1, a: at, b: at, t: 0, dest: this.randomDest(at), state: MOVING, stuck: 0, cool: this.rng() * 1.5, slot: this.cars.length });
+  }
+  setCarCount(k) {
+    while (this.cars.length < k) this.spawnCar();
+    if (this.cars.length > k) this.cars.length = k;
+  }
+  respawn(c) { c.at = this.randomNode(); c.e = -1; c.t = 0; c.dest = this.randomDest(c.at); c.state = MOVING; c.stuck = 0; c.cool = 0.3; }
+  repairCar(c) {
+    if (!this.list.length) return;
+    if (c.e >= 0) {
+      if (!this.edgeActive(c.e) || this.bN[c.b]) {
+        if (this.bN[c.a]) this.respawn(c);
+        else { const tmp = c.a; c.a = c.b; c.b = tmp; c.t = 1 - c.t; c.backing = true; }
+      }
+    } else if (this.bN[c.at]) this.respawn(c);
+    if (this.bN[c.dest]) c.dest = this.randomDest(c.e >= 0 ? c.b : c.at);
+  }
+  updateLoads() {
+    const g = this.g; this.load.fill(0);
+    for (const c of this.cars) if (c.e >= 0) this.load[c.e]++;
+    for (let e = 0; e < g.edges.length; e++) {
+      const E = g.edges[e]; const r = this.load[e] / E.capCars;
+      this.speedF[e] = Math.max(0.05, 1 / (1 + 0.5 * r * r * r * r));
+    }
+  }
+  nextHop(src, dst) {
+    // Dijkstra on current travel times (congestion-aware routing)
+    const g = this.g, n = g.nodes.length;
+    const dist = new Float64Array(n).fill(Infinity), first = new Int32Array(n).fill(-1);
+    dist[src] = 0; const h = new Heap();
+    h.push(0, src);
+    while (h.size) {
+      const [d, u] = h.pop();
+      if (d > dist[u]) continue;
+      if (u === dst) break;
+      for (const { v, e } of this.act[u]) {
+        const nd = d + g.edges[e].len / this.speedF[e];
+        if (nd < dist[v]) { dist[v] = nd; first[v] = u === src ? e : first[u]; h.push(nd, v); }
+      }
+    }
+    if (first[dst] < 0) return null;
+    const E = g.edges[first[dst]];
+    return { e: first[dst], v: E.u === src ? E.v : E.u };
+  }
+  step(dt) {
+    this.time += dt;
+    if (!this.list.length) return;
+    this.updateLoads();
+    for (const c of this.cars) {
+      if (c.e < 0) {
+        if (c.cool > 0) { c.cool -= dt; if (c.state === STRANDED) c.stuck += dt; continue; }
+        if (c.at === c.dest) { c.dest = this.randomDest(c.at); }
+        const nh = this.nextHop(c.at, c.dest);
+        if (!nh) {
+          c.state = STRANDED; c.cool = 0.5;
+          if (c.stuck >= GIVE_UP) { this.trips.push({ t: this.time, ok: false }); c.stuck = 0; c.dest = this.randomDest(c.at); }
+        } else { c.state = MOVING; c.stuck = 0; c.e = nh.e; c.a = c.at; c.b = nh.v; c.t = 0; c.backing = false; }
+      } else {
+        const E = this.g.edges[c.e];
+        c.t += BASE_SPEED * this.speedF[c.e] * dt / E.len;
+        if (c.t >= 1) {
+          c.at = c.b; c.e = -1; c.t = 0; c.backing = false;
+          if (c.at === c.dest) { this.trips.push({ t: this.time, ok: true }); c.dest = this.randomDest(c.at); }
+        }
+      }
+    }
+    while (this.trips.length && this.trips[0].t < this.time - WINDOW) this.trips.shift();
+  }
+  traffic() {
+    let moving = 0, crawling = 0, stranded = 0, sp = 0, cnt = 0;
+    for (const c of this.cars) {
+      if (c.state === STRANDED) { stranded++; continue; }
+      if (c.e >= 0) { const f = this.speedF[c.e]; sp += f; cnt++; if (f < 0.4) crawling++; else moving++; } else moving++;
+    }
+    let jammed = 0;
+    for (let e = 0; e < this.g.edges.length; e++) if (this.edgeActive(e) && this.speedF[e] < 0.4) jammed++;
+    const ok = this.trips.filter(t => t.ok).length, all = this.trips.length;
+    return { moving, crawling, stranded, avgSpeed: cnt ? sp / cnt : 1, jammed, success: all ? ok / all : null, done: ok };
+  }
+}
+
+// ---------- worst-case strike: block a minimum cut that strands the most intersections ----------
+function damageAfter(city, rmN, rmE) {
+  const n = city.g.nodes.length, seen = new Uint8Array(n);
+  let total = 0, largest = 0;
+  for (const s of city.list) {
+    if (rmN.has(s) || seen[s]) continue;
+    seen[s] = 1; const q = [s];
+    for (let i = 0; i < q.length; i++) for (const { v, e } of city.act[q[i]]) if (!seen[v] && !rmN.has(v) && !rmE.has(e)) { seen[v] = 1; q.push(v); }
+    total += q.length; largest = Math.max(largest, q.length);
+  }
+  return total - largest;
+}
+function worstStrike(city, type) {
+  city.clearBlocks(); city.recompute();
+  const A = city.A, k = type === 'vertex' ? A.kappa : A.lambda;
+  let best = null, bestDmg = -1;
+  if (k <= 2) {
+    const items = type === 'vertex' ? city.list.slice() : city.g.edges.map(e => e.id).filter(e => city.edgeActive(e));
+    const test = combo => {
+      const d = type === 'vertex' ? damageAfter(city, new Set(combo), new Set()) : damageAfter(city, new Set(), new Set(combo));
+      if (d > bestDmg) { bestDmg = d; best = combo.slice(); }
+    };
+    if (k === 1) for (const a of items) test([a]);
+    else for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) test([items[i], items[j]]);
+  } else best = type === 'vertex' ? A.vcut : A.ecut;
+  for (const x of best) (type === 'vertex' ? city.bN : city.bE)[x] = 1;
+  city.afterTopology();
+  return { k, items: best, stranded: city.A.N - Math.max(...city.A.sizes) };
+}
+
+function randomBlocks(city, type, count) {
+  for (let i = 0; i < count; i++) {
+    if (type === 'vertex') {
+      const free = city.list; if (free.length < 3) break;
+      city.bN[free[Math.floor(city.rng() * free.length)]] = 1;
+    } else {
+      const free = city.g.edges.filter(e => city.edgeActive(e.id)); if (!free.length) break;
+      city.bE[free[Math.floor(city.rng() * free.length)].id] = 1;
+    }
+    city.recompute();
+  }
+  city.afterTopology();
+}
+
+// ---------- Menger: internally disjoint A–B routes ----------
+function mengerPaths(city, s, t) {
+  const n = city.g.nodes.length, act = city.act;
+  const direct = act[s].find(a => a.v === t);
+  const F = vertexNet(n, act, city.bN, s, t, direct ? direct.e : -1);
+  const f = F.maxflow(2 * s + 1, 2 * t);
+  const flow = F.orig.map((o, i) => (i % 2 === 0 ? o - F.cap[i] : 0));
+  const paths = [];
+  if (direct) paths.push([s, t]);
+  for (let k = 0; k < f; k++) {
+    const p = [s]; let x = 2 * s + 1, guard = 0;
+    while (x !== 2 * t && guard++ < 4 * n) {
+      let moved = false;
+      for (let a = F.head[x]; a !== -1; a = F.nxt[a]) {
+        if (a % 2 === 0 && flow[a] > 0) { flow[a]--; x = F.to[a]; moved = true; break; }
+      }
+      if (!moved) break;
+      if (x % 2 === 1) p.push((x - 1) / 2);
+    }
+    p.push(t);
+    // remove any loop
+    const clean = [];
+    for (const v of p) { const i = clean.indexOf(v); if (i >= 0) clean.length = i + 1; else clean.push(v); }
+    paths.push(clean);
+  }
+  const E = edgeNet(n, act); const lam = E.maxflow(s, t);
+  return { paths, kappa: paths.length, lambda: lam };
+}
+
+// ---------- utilities ----------
+class Heap {
+  constructor() { this.k = []; this.v = []; }
+  get size() { return this.k.length; }
+  push(key, val) {
+    const k = this.k, v = this.v; let i = k.length; k.push(key); v.push(val);
+    while (i > 0) { const p = (i - 1) >> 1; if (k[p] <= k[i]) break; [k[p], k[i]] = [k[i], k[p]]; [v[p], v[i]] = [v[i], v[p]]; i = p; }
+  }
+  pop() {
+    const k = this.k, v = this.v; const top = [k[0], v[0]];
+    const lk = k.pop(), lv = v.pop();
+    if (k.length) {
+      k[0] = lk; v[0] = lv; let i = 0;
+      for (;;) {
+        const l = 2 * i + 1, r = l + 1; let m = i;
+        if (l < k.length && k[l] < k[m]) m = l;
+        if (r < k.length && k[r] < k[m]) m = r;
+        if (m === i) break;
+        [k[m], k[i]] = [k[i], k[m]]; [v[m], v[i]] = [v[i], v[m]]; i = m;
+      }
+    }
+    return top;
+  }
+}
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+
+</script>
+<script>
+(function () {
+  const KEYS = ['bcn', 'bkk'];
+  const NAMES = { bcn: 'Barcelona', bkk: 'Bangkok' };
+  const DRIVE = { bcn: 1, bkk: -1 };            // keep right vs keep left
+  const PATHS = ['#3B82F6', '#E0479E', '#14A3A3', '#D9731A', '#6BA81E', '#6366F1'];
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const state = { mode: 'vertex', weak: false, paused: false, speed: 1, cars: 80, hover: { bcn: null, bkk: null } };
+  const cities = { bcn: new City(buildBarcelona(), 11), bkk: new City(buildBangkok(), 29) };
+  KEYS.forEach(k => cities[k].setCarCount(state.cars));
+
+  // ---------- facts for the notes (intact networks) ----------
+  (function facts() {
+    const put = (k, v) => document.querySelectorAll(`[data-fact="${k}"]`).forEach(el => el.textContent = v);
+    for (const k of KEYS) {
+      const A = cities[k].A;
+      put(k + '-V', A.N); put(k + '-E', A.M); put(k + '-loops', A.M - A.N + A.C);
+      put(k + '-cutv', A.cutV.size); put(k + '-bridges', A.bridges.size);
+    }
+    const c = cities.bkk, n = c.g.nodes.length, A = c.A;
+    const comp = new Int32Array(n).fill(-1); let m = 0;
+    for (let s = 0; s < n; s++) {
+      if (comp[s] >= 0) continue; comp[s] = m; const q = [s];
+      for (let i = 0; i < q.length; i++) for (const { v, e } of c.act[q[i]]) if (!A.bridges.has(e) && comp[v] < 0) { comp[v] = m; q.push(v); }
+      m++;
+    }
+    const deg = new Int32Array(m);
+    for (const e of A.bridges) { const E = c.g.edges[e]; deg[comp[E.u]]++; deg[comp[E.v]]++; }
+    let p = 0; for (let i = 0; i < m; i++) if (deg[i] === 1) p++;
+    put('bkk-leaves', p); put('bkk-links', Math.ceil(p / 2));
+  })();
+
+  // ---------- theme ----------
+  const theme = {};
+  function readTheme() {
+    const cs = getComputedStyle(document.documentElement);
+    for (const k of ['map', 'block', 'road', 'road-edge', 'node', 'go', 'slow', 'stop', 'weak', 'ink', 'muted', 'paper']) theme[k] = cs.getPropertyValue('--' + k).trim();
+  }
+  readTheme();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readTheme);
+  new MutationObserver(readTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  // ---------- views ----------
+  const views = {};
+  for (const key of KEYS) {
+    const panel = document.querySelector(`[data-city="${key}"]`);
+    const canvas = panel.querySelector('canvas');
+    const v = { key, panel, canvas, ctx: canvas.getContext('2d'), tip: panel.querySelector('.tip'), s: 0.5, dpr: 1 };
+    views[key] = v;
+    new ResizeObserver(() => resize(v)).observe(canvas);
+    resize(v);
+    canvas.addEventListener('pointermove', e => onMove(v, e));
+    canvas.addEventListener('pointerleave', () => { state.hover[key] = null; v.tip.hidden = true; });
+    canvas.addEventListener('click', e => onClick(v, e));
+  }
+  function resize(v) {
+    const r = v.canvas.getBoundingClientRect();
+    if (!r.width) return;
+    v.dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    v.canvas.width = Math.round(r.width * v.dpr); v.canvas.height = Math.round(r.height * v.dpr);
+    v.s = r.width / 1000;
+  }
+  function toLogical(v, e) { const r = v.canvas.getBoundingClientRect(); return { x: (e.clientX - r.left) / v.s, y: (e.clientY - r.top) / v.s, cx: e.clientX - r.left, cy: e.clientY - r.top }; }
+  function segDist(px, py, A, B) {
+    const dx = B.x - A.x, dy = B.y - A.y, L = dx * dx + dy * dy;
+    let t = L ? ((px - A.x) * dx + (py - A.y) * dy) / L : 0; t = Math.max(0, Math.min(1, t));
+    return Math.hypot(px - (A.x + t * dx), py - (A.y + t * dy));
+  }
+  function pick(v, x, y) {
+    const g = cities[v.key].g;
+    if (state.mode !== 'edge') {
+      let best = -1, bd = Math.max(14, 16 / v.s);
+      for (const n of g.nodes) { const d = Math.hypot(n.x - x, n.y - y); if (d < bd) { bd = d; best = n.id; } }
+      return best >= 0 ? { type: 'node', id: best } : null;
+    }
+    let best = -1, bd = Math.max(9, 11 / v.s);
+    for (const E of g.edges) { const d = segDist(x, y, g.nodes[E.u], g.nodes[E.v]); if (d < bd) { bd = d; best = E.id; } }
+    return best >= 0 ? { type: 'edge', id: best } : null;
+  }
+  function onMove(v, e) {
+    const p = toLogical(v, e), h = pick(v, p.x, p.y), c = cities[v.key];
+    state.hover[v.key] = h;
+    if (!h) { v.tip.hidden = true; return; }
+    let html;
+    if (h.type === 'node') {
+      const n = c.g.nodes[h.id];
+      const extra = c.bN[h.id] ? 'Closed. Click to reopen.' : `Degree ${c.act[h.id].length}${c.A.cutV.has(h.id) ? ', cut vertex' : ''}`;
+      html = `<b>${n.label}</b>${extra}`;
+    } else {
+      const E = c.g.edges[h.id];
+      const extra = c.bE[h.id] ? 'Blocked. Click to reopen.' : `${c.load[h.id]} car${c.load[h.id] === 1 ? '' : 's'}, ${Math.round(c.speedF[h.id] * 100)}% of free-flow speed${c.A.bridges.has(h.id) ? ', bridge' : ''}`;
+      html = `<b>${E.road}</b>${extra}`;
+    }
+    v.tip.innerHTML = html; v.tip.hidden = false;
+    const W = v.canvas.clientWidth, tw = v.tip.offsetWidth, th = v.tip.offsetHeight;
+    let lx = p.cx + 14, ly = p.cy + 14;
+    if (lx + tw > W - 4) lx = p.cx - tw - 12;
+    if (ly + th > v.canvas.clientHeight - 4) ly = p.cy - th - 12;
+    v.tip.style.left = Math.max(4, lx) + 'px'; v.tip.style.top = Math.max(4, ly) + 'px';
+  }
+  function onClick(v, e) {
+    const p = toLogical(v, e), h = pick(v, p.x, p.y), c = cities[v.key];
+    if (!h) return;
+    if (state.mode === 'vertex' && h.type === 'node') { c.toggleNode(h.id); say(''); }
+    else if (state.mode === 'edge' && h.type === 'edge') { c.toggleEdge(h.id); say(''); }
+    else if (state.mode === 'routes' && h.type === 'node') {
+      if (c.bN[h.id]) return;
+      if (c.sel.length >= 2 || c.sel.includes(h.id)) c.sel = [];
+      c.sel.push(h.id);
+      c.menger = c.sel.length === 2 ? mengerPaths(c, c.sel[0], c.sel[1]) : null;
+    }
+    updateStats(); onMove(v, e);
+  }
+
+  // ---------- controls ----------
+  const hints = {
+    vertex: 'Click an intersection to close it, as an accident or a flooded junction would. Every road touching it closes too. Click it again to reopen.',
+    edge: 'Click a road segment to block it. The intersections at both ends stay open. Click it again to reopen.',
+    routes: 'Click two intersections in the same city. The coloured routes share no intersection except their two ends, and by Menger\u2019s theorem the most you can find is \u03BA(A,B).'
+  };
+  const strikeTitle = {
+    vertex: 'Clear all roadblocks, then close a smallest set of intersections that disconnects each city, choosing the set that strands the most intersections',
+    edge: 'Clear all roadblocks, then block a smallest set of roads that disconnects each city, choosing the set that strands the most intersections'
+  };
+  const $ = s => document.querySelector(s);
+  function say(t) { $('#status').textContent = t; }
+  function setMode(m) {
+    state.mode = m;
+    document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
+    $('#hint').textContent = hints[m];
+    $('#strike').title = strikeTitle[m === 'edge' ? 'edge' : 'vertex'];
+    if (m !== 'routes') KEYS.forEach(k => { cities[k].sel = []; cities[k].menger = null; });
+    updateStats();
+  }
+  document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  $('#strike').addEventListener('click', () => {
+    const type = state.mode === 'edge' ? 'edge' : 'vertex';
+    const parts = KEYS.map(k => {
+      const r = worstStrike(cities[k], type);
+      const what = type === 'vertex' ? `closing ${r.k} intersection${r.k === 1 ? '' : 's'}` : `blocking ${r.k} road${r.k === 1 ? '' : 's'}`;
+      return `${NAMES[k]}: ${what} cut off ${r.stranded} intersection${r.stranded === 1 ? '' : 's'}.`;
+    });
+    say(parts.join(' '));
+    updateStats();
+  });
+  $('#random').addEventListener('click', () => {
+    const type = state.mode === 'edge' ? 'edge' : 'vertex';
+    KEYS.forEach(k => randomBlocks(cities[k], type, 3));
+    say(`Added 3 random ${type === 'vertex' ? 'intersection closures' : 'road blocks'} in each city. Pairs that can still reach each other: ` +
+      KEYS.map(k => `${NAMES[k]} ${pct(cities[k].A.reach)}`).join(', ') + '.');
+    updateStats();
+  });
+  $('#clear').addEventListener('click', () => { KEYS.forEach(k => { cities[k].clearBlocks(); cities[k].afterTopology(); }); say('All roadblocks cleared.'); updateStats(); });
+  $('#weak').addEventListener('change', e => { state.weak = e.target.checked; });
+  $('#pause').addEventListener('click', e => { state.paused = !state.paused; e.target.textContent = state.paused ? 'Resume traffic' : 'Pause traffic'; });
+  $('#cars').addEventListener('input', e => { state.cars = +e.target.value; $('#carsOut').textContent = state.cars; KEYS.forEach(k => cities[k].setCarCount(state.cars)); });
+  $('#speed').addEventListener('input', e => { state.speed = +e.target.value; $('#speedOut').textContent = state.speed + '×'; });
+
+  // ---------- stats ----------
+  const pct = x => (x === null || x === undefined) ? '–' : Math.round(x * 100) + '%';
+  function updateStats() {
+    for (const k of KEYS) {
+      const c = cities[k], A = c.A, T = c.traffic(), p = views[k].panel;
+      const set = (s, v) => { const el = p.querySelector(`[data-s="${s}"]`); if (el && el.textContent !== String(v)) el.textContent = v; };
+      set('kappa', A.kappa); set('lambda', A.lambda); set('delta', A.delta);
+      p.querySelector('[data-s="whitney"]').classList.toggle('broken', A.C > 1);
+      const conn = p.querySelector('[data-s="conn"]');
+      if (A.C > 1) { conn.textContent = `Disconnected into ${A.C} pieces, so κ(G) = λ(G) = 0.`; conn.classList.add('bad'); }
+      else {
+        conn.classList.remove('bad');
+        conn.textContent = A.kappa === 1 ? 'Connected, but one closure in the right place splits it.'
+          : `Connected. It takes at least ${A.kappa} closures or ${A.lambda} roadblocks to split it.`;
+      }
+      set('V', A.N); set('E', A.M); set('loops', A.M - A.N + A.C);
+      set('cutv', A.cutV.size); set('bridges', A.bridges.size); set('reach', pct(A.reach));
+      set('speed', pct(T.avgSpeed)); set('crawl', T.crawling); set('stranded', T.stranded); set('jammed', T.jammed); set('trips', T.done);
+      const mg = p.querySelector('[data-s="menger"]');
+      if (state.mode === 'routes') {
+        mg.hidden = false;
+        let text;
+        if (c.sel.length === 0) text = 'Click an intersection to set A.';
+        else if (c.sel.length === 1) text = 'A is set. Click a second intersection to set B.';
+        else if (c.menger) {
+          const M = c.menger;
+          text = M.kappa === 0 ? 'A and B are in different pieces: no route at all.'
+            : `κ(A,B) = ${M.kappa}: ${M.kappa} route${M.kappa === 1 ? '' : 's'} sharing no intersection except A and B. λ(A,B) = ${M.lambda} edge-disjoint routes.`;
+        }
+        set('menger', text);
+      } else mg.hidden = true;
+    }
+  }
+
+  // ---------- drawing ----------
+  function draw(v, now) {
+    const c = cities[v.key], g = c.g, ctx = v.ctx, T = theme, k = v.s * v.dpr, px = 1 / v.s;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = T.map; ctx.fillRect(0, 0, v.canvas.width, v.canvas.height);
+    ctx.setTransform(k, 0, 0, k, 0, 0);
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+    // city blocks
+    ctx.fillStyle = T.block;
+    for (const d of g.decor) {
+      if (d.type === 'octagon') {
+        const gap = 9, x = d.x + gap, y = d.y + gap, w = d.w - 2 * gap, h = d.h - 2 * gap, ch = 0.26 * Math.min(w, h);
+        ctx.beginPath();
+        ctx.moveTo(x + ch, y); ctx.lineTo(x + w - ch, y); ctx.lineTo(x + w, y + ch); ctx.lineTo(x + w, y + h - ch);
+        ctx.lineTo(x + w - ch, y + h); ctx.lineTo(x + ch, y + h); ctx.lineTo(x, y + h - ch); ctx.lineTo(x, y + ch);
+        ctx.closePath(); ctx.fill();
+      } else {
+        ctx.globalAlpha = 0.55; ctx.fillRect(d.x + 12, d.y + 12, d.w - 24, d.h - 24); ctx.globalAlpha = 1;
+      }
+    }
+    const seg = E => { const A = g.nodes[E.u], B = g.nodes[E.v]; ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke(); };
+    const wOf = E => Math.max(E.w, 2 * px);
+
+    // road casing then fill
+    ctx.strokeStyle = T['road-edge'];
+    for (const E of g.edges) { ctx.lineWidth = wOf(E) + 2 * px; seg(E); }
+    ctx.strokeStyle = T.road;
+    for (const E of g.edges) { ctx.lineWidth = wOf(E); seg(E); }
+
+    // congestion
+    for (const E of g.edges) {
+      if (!c.edgeActive(E.id)) continue;
+      const f = c.speedF[E.id]; if (f >= 0.85) continue;
+      ctx.strokeStyle = f < 0.4 ? T.stop : T.slow; ctx.globalAlpha = f < 0.4 ? 0.9 : 0.75;
+      ctx.lineWidth = Math.max(wOf(E) * 0.6, 2 * px); seg(E);
+    }
+    ctx.globalAlpha = 1;
+
+    // disjoint routes
+    if (c.menger) {
+      c.menger.paths.forEach((path, i) => {
+        ctx.strokeStyle = PATHS[i % PATHS.length]; ctx.globalAlpha = 0.6; ctx.lineWidth = Math.max(10, 7 * px);
+        ctx.beginPath(); path.forEach((n, j) => { const N = g.nodes[n]; j ? ctx.lineTo(N.x, N.y) : ctx.moveTo(N.x, N.y); }); ctx.stroke();
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    // weak points
+    if (state.weak) {
+      ctx.strokeStyle = T.weak; ctx.setLineDash([5 * px, 4 * px]);
+      for (const e of c.A.bridges) { const E = g.edges[e]; ctx.lineWidth = Math.max(wOf(E) * 0.5, 2.2 * px); seg(E); }
+      ctx.setLineDash([]);
+    }
+
+    // blocked roads
+    for (const E of g.edges) {
+      if (!c.bE[E.id]) continue;
+      const A = g.nodes[E.u], B = g.nodes[E.v];
+      ctx.strokeStyle = T.stop; ctx.lineWidth = Math.max(wOf(E) * 0.55, 2.5 * px); ctx.setLineDash([6 * px, 5 * px]); seg(E); ctx.setLineDash([]);
+      const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2, ang = Math.atan2(B.y - A.y, B.x - A.x);
+      ctx.save(); ctx.translate(mx, my); ctx.rotate(ang + Math.PI / 2);
+      const L = Math.max(wOf(E) + 10, 18 * px), H = Math.max(5, 6 * px);
+      ctx.fillStyle = T.stop; ctx.fillRect(-L / 2, -H / 2, L, H);
+      ctx.fillStyle = '#fff'; for (let i = -1; i <= 1; i += 2) ctx.fillRect(i * L / 4 - H * 0.35, -H / 2, H * 0.7, H);
+      ctx.restore();
+    }
+
+    // nodes
+    const nr = Math.max(2.6, 2 * px);
+    ctx.fillStyle = T.node;
+    for (const n of g.nodes) { if (c.bN[n.id]) continue; ctx.beginPath(); ctx.arc(n.x, n.y, nr, 0, 6.2832); ctx.fill(); }
+    if (state.weak) {
+      ctx.strokeStyle = T.weak; ctx.lineWidth = 2.2 * px;
+      for (const id of c.A.cutV) { const n = g.nodes[id]; ctx.beginPath(); ctx.arc(n.x, n.y, Math.max(7, 6 * px), 0, 6.2832); ctx.stroke(); }
+    }
+
+    // cars
+    const cr = Math.max(3.4, 2.4 * px);
+    const pulse = reduceMotion ? 1 : 0.6 + 0.4 * Math.sin(now / 160);
+    for (let i = 0; i < c.cars.length; i++) {
+      const car = c.cars[i]; let x, y, col;
+      if (car.e >= 0) {
+        const A = g.nodes[car.a], B = g.nodes[car.b], E = g.edges[car.e];
+        const dx = B.x - A.x, dy = B.y - A.y, L = Math.hypot(dx, dy) || 1;
+        const off = DRIVE[v.key] * (Math.max(wOf(E), 4 * px) * 0.32 + 0.6 * px);
+        x = A.x + dx * car.t - dy / L * off; y = A.y + dy * car.t + dx / L * off;
+        col = c.speedF[car.e] < 0.4 ? T.slow : T.go;
+      } else {
+        const N = g.nodes[car.at];
+        if (car.state === STRANDED) {
+          const ang = i * 2.39996, rad = Math.max(8, 6 * px) + (i % 3) * Math.max(3.5, 2.6 * px);
+          x = N.x + Math.cos(ang) * rad; y = N.y + Math.sin(ang) * rad; col = T.stop;
+        } else { x = N.x; y = N.y; col = T.go; }
+      }
+      ctx.globalAlpha = car.state === STRANDED ? pulse : 1;
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, cr, 0, 6.2832); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // closed intersections: no-entry signs
+    for (const n of g.nodes) {
+      if (!c.bN[n.id]) continue;
+      const R = Math.max(10, 9 * px);
+      ctx.fillStyle = T.stop; ctx.beginPath(); ctx.arc(n.x, n.y, R, 0, 6.2832); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.fillRect(n.x - R * 0.62, n.y - R * 0.2, R * 1.24, R * 0.4);
+    }
+
+    // A / B markers
+    c.sel.forEach((id, i) => {
+      const n = g.nodes[id], R = Math.max(11, 10 * px);
+      ctx.fillStyle = T.ink; ctx.beginPath(); ctx.arc(n.x, n.y, R, 0, 6.2832); ctx.fill();
+      ctx.fillStyle = T.paper; ctx.font = `700 ${R * 1.25}px "Barlow Condensed", "Arial Narrow", sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(i ? 'B' : 'A', n.x, n.y + R * 0.05);
+    });
+
+    // hover
+    const h = state.hover[v.key];
+    if (h) {
+      ctx.strokeStyle = T.ink; ctx.globalAlpha = 0.8;
+      if (h.type === 'node') { const n = g.nodes[h.id]; ctx.lineWidth = 2 * px; ctx.beginPath(); ctx.arc(n.x, n.y, Math.max(9, 8 * px), 0, 6.2832); ctx.stroke(); }
+      else { const E = g.edges[h.id]; ctx.globalAlpha = 0.35; ctx.lineWidth = wOf(E) + 6 * px; seg(E); }
+      ctx.globalAlpha = 1;
+    }
+
+    // road labels
+    const fs = Math.max(16, 11 * px);
+    ctx.font = `600 ${fs}px "Barlow Condensed", "Arial Narrow", sans-serif`; ctx.textBaseline = 'middle';
+    for (const L of g.labels) {
+      ctx.textAlign = L.align || 'center';
+      ctx.lineWidth = 4 * px; ctx.strokeStyle = T.map; ctx.strokeText(L.text, L.x, L.y);
+      ctx.fillStyle = T.muted; ctx.fillText(L.text, L.x, L.y);
+    }
+  }
+
+  // ---------- loop ----------
+  setMode('vertex');
+  let last = performance.now(), lastStats = 0;
+  function frame(now) {
+    const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    if (!state.paused) {
+      let sim = dt * state.speed;
+      while (sim > 1e-6) { const h = Math.min(sim, 1 / 30); KEYS.forEach(k => cities[k].step(h)); sim -= h; }
+    }
+    KEYS.forEach(k => draw(views[k], now));
+    if (now - lastStats > 300) { updateStats(); lastStats = now; }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+</script>
+</body>
+</html>
